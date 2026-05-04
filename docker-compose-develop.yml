@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:15
+    container_name: wishlist-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
+    networks:
+      - wishlist-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER_ADMIN}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: wishlist-server
+    ports:
+      - "${SERVER_HOST_PORT}:${SERVER_CONTAINER_PORT}"
+    networks:
+      - wishlist-network
+    volumes:
+      - ./server-admin:/app
+      - ./server-admin/.air.toml:/app/.air.toml
+      - ./server-admin/tmp:/app/tmp
+    environment:
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_HOST_PORT}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  wishlist-network:
+    driver: bridge
+
+volumes:
+  db-data:
