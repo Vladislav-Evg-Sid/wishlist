@@ -13,7 +13,7 @@ services:
     networks:
       - wishlist-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER_ADMIN}"]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
