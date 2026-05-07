@@ -14,3 +14,7 @@
     2. `make migrate-up` - применить все миграции
     3. `make migrate-down` - откатить 1 миграцию
     4. `make migrate-version` - проверить текущую версию
+
+## Swagger:
+1. Установить зависимость для создания свагера: `go install github.com/swaggo/swag/cmd/swag@latest`
+2. Запустить скрипт для создания свагера: `make swagger`
