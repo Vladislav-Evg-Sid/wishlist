@@ -28,9 +28,9 @@ services:
     networks:
       - wishlist-network
     volumes:
-      - ./server-admin:/app
-      - ./server-admin/.air.toml:/app/.air.toml
-      - ./server-admin/tmp:/app/tmp
+      - ./server:/app
+      - ./server/.air.toml:/app/.air.toml
+      - ./server/tmp:/app/tmp
     environment:
       - configPath=${CONFIG_PATH}
       - DB_HOST=${POSTGRES_HOST}

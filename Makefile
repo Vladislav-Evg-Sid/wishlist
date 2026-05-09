@@ -34,7 +34,6 @@ swagger:
 
 .PHONY: run-dev
 run-dev:
-	make migrate-up
 	docker-compose -f docker-compose-develop.yml up --build
 
 .PHONY: run-prod
