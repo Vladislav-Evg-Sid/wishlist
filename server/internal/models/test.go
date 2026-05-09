@@ -14,11 +14,6 @@ type UserResponse struct {
 	Username string `json:"username" example:"vlad"`
 }
 
-// ErrorResponse — стандартный ответ с ошибкой.
-type ErrorResponse struct {
-	Error string `json:"error" example:"invalid request body"`
-}
-
 // MessageResponse — простой JSON-ответ.
 type MessageResponse struct {
 	Message string `json:"message" example:"pong"`

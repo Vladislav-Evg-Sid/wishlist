@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/echo": {
+        "/api/auth/authorize": {
             "post": {
-                "description": "Принимает произвольный JSON и возвращает его обратно.",
+                "description": "Получает логин и пароль пользователя,\nпроверяет пользователя и возвращает true/false",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,70 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "debug"
+                    "auth"
                 ],
-                "summary": "Вернуть переданный JSON",
-                "parameters": [
-                    {
-                        "description": "Любой JSON",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/main.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/ping": {
-            "get": {
-                "description": "Возвращает простой JSON-ответ.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "system"
-                ],
-                "summary": "Проверка доступности API",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.MessageResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users": {
-            "post": {
-                "description": "Принимает JSON, биндингует его в Go-структуру и возвращает созданного пользователя.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Создать пользователя",
+                "summary": "Авторизация пользователя",
                 "parameters": [
                     {
                         "description": "Данные пользователя",
@@ -96,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.CreateUserRequest"
+                            "$ref": "#/definitions/models.AuthorizeRequest"
                         }
                     }
                 ],
@@ -104,48 +43,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/main.UserResponse"
+                            "$ref": "#/definitions/models.AuthorizeResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/main.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/{id}": {
-            "get": {
-                "description": "Возвращает пользователя по идентификатору.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Получить пользователя по ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID пользователя",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/main.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -153,62 +57,30 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "main.CreateUserRequest": {
+        "models.AuthorizeRequest": {
             "type": "object",
-            "required": [
-                "email",
-                "password",
-                "username"
-            ],
             "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
                 "password": {
-                    "type": "string",
-                    "minLength": 8,
-                    "example": "password123"
+                    "type": "string"
                 },
-                "username": {
-                    "type": "string",
-                    "minLength": 3,
-                    "example": "vlad"
+                "user_name": {
+                    "type": "string"
                 }
             }
         },
-        "main.ErrorResponse": {
+        "models.AuthorizeResponse": {
+            "type": "object",
+            "properties": {
+                "is_authorize": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string",
-                    "example": "invalid request body"
-                }
-            }
-        },
-        "main.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "pong"
-                }
-            }
-        },
-        "main.UserResponse": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "username": {
-                    "type": "string",
-                    "example": "vlad"
+                    "type": "string"
                 }
             }
         }
@@ -217,12 +89,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Wishlist API",
-	Description:      "API для приложения вишлистов.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -1,16 +1,21 @@
 package main
 
+import (
+	"fmt"
+
+	"github.com/Vladislav-Evg-Sid/wishlist/server/config"
+	"github.com/Vladislav-Evg-Sid/wishlist/server/internal/bootstrap"
+)
+
 func main() {
-	// cfg, err := config.LoadConfig(os.Getenv("configPath"))
-	// if err != nil {
-	// 	panic(fmt.Sprintf("ошибка парсинга конфига: %v", err))
-	// }
+	cfg, err := config.LoadConfig("config.yml")
+	if err != nil {
+		panic(fmt.Sprintf("ошибка парсинга конфига: %v", err))
+	}
 
-	// adminStorage := bootstrap.InitPGStorage(cfg)
-	// adminService := bootstrap.InitAdminService(adminStorage, cfg)
-	// adminInfoProcessor := bootstrap.InitAdminInfoProcessor(adminService)
-	// adminInfoUpsertConsumer := bootstrap.InitAdminInfoUpsertConsumer(cfg, adminInfoProcessor)
-	// adminAPI := bootstrap.InitAdminServiceAPI(adminService)
+	authService := bootstrap.InitAuthService(nil)
+	authAPI := bootstrap.InitAuthAPI(authService)
+	server := bootstrap.InitApiServer(cfg.Server.Host, cfg.Server.Port, authAPI)
 
-	// bootstrap.AppRun(*adminAPI, adminInfoUpsertConsumer, cfg)
+	server.Run()
 }

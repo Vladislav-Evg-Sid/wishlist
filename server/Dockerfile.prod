@@ -1,0 +1,15 @@
+FROM golang:1.25-alpine
+
+WORKDIR /app
+
+# 1. Копируем ТОЛЬКО зависимости для кэширования
+COPY go.mod go.sum ./
+
+# 2. Скачиваем зависимости
+RUN go mod download
+
+# 3. Копируем ВЕСЬ проект (включая сгенерированные protobuf файлы)
+COPY . .
+
+# 4. Запускаем
+CMD ["go", "run", "cmd/app/main.go"]

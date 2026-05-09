@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Database DatabaseConfig `yaml:"database"`
+	Server   ServerConfig   `yaml:"server"`
 }
 
 type DatabaseConfig struct {
@@ -18,6 +19,11 @@ type DatabaseConfig struct {
 	Password string `yaml:"password"`
 	DBName   string `yaml:"name"`
 	SSLMode  string `yaml:"ssl_mode"`
+}
+
+type ServerConfig struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 func LoadConfig(filename string) (*Config, error) {

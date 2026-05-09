@@ -32,9 +32,14 @@ swagger-install:
 swagger:
 	cd $(SERVER_DIR) && swag init -g $(APP_ENTRY) -o $(SWAGGER_OUT) --parseInternal
 
-.PHONY: run
-run:
-	cd $(SERVER_DIR) && go run ./cmd/app
+.PHONY: run-dev
+run-dev:
+	make migrate-up
+	docker-compose -f docker-compose-develop.yml up --build
+
+.PHONY: run-prod
+run-prod:
+	docker-compose -f docker-compose-prod.yml up --build
 
 .PHONY: tidy
 tidy:

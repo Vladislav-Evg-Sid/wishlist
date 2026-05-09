@@ -18,3 +18,4 @@
 ## Swagger:
 1. Установить зависимость для создания свагера: `go install github.com/swaggo/swag/cmd/swag@latest`
 2. Запустить скрипт для создания свагера: `make swagger`
+3. Смотреть swagger можно по URL `http://{host}:{port}/swagger/index.html`

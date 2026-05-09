@@ -21,18 +21,13 @@ services:
   server:
     build:
       context: ./server
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     container_name: wishlist-server
     ports:
       - "${SERVER_HOST_PORT}:${SERVER_CONTAINER_PORT}"
     networks:
       - wishlist-network
-    volumes:
-      - ./server-admin:/app
-      - ./server-admin/.air.toml:/app/.air.toml
-      - ./server-admin/tmp:/app/tmp
     environment:
-      - configPath=${CONFIG_PATH}
       - DB_HOST=${POSTGRES_HOST}
       - DB_PORT=${POSTGRES_HOST_PORT}
       - DB_USER=${POSTGRES_USER}

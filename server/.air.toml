@@ -1,0 +1,43 @@
+# .air.toml
+root = "/app"
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  # Путь к бинарнику ВНУТРИ контейнера
+  cmd = "go build -o ./tmp/main ./cmd/app"
+  bin = "./tmp/main"
+  
+  # Задержка перед повторной сборкой
+  delay = 1000
+  
+  # Исключаем ненужные директории
+  exclude_dir = ["tmp", "vendor", "testdata", ".git", ".docker"]
+  
+  # Только Go файлыdocker
+  include_ext = ["go"]
+  
+  # Логи ошибок
+  log = "tmp/air-build-errors.log"
+  
+  # Правильно завершаем процесс
+  send_interrupt = true
+  interrupt_timeout = 5
+
+[log]
+  # Показываем всё
+  main_only = false
+  time = true
+
+[color]
+  app = "green"
+  build = "yellow"
+  main = "magenta"
+  runner = "cyan"
+  watcher = "blue"
+
+[misc]
+  clean_on_exit = true
+  
+[tmp]
+  dir = "tmp"

@@ -1,142 +1,50 @@
-basePath: /
 definitions:
-  main.CreateUserRequest:
+  models.AuthorizeRequest:
     properties:
-      email:
-        example: user@example.com
-        type: string
       password:
-        example: password123
-        minLength: 8
         type: string
-      username:
-        example: vlad
-        minLength: 3
+      user_name:
         type: string
-    required:
-    - email
-    - password
-    - username
     type: object
-  main.ErrorResponse:
+  models.AuthorizeResponse:
+    properties:
+      is_authorize:
+        type: boolean
+    type: object
+  models.ErrorResponse:
     properties:
       error:
-        example: invalid request body
         type: string
     type: object
-  main.MessageResponse:
-    properties:
-      message:
-        example: pong
-        type: string
-    type: object
-  main.UserResponse:
-    properties:
-      email:
-        example: user@example.com
-        type: string
-      id:
-        example: 1
-        type: integer
-      username:
-        example: vlad
-        type: string
-    type: object
-host: localhost:8080
 info:
   contact: {}
-  description: API для приложения вишлистов.
-  title: Wishlist API
-  version: "1.0"
 paths:
-  /api/v1/echo:
+  /api/auth/authorize:
     post:
       consumes:
       - application/json
-      description: Принимает произвольный JSON и возвращает его обратно.
-      parameters:
-      - description: Любой JSON
-        in: body
-        name: request
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/main.ErrorResponse'
-      summary: Вернуть переданный JSON
-      tags:
-      - debug
-  /api/v1/ping:
-    get:
-      description: Возвращает простой JSON-ответ.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.MessageResponse'
-      summary: Проверка доступности API
-      tags:
-      - system
-  /api/v1/users:
-    post:
-      consumes:
-      - application/json
-      description: Принимает JSON, биндингует его в Go-структуру и возвращает созданного
-        пользователя.
+      description: |-
+        Получает логин и пароль пользователя,
+        проверяет пользователя и возвращает true/false
       parameters:
       - description: Данные пользователя
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.CreateUserRequest'
+          $ref: '#/definitions/models.AuthorizeRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/main.UserResponse'
+            $ref: '#/definitions/models.AuthorizeResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.ErrorResponse'
-      summary: Создать пользователя
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Авторизация пользователя
       tags:
-      - users
-  /api/v1/users/{id}:
-    get:
-      description: Возвращает пользователя по идентификатору.
-      parameters:
-      - description: ID пользователя
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/main.ErrorResponse'
-      summary: Получить пользователя по ID
-      tags:
-      - users
+      - auth
 swagger: "2.0"

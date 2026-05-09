@@ -5,3 +5,7 @@ database:
   password: ${DB_PASSWORD}
   name: ${DB_NAME}
   ssl_mode: ${DB_SSL_MODE}
+
+server:
+  host: ${SERVER_HOST}
+  port: ${SERVER_PORT}
