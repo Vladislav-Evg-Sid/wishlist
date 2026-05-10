@@ -1,7 +1,3 @@
-ALTER SEQUENCE status_id_seq RESTART WITH 1;
+DELETE FROM public.statuses;
 
-INSERT INTO public.statuses(description) VALUES
-    ('Запланировано'),
-    ('В процессе'),
-    ('Завершено'),
-    ('Заброшено')
+ALTER SEQUENCE status_id_seq RESTART WITH 1;
