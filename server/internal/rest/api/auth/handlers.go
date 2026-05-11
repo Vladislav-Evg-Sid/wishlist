@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,7 @@ func (a *AuthAPI) Authorize(c *gin.Context) {
 		return
 	}
 
-	authRes, err := a.authService.Authorize(&request)
+	authRes, err := a.authService.Authorize(context.Background(), &request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error: err.Error(),
@@ -41,8 +42,9 @@ func (a *AuthAPI) Authorize(c *gin.Context) {
 	c.JSON(http.StatusCreated, mapAuthRes2AuthResponse(authRes))
 }
 
-func mapAuthRes2AuthResponse(authInfo *models.AuthorizeResult) models.AuthorizeResponse {
+func mapAuthRes2AuthResponse(authInfo *models.AuthorizeResult) models.AuthorizeResponse { // TODO: Возвращать надо access-токен
 	return models.AuthorizeResponse{
 		IsAuthorize: authInfo.IsAuthorize,
+		AuthError:   authInfo.AuthError,
 	}
 }

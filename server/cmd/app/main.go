@@ -13,7 +13,8 @@ func main() {
 		panic(fmt.Sprintf("ошибка парсинга конфига: %v", err))
 	}
 
-	authService := bootstrap.InitAuthService(nil)
+	pgStorage := bootstrap.InitPgStorage(&cfg.Database)
+	authService := bootstrap.InitAuthService(pgStorage)
 	authAPI := bootstrap.InitAuthAPI(authService)
 	server := bootstrap.InitApiServer(cfg.Server.Host, cfg.Server.Port, authAPI)
 

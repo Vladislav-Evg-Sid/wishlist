@@ -1,9 +1,13 @@
 package auth
 
-import "github.com/Vladislav-Evg-Sid/wishlist/server/internal/models"
+import (
+	"context"
+
+	"github.com/Vladislav-Evg-Sid/wishlist/server/internal/models"
+)
 
 type AuthService interface {
-	Authorize(userData *models.AuthorizeRequest) (*models.AuthorizeResult, error)
+	Authorize(ctx context.Context, userData *models.AuthorizeRequest) (*models.AuthorizeResult, error)
 }
 
 type AuthAPI struct {

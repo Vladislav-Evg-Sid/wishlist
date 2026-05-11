@@ -1,22 +1,22 @@
 services:
-  # db:
-  #   image: postgres:15
-  #   container_name: wishlist-db
-  #   environment:
-  #     - POSTGRES_DB=${POSTGRES_DB}
-  #     - POSTGRES_USER=${POSTGRES_USER}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   ports:
-  #     - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
-  #   networks:
-  #     - wishlist-network
-  #   healthcheck:
-  #     test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  db:
+    image: postgres:15
+    container_name: wishlist-db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
+    networks:
+      - wishlist-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   server:
     build:
@@ -34,16 +34,16 @@ services:
     environment:
       - configPath=${CONFIG_PATH}
       - DB_HOST=${POSTGRES_HOST}
-      - DB_PORT=${POSTGRES_HOST_PORT}
+      - DB_PORT=${POSTGRES_CONTAINER_PORT}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_NAME=${POSTGRES_DB}
       - DB_SSL_MODE=${POSTGRES_SSL_MODE}
       - SERVER_HOST=${SERVER_HOST}
       - SERVER_PORT=${SERVER_HOST_PORT}
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
+    depends_on:
+      db:
+        condition: service_healthy
 
 networks:
   wishlist-network:

@@ -36,6 +36,10 @@ swagger:
 run-dev:
 	docker-compose -f docker-compose-develop.yml up --build
 
+.PHONY: restart-web
+restart-web:
+	docker-compose -f docker-compose-develop.yml restart server
+
 .PHONY: run-prod
 run-prod:
 	docker-compose -f docker-compose-prod.yml up --build
