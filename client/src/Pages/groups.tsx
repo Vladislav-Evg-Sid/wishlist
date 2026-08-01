@@ -1,8 +1,9 @@
-import { Grid, Button } from "@mui/material"
+import { Grid, Typography } from "@mui/material"
 import GroupsIcon from '@mui/icons-material/Groups';
 
 import getUserGroups from "../api/groups"
 import GridElement from "../components/gridElement"
+import Header from "../components/header";
 import { type GroupsProps } from "../types/mainUI"
 import { type WishlistGroup } from "../types/groups";
 import { useEffect, useState } from "react";
@@ -20,7 +21,10 @@ export default function Groups({
   
   return (
     <>
-      <Button onClick={() => dispatchUI({ type: "goBack" })}>Назад</Button>
+      <Header
+        userName={user.name}
+      />
+      <Typography variant="h3">Доступные группы</Typography>
       <Grid container>
         {
           groups.map(
@@ -28,10 +32,12 @@ export default function Groups({
               key={group.id}
               Icon={GroupsIcon}
               name={group.name}
-              onClick={() => dispatchUI({
-                type: "goForvard",
-                parantID: group.id,
-              })}
+              onClick={() => {
+                dispatchUI({
+                  type: "goForvard",
+                  parantElement: group,
+                })
+              }}
             />
           )
         }

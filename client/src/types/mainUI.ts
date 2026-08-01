@@ -1,20 +1,28 @@
-import type { User } from "./user";
+import { type User } from "./user";
+import { type WishlistGroup } from "./groups";
+import { type Wishlist } from "./wishlists";
 
-export type UIType = "groups" | "wishlicts";
+export type UIType = "groups" | "wishlists";
 
 export interface CurrentUI {
   page: UIType;
-  parantID?: string;
+  parantElement?: WishlistGroup;
 }
 
 export type PageActions = "goBack" | "goForvard";
 
 export interface ReducerUIAction {
   type: PageActions;
-  parantID?: string;
+  parantElement?: WishlistGroup | Wishlist;
 }
 
 export interface GroupsProps {
   user: User;
+  dispatchUI: (action: ReducerUIAction) => void;
+}
+
+export interface WishlistsProps {
+  user: User;
+  group?: WishlistGroup;
   dispatchUI: (action: ReducerUIAction) => void;
 }

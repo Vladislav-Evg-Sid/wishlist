@@ -2,45 +2,72 @@ import { useReducer } from 'react'
 import './App.css'
 import { Typography } from '@mui/material';
 
-import { type CurrentUI, type ReducerUIAction, type UIType } from './types/mainUI';
+import {
+  type CurrentUI,
+  type ReducerUIAction,
+} from './types/mainUI';
 import { type User } from './types/user';
 import Groups from './Pages/groups';
+import Wishlists from './Pages/wishlists';
 
-function getNextUIPage(curPage: UIType): UIType {
-  switch (curPage) {
+function getNextUI(curUI: CurrentUI, action: ReducerUIAction): CurrentUI {
+  switch (curUI.page) {
     case "groups":
-      return "wishlicts"
+      return {
+        ...curUI,
+        page: "wishlists",
+        parantElement: action.parantElement,
+      }
     default:
       alert("Невозможно уйти глубже")
-      return curPage
+      return curUI
   }
 }
 
-function reduceCurrentUI(curUI: CurrentUI, action: ReducerUIAction): CurrentUI {
-  switch (action.type) {
-    case "goForvard":
+function getPrevUI(curUI: CurrentUI, action: ReducerUIAction): CurrentUI {
+  switch (curUI.page) {
+    case "wishlists":
       return {
         ...curUI,
-        page: getNextUIPage(curUI.page),
+        page: "groups",
+        parantElement: action.parantElement,
       }
     default:
-      alert("Неизвестное действие")
+      alert("Невозможно подняться выше")
       return curUI
   }
 }
 
 function App() {
   const [curUI, dispatchUI] = useReducer(reduceCurrentUI, {page: "groups"})
-
+  
   const user: User = {
     id: "123",
-    name: "Влад"
+    name: "Владислав"
+  }
+  
+  function reduceCurrentUI(curUI: CurrentUI, action: ReducerUIAction): CurrentUI {
+    switch (action.type) {
+      case "goForvard":
+        return getNextUI(curUI, action)
+      case "goBack":
+        return getPrevUI(curUI, action)
+      default:
+        alert("Неизвестное действие")
+        return curUI
+    }
   }
 
   return (
     curUI.page === "groups"
     ? <Groups
+        user={user}
         dispatchUI={dispatchUI}
+      />
+    : curUI.page === "wishlists"
+    ? <Wishlists
+        dispatchUI={dispatchUI}
+        group={curUI.parantElement}
         user={user}
       />
     : <Typography>Нет данных</Typography>
