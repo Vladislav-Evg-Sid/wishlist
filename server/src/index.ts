@@ -1,12 +1,16 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
+import { logger } from "./middleware/logger.js";
 import { swaggerSpec } from "./swagger.js";
 
 const PORT = 8000
 
 const app = express();
 
-app.use(express.json());
+app.use(
+  express.json(),
+  logger,
+);
 
 app.get("/", (req, res) => {
   res.json({
