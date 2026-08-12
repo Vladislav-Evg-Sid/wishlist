@@ -1,6 +1,7 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { logger } from "./middleware/logger.js";
+import userRouter from "./modules/users/user.router.js";
 import { swaggerSpec } from "./swagger.js";
 
 const PORT = 8000
@@ -12,33 +13,7 @@ app.use(
   logger,
 );
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Server works",
-  });
-});
-
-/**
- * @openapi
- * /users/{id}:
- *   get:
- *     summary: Получить пользователя
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Пользователь найден
- */
-app.get("/users/:id", (req, res) => {
-  res.json({
-    id: Number(req.params.id),
-    name: "Vlad",
-  });
-});
+app.use("/user", userRouter)
 
 app.listen(PORT, () => {
   console.log(`Server started: http://localhost:${PORT}`);
