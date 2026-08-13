@@ -1,7 +1,8 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { logger } from "./middleware/logger.js";
-import userRouter from "./modules/users/user.router.js";
+import groupRouter from "./modules/groups/groups.router.js";
+import wishlistRouter from "./modules/wishlist/wishlist.router.js";
 import { swaggerSpec } from "./swagger.js";
 
 const app = express();
@@ -13,7 +14,8 @@ app.use(express.json(), logger);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routers
-app.use("/user", userRouter);
+app.use("/groups", groupRouter);
+app.use("/wishlists", wishlistRouter);
 
 // 404
 app.use((req, res) => {
