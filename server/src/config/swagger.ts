@@ -1,20 +1,25 @@
-import swaggerJsdoc from "swagger-jsdoc";
+import { groupsPaths } from "../modules/groups/groups.openapi.js";
+import { wishlistsPaths } from "../modules/wishlist/wishlists.openapi.js";
+import { config } from "./env.js";
 
-export const swaggerSpec = swaggerJsdoc({
-  definition: {
-    openapi: "3.0.0",
+export const swaggerDocument = {
+  openapi: "3.0.3",
 
-    info: {
-      title: "Express learning API",
-      version: "1.0.0",
-    },
-
-    servers: [
-      {
-        url: "http://localhost:8000",
-      },
-    ],
+  info: {
+    title: "Wishlist API",
+    version: "1.0.0",
+    description: "Backend API for Wishlist application",
   },
 
-  apis: ["./src/**/*.ts"],
-});
+  servers: [
+    {
+      url: `http://localhost:${config.port}`,
+      description: "Development server",
+    },
+  ],
+
+  paths: {
+    ...groupsPaths,
+    ...wishlistsPaths,
+  },
+};
