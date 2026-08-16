@@ -3,7 +3,7 @@ import swaggerUi from "swagger-ui-express";
 import { logger } from "./middleware/logger.middleware.js";
 import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlist.router.js";
-import { swaggerSpec } from "./swagger.js";
+import { swaggerSpec } from "./config/swagger.js";
 
 const app = express();
 
