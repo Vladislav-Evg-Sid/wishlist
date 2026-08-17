@@ -1,4 +1,5 @@
 import express from "express";
+
 import { getGroupWishlist } from "./wishlists.controller.js";
 
 const wishlistRouter = express.Router();

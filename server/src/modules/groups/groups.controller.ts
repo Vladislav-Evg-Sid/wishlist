@@ -1,12 +1,10 @@
 import { type Response } from "express";
 
-import {
-  type GroupData,
-  type GetUserRequst as GetUserGroupsRequest,
-} from "./groups.types.js";
+import { type GroupData } from "./groups.types.js";
+import { type GetUserGroupsRequstDTO } from "./groups.dto.js";
 
 export function getUserGroups(
-  req: GetUserGroupsRequest,
+  req: GetUserGroupsRequstDTO,
   res: Response<GroupData[]>,
 ): void {
   res.json([
