@@ -1,6 +1,14 @@
-import type { Request, Response } from "express";
+import { type Response } from "express";
 
-export function getUserGroups(req: Request, res: Response): void {
+import {
+  type GroupData,
+  type GetUserRequst as GetUserGroupsRequest,
+} from "./groups.types.js";
+
+export function getUserGroups(
+  req: GetUserGroupsRequest,
+  res: Response<GroupData[]>,
+): void {
   res.json([
     {
       id: "123",

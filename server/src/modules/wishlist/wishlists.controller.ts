@@ -1,6 +1,13 @@
-import type { Request, Response } from "express";
+import { type Response } from "express";
+import {
+  type GetGroupWishlistRequest,
+  type WishlistData,
+} from "./wishlists.types.js";
 
-export function getGroupWishlist(req: Request, res: Response): void {
+export function getGroupWishlist(
+  req: GetGroupWishlistRequest,
+  res: Response<WishlistData[]>,
+): void {
   const groupID = req.params.id;
 
   switch (groupID) {
