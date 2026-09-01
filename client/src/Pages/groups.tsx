@@ -1,28 +1,25 @@
 import { Grid, Typography } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { observer } from "mobx-react-lite/src/observer.js";
+import { useNavigate } from "react-router-dom";
 
-import GridElement from "../components/gridElement";
+import GridElement from "../components/elements/GridElement";
 import { useStore } from "../hooks/useStore";
 
 const Groups = observer(() => {
   const { groupStore } = useStore();
+  const navigate = useNavigate();
 
   return (
     <>
       <Typography variant="h3">Доступные группы</Typography>
       <Grid container>
-        {groupStore.groups.map((group) => (
+        {Array.from(groupStore.groups).map(([groupId, groupName]) => (
           <GridElement
-            key={group.id}
+            key={groupId}
             Icon={GroupsIcon}
-            name={group.name}
-            // onClick={() => {
-            //   dispatchUI({
-            //     type: "goForvard",
-            //     parantElement: group,
-            //   });
-            // }}
+            name={groupName}
+            onClick={() => navigate(`/group/${groupId}`)}
           />
         ))}
       </Grid>

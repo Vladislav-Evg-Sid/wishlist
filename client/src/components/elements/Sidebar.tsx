@@ -2,9 +2,9 @@ import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
-import logoCompany from "../assets/react.svg";
-import { NavButton } from "./gui/NavButton";
-import { useStore } from "../hooks/useStore";
+import logoCompany from "../../assets/react.svg";
+import { NavButton } from "../gui/NavButton";
+import { useStore } from "../../hooks/useStore";
 
 const SideBar = observer(() => {
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-import { type Wishlist } from "../types/wishlists";
+import type { Wishlist } from "../types/wishlists";
 
 export default function getWishlistsByGroup(groupID: string): Wishlist[] {
   // Имитация запроса на бэк

@@ -2,11 +2,13 @@ import { makeAutoObservable, reaction, runInAction } from "mobx";
 
 import type { RootStore } from "./RootStore";
 import getUserGroups from "../api/groups";
-import { type Group } from "../types/groups";
+import type { Groups, GroupData } from "../types/groups";
+import getWishlistsByGroup from "../api/wishlists";
 
 export class GroupStore {
   rootStore: RootStore;
-  groups: Group[] = [];
+  groups: Groups = new Map();
+  currentGroup: GroupData | null = null;
   loading: boolean = false;
 
   constructor(rootStore: RootStore) {
@@ -31,6 +33,18 @@ export class GroupStore {
 
     runInAction(() => {
       this.groups = userGroups;
+    });
+  }
+
+  async loadGroupWishlist(groupId: string) {
+    const groupWishlists = await getWishlistsByGroup(groupId);
+
+    runInAction(() => {
+      this.currentGroup = {
+        id: groupId,
+        name: this.groups.get(groupId) ?? "",
+        wishlists: groupWishlists,
+      };
     });
   }
 }

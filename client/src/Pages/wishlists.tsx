@@ -1,40 +1,55 @@
-import { Grid, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
+import { ArrowBack } from "@mui/icons-material";
 
-import getWishlistsByGroup from "../api/wishlists";
-import GridElement from "../components/gridElement";
-import { type WishlistsProps } from "../types/mainUI";
-import { type Wishlist } from "../types/wishlists";
-import { useEffect, useState } from "react";
+import GridElement from "../components/elements/GridElement";
+import { useNavigate, useParams } from "react-router-dom";
+import { useStore } from "../hooks/useStore";
 
 export default function Wishlists() {
-  const [wishlists, setWishlists] = useState<Wishlist[]>([]);
+  const { groupID } = useParams();
+  const { groupStore } = useStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!group) {
+    if (groupID === undefined) {
+      alert("Не обнвружена группа");
       return;
     }
-    const wishlistsData = getWishlistsByGroup(group.id);
-    setWishlists(wishlistsData);
-  }, [group]);
+    groupStore.loadGroupWishlist(groupID);
+  }, [groupID]);
 
   return (
     <>
-      <Typography variant="h3">
-        {group ? group.name : "Неизвестная группа"}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+        }}
+      >
+        <Button
+          startIcon={<ArrowBack />}
+          variant="contained"
+          onClick={() => navigate(-1)}
+          sx={{ mr: 1 }}
+        >
+          Назад
+        </Button>
+        <Typography variant="h4">{groupStore.currentGroup?.name}</Typography>
+      </Box>
       <Grid container>
-        {wishlists.map((wishlist) => (
+        {groupStore.currentGroup?.wishlists.map((wishlist) => (
           <GridElement
             key={wishlist.id}
             Icon={FeaturedPlayListIcon}
             name={wishlist.name}
-            onClick={() =>
-              dispatchUI({
-                type: "goForvard",
-                parantElement: wishlist,
-              })
-            }
+            // onClick={() =>
+            //   dispatchUI({
+            //     type: "goForvard",
+            //     parantElement: wishlist,
+            //   })
+            // }
           />
         ))}
       </Grid>

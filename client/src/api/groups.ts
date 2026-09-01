@@ -1,36 +1,18 @@
-import type { Group } from "../types/groups";
+import type { Groups } from "../types/groups";
 
-export default function getUserGroups(userID: string): Group[] {
+export default function getUserGroups(userID: string): Groups {
   switch (userID) {
     case "123":
-      return [
-        {
-          id: "123",
-          name: "Группа 1",
-        },
-        {
-          id: "124",
-          name: "Группа 2",
-        },
-        {
-          id: "125",
-          name: "Группа 3",
-        },
-        {
-          id: "126",
-          name: "Группа 4",
-        },
-        {
-          id: "127",
-          name: "Группа 5",
-        },
-        {
-          id: "128",
-          name: "Группа 6",
-        },
-      ];
+      return new Map([
+        ["123", "Группа 1"],
+        ["124", "Группа 2"],
+        ["125", "Группа 3"],
+        ["126", "Группа 4"],
+        ["127", "Группа 5"],
+        ["128", "Группа 6"],
+      ]);
 
     default:
-      return [];
+      return new Map();
   }
 }
