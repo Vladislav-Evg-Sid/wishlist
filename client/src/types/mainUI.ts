@@ -22,7 +22,6 @@ export interface GroupsProps {
 }
 
 export interface WishlistsProps {
-  user: User;
   group?: WishlistGroup;
   dispatchUI: (action: ReducerUIAction) => void;
 }

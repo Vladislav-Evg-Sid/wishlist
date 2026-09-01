@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { useNavigate, NavLink } from "react-router-dom";
 
-// import logoCompany from "../assets/logo.png";
+import logoCompany from "../assets/react.svg";
 
 interface NavButtonProps {
   to: string;
@@ -72,7 +72,7 @@ export default function SideBar() {
     >
       <Box>
         <img
-          // src={logoCompany}
+          src={logoCompany}
           alt="Company Logo"
           style={{ width: "100%", maxWidth: 300, cursor: "pointer" }}
           onClick={() => navigate("/")}

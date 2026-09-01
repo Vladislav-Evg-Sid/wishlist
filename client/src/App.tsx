@@ -83,11 +83,7 @@ function App() {
           <Route
             path="/wishlist"
             element={
-              <Wishlists
-                dispatchUI={dispatchUI}
-                group={curUI.parantElement}
-                user={user}
-              />
+              <Wishlists dispatchUI={dispatchUI} group={curUI.parantElement} />
             }
           />
         </Routes>
