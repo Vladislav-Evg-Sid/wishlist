@@ -26,6 +26,7 @@ export default function Wishlists() {
         sx={{
           display: "flex",
           flexDirection: "row",
+          mb: 1,
         }}
       >
         <Button
