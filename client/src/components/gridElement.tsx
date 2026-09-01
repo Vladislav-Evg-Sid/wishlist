@@ -1,15 +1,26 @@
-import { Grid, Button, Box, Typography } from "@mui/material"
+import {
+  Grid,
+  Button,
+  Box,
+  Typography,
+  type SvgIconProps,
+} from "@mui/material";
+import type { ComponentType } from "react";
 
-import { type GridElementProps } from "../types/gridElement"
+export interface GridElementProps {
+  Icon: ComponentType<SvgIconProps>;
+  name: string;
+  onClick?: () => void;
+}
 
-export default function GridElement({Icon, name, onClick}: GridElementProps) {
+export default function GridElement({ Icon, name, onClick }: GridElementProps) {
   function handleClick() {
     if (!onClick) {
-      return
+      return;
     }
-    onClick()
+    onClick();
   }
-  
+
   return (
     <Grid
       size={{
@@ -22,14 +33,14 @@ export default function GridElement({Icon, name, onClick}: GridElementProps) {
       <Button
         onClick={handleClick}
         sx={{
-          width: "90%"
+          width: "90%",
         }}
       >
         <Box>
-          <Icon sx={{ fontSize: 100 }}/>
+          <Icon sx={{ fontSize: 100 }} />
           <Typography>{name}</Typography>
         </Box>
       </Button>
     </Grid>
-  )
+  );
 }

@@ -1,38 +1,33 @@
 import { Grid, Typography } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { observer } from "mobx-react-lite/src/observer.js";
 
-import getUserGroups from "../api/groups";
 import GridElement from "../components/gridElement";
-import { type GroupsProps } from "../types/mainUI";
-import { type WishlistGroup } from "../types/groups";
-import { useEffect, useState } from "react";
+import { useStore } from "../hooks/useStore";
 
-export default function Groups({ user, dispatchUI }: GroupsProps) {
-  const [groups, setGropus] = useState<WishlistGroup[]>([]);
-
-  useEffect(() => {
-    const groupsData = getUserGroups(user.id);
-    setGropus(groupsData);
-  }, [user.id]);
+const Groups = observer(() => {
+  const { groupStore } = useStore();
 
   return (
     <>
       <Typography variant="h3">Доступные группы</Typography>
       <Grid container>
-        {groups.map((group) => (
+        {groupStore.groups.map((group) => (
           <GridElement
             key={group.id}
             Icon={GroupsIcon}
             name={group.name}
-            onClick={() => {
-              dispatchUI({
-                type: "goForvard",
-                parantElement: group,
-              });
-            }}
+            // onClick={() => {
+            //   dispatchUI({
+            //     type: "goForvard",
+            //     parantElement: group,
+            //   });
+            // }}
           />
         ))}
       </Grid>
     </>
   );
-}
+});
+
+export default Groups;

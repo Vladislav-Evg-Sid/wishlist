@@ -7,7 +7,7 @@ import { type WishlistsProps } from "../types/mainUI";
 import { type Wishlist } from "../types/wishlists";
 import { useEffect, useState } from "react";
 
-export default function Wishlists({ group, dispatchUI }: WishlistsProps) {
+export default function Wishlists() {
   const [wishlists, setWishlists] = useState<Wishlist[]>([]);
 
   useEffect(() => {

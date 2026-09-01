@@ -1,6 +1,6 @@
-import { type WishlistGroup } from "../types/groups";
+import type { Group } from "../types/groups";
 
-export default function getUserGroups(userID: string): WishlistGroup[] {
+export default function getUserGroups(userID: string): Group[] {
   switch (userID) {
     case "123":
       return [

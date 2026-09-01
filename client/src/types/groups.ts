@@ -1,4 +1,4 @@
-export interface WishlistGroup {
+export interface Group {
   id: string;
   name: string;
 }

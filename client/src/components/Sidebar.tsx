@@ -1,60 +1,14 @@
-import { Box, Typography } from "@mui/material";
-import { useNavigate, NavLink } from "react-router-dom";
+import { Box, Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { observer } from "mobx-react-lite";
 
 import logoCompany from "../assets/react.svg";
+import { NavButton } from "./gui/NavButton";
+import { useStore } from "../hooks/useStore";
 
-interface NavButtonProps {
-  to: string;
-  text: string;
-}
-
-export default function SideBar() {
+const SideBar = observer(() => {
   const navigate = useNavigate();
-
-  const NavButton = ({ to, text }: NavButtonProps) => {
-    return (
-      <Box
-        component={NavLink}
-        to={to}
-        sx={{
-          width: "100%",
-          boxSizing: "border-box",
-          display: "flex",
-          alignItems: "center",
-          minHeight: 48,
-          my: 0.2,
-          px: 2,
-          color: "rgba(255, 255, 255, 0.82)",
-          fontSize: "0.95rem",
-          fontWeight: 500,
-          textAlign: "left",
-          textDecoration: "none",
-          borderRadius: 2,
-          borderLeft: "4px solid transparent",
-          transition:
-            "background-color 160ms ease, color 160ms ease, transform 160ms ease",
-          "&:hover": {
-            color: "background.paper",
-            backgroundColor: "rgba(255, 255, 255, 0.12)",
-            transform: "translateX(2px)",
-          },
-          "&:focus-visible": {
-            outline: "2px solid background.paper",
-            outlineOffset: 2,
-          },
-          "&.active": {
-            color: "primary.main",
-            backgroundColor: "background.paper",
-            borderLeftColor: "primary.light",
-            fontWeight: 700,
-            boxShadow: "0 4px 14px rgba(0, 0, 0, 0.16)",
-          },
-        }}
-      >
-        {text}
-      </Box>
-    );
-  };
+  const { authStore } = useStore();
 
   return (
     <Box
@@ -91,6 +45,16 @@ export default function SideBar() {
       >
         <NavButton to="/" text="Группы" />
       </Box>
+      <Box
+        onClick={() => authStore.authorise()}
+        sx={{
+          justifySelf: "end",
+        }}
+      >
+        {authStore.isAuthorised || <Button variant="contained">Войти</Button>}
+      </Box>
     </Box>
   );
-}
+});
+
+export default SideBar;
