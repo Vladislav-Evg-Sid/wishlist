@@ -3,8 +3,8 @@ import { Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import SideBar from "./components/elements/Sidebar";
-import Groups from "./Pages/groups";
-import Wishlists from "./Pages/wishlists";
+import Groups from "./Pages/GroupsPage";
+import Wishlists from "./Pages/WishlistsPage";
 import { useStore } from "./hooks/useStore";
 import { useLayoutEffect } from "react";
 
