@@ -4,10 +4,10 @@ import { observer } from "mobx-react-lite/src/observer.js";
 import { useNavigate } from "react-router-dom";
 
 import GridElement from "../components/elements/GridElement";
-import { useStore } from "../hooks/useStore";
+import { useStoreGroups } from "../hooks/useStore";
 
 const Groups = observer(() => {
-  const { groupStore } = useStore();
+  const groupStore = useStoreGroups();
   const navigate = useNavigate();
 
   return (

@@ -5,15 +5,15 @@ import "./index.css";
 import App from "./App.jsx";
 import { ThemeProvider } from "@mui/material";
 import { theme } from "./theme/theme.js";
-import { StoreProvider } from "./context/store.provider.js";
+import { RootStoreProvider } from "./context/store.provider.js";
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider theme={theme}>
     <StrictMode>
       <BrowserRouter>
-        <StoreProvider>
+        <RootStoreProvider>
           <App />
-        </StoreProvider>
+        </RootStoreProvider>
       </BrowserRouter>
     </StrictMode>
   </ThemeProvider>,
