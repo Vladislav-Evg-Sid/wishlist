@@ -8,7 +8,6 @@ import SideBar from "./components/elements/Sidebar";
 import Groups from "./Pages/GroupsPage";
 import Wishlists from "./Pages/WishlistsPage";
 import { useStore } from "./hooks/useStore";
-import { GroupStoreProvider } from "./context/store.provider";
 
 const App = observer(() => {
   const { authStore, userStore } = useStore();
@@ -43,14 +42,7 @@ const App = observer(() => {
       <Box sx={{ flex: 1, minWidth: 0, m: "1%" }}>
         <Routes>
           <Route path="/auth" element={<>Авторизация. Доделать</>} />
-          <Route
-            path="/"
-            element={
-              <GroupStoreProvider userID={userStore.currentUser?.id ?? ""}>
-                <Groups />
-              </GroupStoreProvider>
-            }
-          />
+          <Route path="/" element={<Groups />} />
           <Route path="/group/:groupID" element={<Wishlists />} />
         </Routes>
       </Box>
