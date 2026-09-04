@@ -1,9 +1,20 @@
 export const groupsPaths = {
-  "/groups": {
+  "/groups/{userID}": {
     get: {
       tags: ["groups"],
       summary: "Получить все группы",
 
+      parameters: [
+        {
+          in: "path",
+          name: "userID",
+          required: true,
+
+          schema: {
+            type: "string",
+          },
+        },
+      ],
       responses: {
         "200": {
           description: "Гуппы получены",
