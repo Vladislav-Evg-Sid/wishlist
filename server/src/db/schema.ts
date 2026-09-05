@@ -9,6 +9,8 @@ export const TABLES = {
 export const USER_COLUMNS = {
   id: "id",
   username: "username",
+  user_hash: "user_hash",
+  email: "email",
   password_hash: "password_hash",
   created_at: "created_at",
   updated_at: "updated_at",
