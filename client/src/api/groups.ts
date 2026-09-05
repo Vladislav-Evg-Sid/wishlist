@@ -1,18 +1,17 @@
+import { baseApi } from "../env";
 import type { Groups } from "../types/groups";
 
-export default function getUserGroups(userID: string): Groups {
-  switch (userID) {
-    case "123":
-      return new Map([
-        ["123", "Группа 1"],
-        ["124", "Группа 2"],
-        ["125", "Группа 3"],
-        ["126", "Группа 4"],
-        ["127", "Группа 5"],
-        ["128", "Группа 6"],
-      ]);
+interface groupRes {
+  id: string;
+  title: string;
+}
 
-    default:
-      return new Map();
+export default async function getUserGroups(userID: string): Promise<Groups> {
+  const response = await fetch(`${baseApi}/groups/${userID}`);
+  if (!response.ok) {
+    throw new Error(`${response.status}`);
   }
+  const groupData: groupRes[] = await response.json();
+
+  return new Map(groupData.map((group) => [group.id, group.title]));
 }
