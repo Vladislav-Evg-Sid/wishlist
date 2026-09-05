@@ -1,5 +1,7 @@
 export const config = {
   port: Number(process.env.PORT ?? 8000),
+  clientHost: process.env.CLIENT_HOST ?? "frontend",
+  clientPort: Number(process.env.CLIENT_HOST_PORT ?? 5173),
 
   db: {
     client: process.env.DB_CLIENT ?? "pg",
@@ -9,7 +11,7 @@ export const config = {
       name: process.env.DB_NAME ?? "wishlist",
       user: process.env.DB_USER ?? "postgres",
       password: process.env.DB_PASSWORD ?? "postgres",
-      database: process.env.DB_DB ?? "wishlist",
+      database: process.env.DB_NAME ?? "wishlist",
     },
   },
 };

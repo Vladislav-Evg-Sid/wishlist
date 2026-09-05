@@ -18,6 +18,48 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    container_name: wishlist-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${SERVER_HOST_PORT}:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_HOST_PORT}
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      PORT: ${SERVER_HOST_PORT}
+      CLIENT_HOST: ${CLIENT_HOST}
+      CLIENT_PORT: ${CLIENT_HOST_PORT}
+    depends_on:
+      - db
+    networks:
+      - wishlist-network
+
+  frontend:
+    container_name: wishlist-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_SERVER_HOST: ${SERVER_HOST}
+      VITE_SERVER_PORT: ${SERVER_HOST_PORT}
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - wishlist-network
+
 networks:
   wishlist-network:
     driver: bridge

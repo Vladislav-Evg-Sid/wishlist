@@ -6,12 +6,13 @@ import { logger } from "./middleware/logger.middleware.js";
 import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import { swaggerDocument } from "./config/swagger.js";
+import { config } from "./config/env.js";
 
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: `http://${config.clientHost}:${config.clientPort}`,
   }),
 );
 
