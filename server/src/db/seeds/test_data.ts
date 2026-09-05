@@ -1,5 +1,5 @@
 import type { Knex } from "knex";
-import { TABLES, USER_COLUMNS } from "../schema.ts";
+import { GROUPS_COLUMNS, TABLES, USER_COLUMNS } from "../schema.ts";
 
 export async function seed(knex: Knex): Promise<void> {
   await knex(TABLES.card).del();
@@ -15,6 +15,17 @@ export async function seed(knex: Knex): Promise<void> {
       [USER_COLUMNS.user_hash]: 1,
       [USER_COLUMNS.email]: "vlad@mail.ru",
       [USER_COLUMNS.password_hash]: "test",
+    },
+  ]);
+
+  await knex(TABLES.groups).insert([
+    {
+      [GROUPS_COLUMNS.title]: "Друзья",
+      [GROUPS_COLUMNS.creator_id]: "00000000-0000-0000-0000-000000000000",
+    },
+    {
+      [GROUPS_COLUMNS.title]: "Семья",
+      [GROUPS_COLUMNS.creator_id]: "00000000-0000-0000-0000-000000000000",
     },
   ]);
 }
