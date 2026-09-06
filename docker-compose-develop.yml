@@ -18,6 +18,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: wishlist-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: redis-server --appendonly yes --bind 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - wishlist-network
+
   backend:
     container_name: wishlist-server
     build:
@@ -37,8 +47,14 @@ services:
       PORT: ${SERVER_HOST_PORT}
       CLIENT_HOST: ${CLIENT_HOST}
       CLIENT_PORT: ${CLIENT_HOST_PORT}
+      REDIS_PORT: ${REDIS_PORT}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL}
     depends_on:
       - db
+      - redis
     networks:
       - wishlist-network
 
