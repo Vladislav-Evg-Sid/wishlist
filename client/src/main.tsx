@@ -1,20 +1,24 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import "./index.css";
-import App from "./App.jsx";
 import { ThemeProvider } from "@mui/material";
+import "./index.css";
+
 import { theme } from "./theme/theme.js";
-import { RootStoreProvider } from "./context/store.provider.js";
+import { RootStoreProvider } from "./providers/storeProvider.js";
+import AuthSession from "./providers/authProvider.js";
+import RouteProvider from "./providers/routerProvider.js";
 
 createRoot(document.getElementById("root")!).render(
-  <ThemeProvider theme={theme}>
-    <StrictMode>
+  <StrictMode>
+    <ThemeProvider theme={theme}>
       <BrowserRouter>
         <RootStoreProvider>
-          <App />
+          <AuthSession>
+            <RouteProvider />
+          </AuthSession>
         </RootStoreProvider>
       </BrowserRouter>
-    </StrictMode>
-  </ThemeProvider>,
+    </ThemeProvider>
+  </StrictMode>,
 );

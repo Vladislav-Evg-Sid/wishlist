@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { rootStore } from "../stores/RootStore";
-import { GroupsStoreContext, RootStoreContext } from "./store.context";
+import { GroupsStoreContext, RootStoreContext } from "../context/store.context";
 import { GroupStore } from "../stores/GroupStore";
 
 interface RootStoreProviderProps {

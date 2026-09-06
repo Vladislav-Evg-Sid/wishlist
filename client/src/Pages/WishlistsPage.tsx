@@ -7,7 +7,7 @@ import GridElement from "../components/elements/GridElement";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "../hooks/useStore";
 
-export default function Wishlists() {
+export default function WishlistsPage() {
   const { groupID } = useParams();
   const { groupStore } = useStore();
   const navigate = useNavigate();
