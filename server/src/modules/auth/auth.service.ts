@@ -1,69 +1,31 @@
-import jwt from "jsonwebtoken";
-import crypto from "node:crypto";
+import {
+  verifyRefreshToken,
+  createAccessToken,
+  createRefreshToken,
+} from "./auth.jwt.js";
 
-import { config } from "../../config/env.js";
-import type { AccessTokenPayload, RefreshTokenPayload } from "./auth.types.js";
+import {
+  isRefreshBlacklisted,
+  blacklistRefreshToken,
+} from "./auth.blacklist.js";
 
-export function createAccessToken(userId: string) {
-  return jwt.sign(
-    {
-      type: "access",
-    },
-    config.jwt.accessSecret,
-    {
-      subject: userId,
-      expiresIn: config.jwt.accessTTL,
-    },
-  );
-}
+export async function refreshTokens(refreshToken: string) {
+  const payload = verifyRefreshToken(refreshToken);
 
-export function createRefreshToken(userId: string) {
-  const jti = crypto.randomUUID();
+  const blacklisted = await isRefreshBlacklisted(payload.jti);
 
-  const token = jwt.sign(
-    {
-      type: "refresh",
-    },
-    config.jwt.refreshSecret,
-    {
-      subject: userId,
-      jwtid: jti,
-      expiresIn: config.jwt.refreshTTL,
-    },
-  );
-
-  return { token, jti };
-}
-
-export function verifyAccessToken(token: string): AccessTokenPayload {
-  const payload = jwt.verify(token, config.jwt.accessSecret);
-
-  if (typeof payload === "string") {
-    throw new Error("Invalid access token payload");
+  if (blacklisted) {
+    throw new Error("Refresh token revoked");
   }
 
-  if (payload.type !== "access" || typeof payload.sub !== "string") {
-    throw new Error("Invalid access token");
-  }
+  await blacklistRefreshToken(payload.jti, payload.exp);
 
-  return payload as AccessTokenPayload;
-}
+  const accessToken = createAccessToken(payload.sub);
 
-export function verifyRefreshToken(token: string): RefreshTokenPayload {
-  const payload = jwt.verify(token, config.jwt.refreshSecret);
+  const newRefreshToken = createRefreshToken(payload.sub).token;
 
-  if (typeof payload === "string") {
-    throw new Error("Invalid refresh token payload");
-  }
-
-  if (
-    payload.type !== "refresh" ||
-    typeof payload.sub !== "string" ||
-    typeof payload.jti !== "string" ||
-    typeof payload.exp !== "number"
-  ) {
-    throw new Error("Invalid refresh token");
-  }
-
-  return payload as RefreshTokenPayload;
+  return {
+    accessToken,
+    refreshToken: newRefreshToken,
+  };
 }

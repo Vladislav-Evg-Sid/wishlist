@@ -4,7 +4,10 @@ export const TABLES = {
   group_member: "group_member",
   wishlist: "wishlist",
   card: "card",
+  refresh_tokens: "refresh_tokens",
 } as const;
+
+export type statuses = "Новая" | "Завершена";
 
 export const USER_COLUMNS = {
   id: "id",
@@ -46,4 +49,11 @@ export const CARD_COLUMNS = {
   creator_id: "creator_id",
 } as const;
 
-export type statuses = "Новая" | "Завершена";
+export const REFRESH_TOKENS_COLUMNS = {
+  id: "id",
+  jti: "jti",
+  user_agent: "user_agent",
+  created_at: "created_at",
+  expires_at: "expires_at",
+  revoked_ta: "revoked_at",
+} as const;
