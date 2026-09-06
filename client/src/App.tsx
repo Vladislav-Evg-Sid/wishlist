@@ -1,5 +1,5 @@
 import "./App.css";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect as useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material";
@@ -12,7 +12,7 @@ import { useStore } from "./hooks/useStore";
 const App = observer(() => {
   const { authStore, userStore } = useStore();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     authStore.authorise();
   }, []);
 
