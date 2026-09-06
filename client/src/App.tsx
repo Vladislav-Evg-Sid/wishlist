@@ -12,6 +12,7 @@ import { useStore } from "./hooks/useStore";
 const App = observer(() => {
   const { authStore, userStore } = useStore();
 
+  // TODO Вынести авторизацию в провайдер AuthSession
   useEffect(() => {
     authStore.authorise();
   }, []);
@@ -25,6 +26,7 @@ const App = observer(() => {
   }
 
   return (
+    // TODO Вынести руты в провайдер рутов (смотри комментарий ниже)
     <Box
       sx={{
         display: "flex",
@@ -51,3 +53,20 @@ const App = observer(() => {
 });
 
 export default App;
+
+/*
+import {createBrowserRouter} from "react-router-dom";
+import {AuthPage} from "../../modules/auth/pages/AuthPage.tsx";
+import {ProtectedRoute} from "./ProtectedRoute.tsx";
+
+export const router = createBrowserRouter([
+  {
+    path: "/auth/*",
+    element: <AuthPage />
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [],
+  }
+])
+*/
