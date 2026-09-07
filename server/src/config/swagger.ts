@@ -19,6 +19,22 @@ export const swaggerDocument = {
     },
   ],
 
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+
+      refreshCookie: {
+        type: "apiKey",
+        in: "cookie",
+        name: "refreshToken",
+      },
+    },
+  },
+
   paths: {
     ...groupsPaths,
     ...wishlistsPaths,

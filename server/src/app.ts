@@ -8,6 +8,7 @@ import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
 import authRouter from "./modules/auth/auth.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.use(
 );
 
 // Midlware
-app.use(express.json(), logger);
+app.use(express.json(), cookieParser(), logger);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

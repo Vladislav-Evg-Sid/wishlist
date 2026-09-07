@@ -94,8 +94,8 @@ export const authPaths = {
       },
 
       responses: {
-        "201": {
-          description: "Пользователь авторизирован",
+        "200": {
+          description: "Пользователь успешно авторизован",
           content: {
             "application/json": {
               schema: {
@@ -112,6 +112,56 @@ export const authPaths = {
 
         "401": {
           description: "Пользователь с таким email или парелем не существует",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
+        },
+      },
+    },
+  },
+  "/auth/refresh": {
+    post: {
+      tags: ["auth"],
+      summary: "Обновление токенов",
+
+      responses: {
+        "200": {
+          description: "Токены успешно обновлены",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["accessToken"],
+                properties: {
+                  accessToken: {
+                    type: "string",
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        "401": {
+          description:
+            "Refresh token отсутствует, недействителен, истёк или был отозван",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
+        },
+      },
+    },
+  },
+  "/auth/logout": {
+    post: {
+      tags: ["auth"],
+      summary: "Выход из системы",
+
+      responses: {
+        "204": {
+          description: "Сессия успешно завершена",
         },
 
         "500": {

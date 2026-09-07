@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 import type {
   CreateUserRequestDTO,
@@ -6,7 +6,7 @@ import type {
   LoginUserRequestDTO,
   LoginUserResponseDTO,
 } from "./auth.dto.js";
-import { loginUser, registerUser } from "./auth.service.js";
+import { loginUser, logoutUser, registerUser } from "./auth.service.js";
 import { config } from "../../config/env.js";
 
 export async function registerUserRequest(
@@ -73,5 +73,57 @@ export async function loginUserRequest(
     }
 
     res.status(500).send("Unknown internal Server error");
+  }
+}
+
+export async function refreshTokensRequest(
+  req: Request,
+  res: LoginUserResponseDTO,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      res.status(401).send("Refresh token not found");
+      return;
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await refreshToken(refreshToken);
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: config.nodeEnv === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({
+      accessToken,
+    });
+  } catch {
+    res.status(401).send("Invalid refresh token");
+  }
+}
+
+export async function logoutUserRequest(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      await logoutUser(refreshToken);
+    }
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: config.nodeEnv === "production",
+      sameSite: "strict",
+    });
+
+    res.status(204).send();
+  } catch {
+    res.status(500).send("Internal Server Error");
   }
 }
