@@ -29,3 +29,36 @@ export async function findUserByID(id: string): Promise<User> {
     .where({ [USER_COLUMNS.id]: id })
     .first();
 }
+
+export async function createUser(
+  username: string,
+  email: string,
+  passwordHash: string,
+  user_hash: number,
+) {
+  return db(TABLES.users)
+    .insert({
+      [USER_COLUMNS.username]: username,
+      [USER_COLUMNS.user_hash]: user_hash,
+      [USER_COLUMNS.email]: email,
+      [USER_COLUMNS.password_hash]: passwordHash,
+    })
+    .returning("*");
+}
+
+export async function findMaxUserHash(username: string): Promise<number> {
+  const maxUserHash = await db(TABLES.users)
+    .max(USER_COLUMNS.user_hash)
+    .where({ [USER_COLUMNS.username]: username })
+    .first();
+
+  if (!maxUserHash) {
+    return 0;
+  }
+
+  if (maxUserHash.max === null) {
+    return 0;
+  }
+
+  return maxUserHash.max;
+}

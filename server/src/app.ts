@@ -7,6 +7,7 @@ import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
+import authRouter from "./modules/auth/auth.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // Routers
 app.use("/groups", groupRouter);
 app.use("/wishlists", wishlistRouter);
+app.use("/auth", authRouter);
 
 // 404
 app.use((req, res) => {

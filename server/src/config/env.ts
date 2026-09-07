@@ -30,4 +30,8 @@ export const config = {
     accessTTL: process.env.JWT_ACCESS_TTL as JwtTTL,
     refreshTTL: process.env.JWT_REFRESH_TTL as JwtTTL,
   },
+
+  auth: {
+    bcryptRounds: Number(process.env.BCRYPT_ROUNDS) ?? 12,
+  },
 };

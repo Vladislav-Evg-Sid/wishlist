@@ -35,9 +35,6 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "${SERVER_HOST_PORT}:3000"
-    volumes:
-      - ./server:/app
-      - /app/node_modules
     environment:
       DB_HOST: ${POSTGRES_HOST}
       DB_PORT: ${POSTGRES_CONTAINER_PORT}
@@ -52,6 +49,7 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL}
       JWT_REFRESH_TTL: ${JWT_REFRESH_TTL}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
     networks:
       - wishlist-network
     depends_on:
@@ -59,6 +57,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./server/src
+          target: /app/src
+
+        - action: rebuild
+          path: ./server/package.json
+
+        - action: rebuild
+          path: ./server/package-lock.json
 
   frontend:
     container_name: wishlist-client

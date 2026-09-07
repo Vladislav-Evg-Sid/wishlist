@@ -29,3 +29,9 @@ export interface User {
   userHash: string;
   passwordHash: string;
 }
+
+export interface UserData {
+  email: string;
+  username: string;
+  password: string;
+}
