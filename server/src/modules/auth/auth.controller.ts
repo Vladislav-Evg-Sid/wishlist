@@ -11,6 +11,7 @@ import {
   logoutUser,
   refreshTokens,
   registerUser,
+  revokeAllUserRefresh,
 } from "./auth.service.js";
 import { config } from "../../config/env.js";
 
@@ -119,6 +120,29 @@ export async function logoutUserRequest(
 
     if (refreshToken) {
       await logoutUser(refreshToken);
+    }
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: config.nodeEnv === "production",
+      sameSite: "strict",
+    });
+
+    res.status(204).send();
+  } catch {
+    res.status(500).send("Internal Server Error");
+  }
+}
+
+export async function revokeAllUserRefreshRequest(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (refreshToken) {
+      await revokeAllUserRefresh(refreshToken);
     }
 
     res.clearCookie("refreshToken", {

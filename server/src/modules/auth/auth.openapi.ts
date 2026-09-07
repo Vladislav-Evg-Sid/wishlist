@@ -170,4 +170,20 @@ export const authPaths = {
       },
     },
   },
+  "/auth/logout/all-sessions": {
+    post: {
+      tags: ["auth"],
+      summary: "Закрытие всех сессий пользователя",
+
+      responses: {
+        "204": {
+          description: "Сессии успешно завершены",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
+        },
+      },
+    },
+  },
 };

@@ -44,17 +44,16 @@ export async function revokeRefreshToken(jti: string): Promise<void> {
     });
 }
 
-export async function revokeAllUserRefreshTokens(
-  userId: string,
-): Promise<void> {
-  await db(TABLES.refresh_tokens)
+export async function revokeAllUserRefreshTokens(userId: string) {
+  return db(TABLES.refresh_tokens)
     .where({
       [REFRESH_TOKENS_COLUMNS.user_id]: userId,
       [REFRESH_TOKENS_COLUMNS.revoked_at]: null,
     })
     .update({
       [REFRESH_TOKENS_COLUMNS.revoked_at]: db.fn.now(),
-    });
+    })
+    .returning([REFRESH_TOKENS_COLUMNS.jti, REFRESH_TOKENS_COLUMNS.expires_at]);
 }
 
 export async function deleteExpiredRefreshTokens(): Promise<number> {

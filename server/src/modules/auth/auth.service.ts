@@ -18,6 +18,7 @@ import { config } from "../../config/env.js";
 import {
   createRefreshTokenRecord,
   findRefreshTokenByJti,
+  revokeAllUserRefreshTokens,
   revokeRefreshToken,
 } from "./jwt.repository.js";
 
@@ -118,4 +119,19 @@ export async function logoutUser(refreshToken: string) {
 
   await revokeRefreshToken(payload.jti);
   await blacklistRefreshToken(payload.jti, payload.exp);
+}
+
+export async function revokeAllUserRefresh(refreshToken: string) {
+  const payload = verifyRefreshToken(refreshToken);
+  const refreshTokenData = await findRefreshTokenByJti(payload.jti);
+  if (!refreshTokenData) {
+    throw new Error("Refresh token session not found");
+  }
+
+  const allUserActiveRefresh = await revokeAllUserRefreshTokens(
+    refreshTokenData.user_id,
+  );
+  for (const userRefresh of allUserActiveRefresh) {
+    blacklistRefreshToken(userRefresh.jti, userRefresh.expires_at);
+  }
 }
