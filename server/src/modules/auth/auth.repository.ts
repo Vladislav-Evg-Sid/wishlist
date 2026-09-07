@@ -1,5 +1,6 @@
 import { db } from "../../db/knex.js";
 import { TABLES, USER_COLUMNS } from "../../db/schema.js";
+import type { UserRaw } from "./auth.dto.js";
 import type { User } from "./auth.types.js";
 
 export async function findUserByEmail(
@@ -36,14 +37,15 @@ export async function createUser(
   passwordHash: string,
   user_hash: number,
 ) {
-  return db(TABLES.users)
+  return db<UserRaw>(TABLES.users)
     .insert({
       [USER_COLUMNS.username]: username,
       [USER_COLUMNS.user_hash]: user_hash,
       [USER_COLUMNS.email]: email,
       [USER_COLUMNS.password_hash]: passwordHash,
     })
-    .returning("*");
+    .returning("*")
+    .first();
 }
 
 export async function findMaxUserHash(username: string): Promise<number> {

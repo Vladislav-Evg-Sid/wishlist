@@ -1,18 +1,18 @@
 import { db } from "../../db/knex.js";
 import { TABLES, REFRESH_TOKENS_COLUMNS } from "../../db/schema.js";
-import type { RefreshTokenRecord } from "./auth.types.js";
+import type { RefreshTokenRaw } from "./auth.dto.js";
 
 type CreateRefreshTokenData = {
   userId: string;
   jti: string;
   expiresAt: Date;
-  userAgent?: string;
+  userAgent: string | undefined;
 };
 
 export async function createRefreshTokenRecord(
   data: CreateRefreshTokenData,
-): Promise<RefreshTokenRecord> {
-  const [record] = await db<RefreshTokenRecord>(TABLES.refresh_tokens)
+): Promise<RefreshTokenRaw> {
+  const [record] = await db<RefreshTokenRaw>(TABLES.refresh_tokens)
     .insert({
       [REFRESH_TOKENS_COLUMNS.user_id]: data.userId,
       [REFRESH_TOKENS_COLUMNS.jti]: data.jti,
@@ -30,8 +30,8 @@ export async function createRefreshTokenRecord(
 
 export async function findRefreshTokenByJti(
   jti: string,
-): Promise<RefreshTokenRecord | undefined> {
-  return db<RefreshTokenRecord>(TABLES.refresh_tokens)
+): Promise<RefreshTokenRaw | undefined> {
+  return db<RefreshTokenRaw>(TABLES.refresh_tokens)
     .where({ [REFRESH_TOKENS_COLUMNS.jti]: jti })
     .first();
 }

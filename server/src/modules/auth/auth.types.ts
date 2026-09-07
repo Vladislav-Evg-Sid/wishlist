@@ -12,16 +12,6 @@ export type RefreshTokenPayload = JwtPayload & {
   type: "refresh";
 };
 
-export type RefreshTokenRecord = {
-  id: string;
-  user_id: string;
-  jti: string;
-  created_at: Date;
-  expires_at: Date;
-  revoked_at: Date | null;
-  user_agent: string | null;
-};
-
 export interface User {
   id: string;
   email: string;
