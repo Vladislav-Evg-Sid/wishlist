@@ -51,9 +51,10 @@ export const CARD_COLUMNS = {
 
 export const REFRESH_TOKENS_COLUMNS = {
   id: "id",
+  user_id: "user_id",
   jti: "jti",
   user_agent: "user_agent",
   created_at: "created_at",
   expires_at: "expires_at",
-  revoked_ta: "revoked_at",
+  revoked_at: "revoked_at",
 } as const;
