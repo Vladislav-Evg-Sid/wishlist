@@ -6,7 +6,12 @@ import type {
   LoginUserRequestDTO,
   LoginUserResponseDTO,
 } from "./auth.dto.js";
-import { loginUser, logoutUser, registerUser } from "./auth.service.js";
+import {
+  loginUser,
+  logoutUser,
+  refreshTokens,
+  registerUser,
+} from "./auth.service.js";
 import { config } from "../../config/env.js";
 
 export async function registerUserRequest(
@@ -89,7 +94,7 @@ export async function refreshTokensRequest(
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
-      await refreshToken(refreshToken);
+      await refreshTokens(refreshToken);
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
