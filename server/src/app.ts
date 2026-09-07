@@ -9,6 +9,7 @@ import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import cookieParser from "cookie-parser";
+import { requireAccessToken } from "./middleware/require-access-token.middleware.js";
 
 const app = express();
 
@@ -25,9 +26,9 @@ app.use(express.json(), cookieParser(), logger);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Routers
-app.use("/groups", groupRouter);
-app.use("/wishlists", wishlistRouter);
 app.use("/auth", authRouter);
+app.use("/groups", requireAccessToken, groupRouter);
+app.use("/wishlists", requireAccessToken, wishlistRouter);
 
 // 404
 app.use((req, res) => {
