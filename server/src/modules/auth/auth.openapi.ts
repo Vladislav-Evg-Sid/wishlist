@@ -62,4 +62,62 @@ export const authPaths = {
       },
     },
   },
+  "/auth/login": {
+    post: {
+      tags: ["auth"],
+      summary: "Авторизация пользователя",
+
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["email", "password"],
+
+              properties: {
+                email: {
+                  type: "string",
+                  format: "email",
+                  example: "ivan@example.com",
+                },
+
+                password: {
+                  type: "string",
+                  format: "password",
+                  example: "strongPassword123",
+                },
+              },
+            },
+          },
+        },
+      },
+
+      responses: {
+        "201": {
+          description: "Пользователь авторизирован",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  accessToken: {
+                    type: "string",
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        "401": {
+          description: "Пользователь с таким email или парелем не существует",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
+        },
+      },
+    },
+  },
 };

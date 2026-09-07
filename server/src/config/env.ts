@@ -3,6 +3,7 @@ import type { SignOptions } from "jsonwebtoken";
 type JwtTTL = NonNullable<SignOptions["expiresIn"]>;
 
 export const config = {
+  nodeEnv: process.env.NODE_ENV ?? "dev",
   port: Number(process.env.PORT ?? 8000),
   clientHost: process.env.CLIENT_HOST ?? "frontend",
   clientPort: Number(process.env.CLIENT_HOST_PORT ?? 5173),

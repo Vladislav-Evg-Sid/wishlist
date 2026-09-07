@@ -7,13 +7,13 @@ export async function findUserByEmail(
   email: string,
 ): Promise<User | undefined> {
   return db(TABLES.users)
-    .select(
-      USER_COLUMNS.id,
-      USER_COLUMNS.email,
-      USER_COLUMNS.username,
-      USER_COLUMNS.user_hash,
-      USER_COLUMNS.password_hash,
-    )
+    .select({
+      id: USER_COLUMNS.id,
+      email: USER_COLUMNS.email,
+      username: USER_COLUMNS.username,
+      userHash: USER_COLUMNS.user_hash,
+      passwordHash: USER_COLUMNS.password_hash,
+    })
     .where({ [USER_COLUMNS.email]: email })
     .first();
 }

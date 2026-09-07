@@ -36,6 +36,7 @@ services:
     ports:
       - "${SERVER_HOST_PORT}:3000"
     environment:
+      NODE_ENV: ${NODE_ENV}
       DB_HOST: ${POSTGRES_HOST}
       DB_PORT: ${POSTGRES_CONTAINER_PORT}
       DB_NAME: ${POSTGRES_DB}

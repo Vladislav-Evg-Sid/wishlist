@@ -1,9 +1,23 @@
-import type { Request } from "express";
+import type { Request, Response } from "express";
 
 import type { NoParams } from "../../types/requests.js";
-import type { UserData } from "./auth.types.js";
+import type { UserData, UserLoginData } from "./auth.types.js";
 
-export type CreateUserRequestDTO = Request<NoParams, NoParams, UserData>;
+type AccessTokenRes =
+  | {
+      accessToken: string;
+    }
+  | string;
+
+export type CreateUserRequestDTO = Request<NoParams, AccessTokenRes, UserData>;
+export type CreateUserResponseDTO = Response<AccessTokenRes>;
+
+export type LoginUserRequestDTO = Request<
+  NoParams,
+  AccessTokenRes,
+  UserLoginData
+>;
+export type LoginUserResponseDTO = Response<AccessTokenRes>;
 
 export interface UserRaw {
   id: string;
