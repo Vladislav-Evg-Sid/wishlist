@@ -8,17 +8,31 @@ export async function registerUserRequest(
   res: Response,
 ): Promise<void> {
   try {
-    await registerUser(req.body.email, req.body.username, req.body.password);
+    const { accessToken, refreshToken } = await registerUser(
+      req.body.email,
+      req.body.username,
+      req.body.password,
+      req.get("user-agent"),
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
+    res.status(201).json({
+      accessToken,
+    });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "User with this email already exists"
-    ) {
-      res.status(409).send(error.message);
-      return;
+    if (error instanceof Error) {
+      if (error.message === "User with this email already exists") {
+        res.status(409).send(error.message);
+        return;
+      }
+      res.status(500).send(error.message);
     }
-    res.status(500).send("Internal Server error");
+    res.status(500).send("Unknown internal Server error");
     return;
   }
-  res.status(201).send("user created");
 }

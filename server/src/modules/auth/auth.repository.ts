@@ -37,15 +37,15 @@ export async function createUser(
   passwordHash: string,
   user_hash: number,
 ) {
-  return db<UserRaw>(TABLES.users)
+  const newUser = await db<UserRaw>(TABLES.users)
     .insert({
       [USER_COLUMNS.username]: username,
       [USER_COLUMNS.user_hash]: user_hash,
       [USER_COLUMNS.email]: email,
       [USER_COLUMNS.password_hash]: passwordHash,
     })
-    .returning("*")
-    .first();
+    .returning("*");
+  return newUser[0];
 }
 
 export async function findMaxUserHash(username: string): Promise<number> {

@@ -7,10 +7,10 @@ export type CreateUserRequestDTO = Request<NoParams, NoParams, UserData>;
 
 export interface UserRaw {
   id: string;
-  username: String;
-  user_hash: Number;
-  email: String;
-  password_hash: String;
+  username: string;
+  user_hash: number;
+  email: string;
+  password_hash: string;
   created_at: Date;
   updated_at: Date | null;
 }

@@ -10,7 +10,7 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["гыуктфьу", "email", "password"],
+              required: ["username", "email", "password"],
 
               properties: {
                 username: {
@@ -36,8 +36,28 @@ export const authPaths = {
       },
 
       responses: {
-        "200": {
+        "201": {
           description: "Пользователь зарегестрирован",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  accessToken: {
+                    type: "string",
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        "409": {
+          description: "Пользователь с таким email уже существует",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
         },
       },
     },
