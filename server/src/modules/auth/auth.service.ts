@@ -105,3 +105,17 @@ export async function loginUser(
 
   return issueTokens(user.id, userAgent);
 }
+
+export async function logoutUser(refreshToken: string) {
+  const payload = verifyRefreshToken(refreshToken);
+  const refreshTokenData = await findRefreshTokenByJti(payload.jti);
+  if (!refreshTokenData) {
+    throw new Error("Refresh token session not found");
+  }
+  if (refreshTokenData.revoked_at) {
+    return;
+  }
+
+  await revokeRefreshToken(payload.jti);
+  await blacklistRefreshToken(payload.jti, payload.exp);
+}
