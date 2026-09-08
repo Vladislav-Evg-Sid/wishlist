@@ -1,5 +1,4 @@
 import { makeAutoObservable, runInAction } from "mobx";
-
 import type { RootStore } from "./RootStore";
 import { getCurrentUser } from "../api/auth";
 
@@ -14,15 +13,23 @@ export class AuthStore {
 
   async authorise() {
     this.isAuthInitializуed = false;
-    const user = await getCurrentUser();
-
-    runInAction(() => {
-      this.rootStore.userStore.currentUser = user;
-      this.isAuthInitializуed = true;
-    });
+    try {
+      const user = await getCurrentUser();
+      runInAction(() => {
+        this.rootStore.userStore.currentUser = user;
+      });
+    } catch {
+      runInAction(() => {
+        this.rootStore.userStore.currentUser = undefined;
+      });
+    } finally {
+      runInAction(() => {
+        this.isAuthInitializуed = true;
+      });
+    }
   }
 
   get isAuthorised() {
-    return !(this.rootStore.userStore.currentUser === undefined);
+    return Boolean(this.rootStore.userStore.currentUser);
   }
 }
