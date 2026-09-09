@@ -13,6 +13,7 @@ import {
   createUser,
   findMaxUserHash,
   findUserByEmail,
+  findUserByJti,
 } from "./auth.repository.js";
 import { config } from "../../config/env.js";
 import {
@@ -21,6 +22,7 @@ import {
   revokeAllUserRefreshTokens,
   revokeRefreshToken,
 } from "./jwt.repository.js";
+import type { UserData } from "./auth.types.js";
 
 async function issueTokens(userId: string, userAgent?: string) {
   const accessToken = createAccessToken(userId);
@@ -134,4 +136,13 @@ export async function revokeAllUserRefresh(refreshToken: string) {
   for (const userRefresh of allUserActiveRefresh) {
     blacklistRefreshToken(userRefresh.jti, userRefresh.expires_at);
   }
+}
+
+export async function getUserData(refreshToken: string): Promise<UserData> {
+  const payload = verifyRefreshToken(refreshToken);
+  const userData = await findUserByJti(payload.jti);
+  if (!userData) {
+    throw new Error("Refresh token session not found");
+  }
+  return userData;
 }

@@ -1,7 +1,12 @@
 import { db } from "../../db/knex.js";
-import { TABLES, USER_COLUMNS } from "../../db/schema.js";
+import {
+  REFRESH_TOKENS_COLUMNS,
+  TABLES,
+  USER_COLUMNS,
+} from "../../db/schema.js";
+import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UserRaw } from "./auth.dto.js";
-import type { User } from "./auth.types.js";
+import type { User, UserData } from "./auth.types.js";
 
 export async function findUserByEmail(
   email: string,
@@ -15,6 +20,31 @@ export async function findUserByEmail(
       passwordHash: USER_COLUMNS.password_hash,
     })
     .where({ [USER_COLUMNS.email]: email })
+    .first();
+}
+
+export async function findUserByJti(
+  jti: string,
+): Promise<UserData | undefined> {
+  return db<UserRaw, UserData>(TABLES.users)
+    .select({
+      id: USER_COLUMNS.id,
+      email: USER_COLUMNS.email,
+      username: USER_COLUMNS.username,
+      userHash: USER_COLUMNS.user_hash,
+    })
+    .join(
+      TABLES.refresh_tokens,
+      concatTableAndColumn(
+        TABLES.refresh_tokens,
+        REFRESH_TOKENS_COLUMNS.user_id,
+      ),
+      concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
+    )
+    .where({
+      [concatTableAndColumn(TABLES.refresh_tokens, REFRESH_TOKENS_COLUMNS.jti)]:
+        jti,
+    })
     .first();
 }
 

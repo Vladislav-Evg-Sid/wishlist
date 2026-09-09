@@ -186,4 +186,38 @@ export const authPaths = {
       },
     },
   },
+  "/auth/me": {
+    post: {
+      tags: ["auth"],
+      summary: "Вернуть текущего пользователя",
+
+      responses: {
+        "200": {
+          description: "Пользователь получен",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["id", "email", "username", "userHash"],
+                properties: {
+                  id: { type: "string" },
+                  email: { type: "string" },
+                  username: { type: "string" },
+                  userHash: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+
+        "401": {
+          description: "Неавторизирован",
+        },
+
+        "500": {
+          description: "Внутренняя ошибка сервера",
+        },
+      },
+    },
+  },
 };

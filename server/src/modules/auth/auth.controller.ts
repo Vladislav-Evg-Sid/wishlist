@@ -3,10 +3,13 @@ import type { Request, Response } from "express";
 import type {
   CreateUserRequestDTO,
   CreateUserResponseDTO,
+  GetUserDataRequestDTO,
+  GetUserDataResponseDTO,
   LoginUserRequestDTO,
   LoginUserResponseDTO,
 } from "./auth.dto.js";
 import {
+  getUserData,
   loginUser,
   logoutUser,
   refreshTokens,
@@ -154,5 +157,33 @@ export async function revokeAllUserRefreshRequest(
     res.status(204).send();
   } catch {
     res.status(500).send("Internal Server Error");
+  }
+}
+
+export async function getUserDataRequest(
+  req: GetUserDataRequestDTO,
+  res: GetUserDataResponseDTO,
+): Promise<void> {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      res.status(401).send("Refresh token not found");
+      return;
+    }
+
+    const user = await getUserData(refreshToken);
+
+    res.status(200).json(user);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Refresh token session not found") {
+        res.status(401).send(error.message);
+        return;
+      }
+      res.status(500).send(error.message);
+    }
+
+    res.status(500).send("Unknown internal Server error");
   }
 }
