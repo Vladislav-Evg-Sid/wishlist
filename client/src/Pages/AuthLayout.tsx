@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
+
 import logoCompany from "../assets/react.svg";
+import { APP_NAME } from "../env";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -55,7 +57,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
               letterSpacing: "-0.04em",
             }}
           >
-            Название
+            {APP_NAME}
           </Typography>
           <Typography
             sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)", fontSize: 15 }}

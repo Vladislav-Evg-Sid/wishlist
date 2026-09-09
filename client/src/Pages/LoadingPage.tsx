@@ -1,5 +1,7 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
+
 import logoCompany from "../assets/react.svg";
+import { APP_NAME } from "../env";
 
 export default function LoadingPage() {
   return (
@@ -43,7 +45,7 @@ export default function LoadingPage() {
           letterSpacing: "-0.03em",
         }}
       >
-        Название
+        {APP_NAME}
       </Typography>
       <Typography sx={{ color: "text.secondary", mt: 1, mb: 3 }}>
         Получаем данные пользователя…

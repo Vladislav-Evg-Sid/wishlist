@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import logoCompany from "../../assets/react.svg";
 import { NavButton } from "../gui/NavButton";
 import { useStore } from "../../hooks/useStore";
+import { APP_NAME } from "../../env";
 
 const SideBar = observer(() => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const SideBar = observer(() => {
           onClick={() => navigate("/")}
         />
         <Typography variant="h4" sx={{ color: "background.paper" }}>
-          Название
+          {APP_NAME}
         </Typography>
       </Box>
       <Box
