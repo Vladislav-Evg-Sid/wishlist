@@ -28,7 +28,7 @@ export async function findUserByJti(
 ): Promise<UserData | undefined> {
   return db<UserRaw, UserData>(TABLES.users)
     .select({
-      id: USER_COLUMNS.id,
+      id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
       email: USER_COLUMNS.email,
       username: USER_COLUMNS.username,
       userHash: USER_COLUMNS.user_hash,

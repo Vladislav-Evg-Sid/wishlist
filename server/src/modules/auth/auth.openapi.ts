@@ -187,7 +187,7 @@ export const authPaths = {
     },
   },
   "/auth/me": {
-    post: {
+    get: {
       tags: ["auth"],
       summary: "Вернуть текущего пользователя",
 
