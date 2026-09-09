@@ -80,13 +80,21 @@ services:
     environment:
       VITE_SERVER_HOST: ${SERVER_HOST}
       VITE_SERVER_PORT: ${SERVER_HOST_PORT}
-    volumes:
-      - ./client:/app
-      - /app/node_modules
     depends_on:
       - backend
     networks:
       - wishlist-network
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./client/src
+          target: /app/src
+
+        - action: rebuild
+          path: ./client/package.json
+
+        - action: rebuild
+          path: ./client/package-lock.json
 
 networks:
   wishlist-network:
