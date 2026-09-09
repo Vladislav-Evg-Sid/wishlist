@@ -74,7 +74,11 @@ export async function loginUserRequest(
     });
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === "Invalid email or password") {
+      if (
+        ["Invalid email", "Invalid password for this email"].includes(
+          error.message,
+        )
+      ) {
         res.status(401).send(error.message);
         return;
       }
