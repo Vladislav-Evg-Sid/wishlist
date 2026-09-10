@@ -1,5 +1,5 @@
 export const groupsPaths = {
-  "/groups/{userID}": {
+  "/groups": {
     get: {
       tags: ["groups"],
       summary: "Получить все группы",

@@ -4,6 +4,6 @@ import { getUserGroups } from "./groups.controller.js";
 
 const groupRouter = express.Router();
 
-groupRouter.get("/:userID", getUserGroups);
+groupRouter.get("/", getUserGroups);
 
 export default groupRouter;

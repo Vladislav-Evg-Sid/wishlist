@@ -1,12 +1,22 @@
-import type { Response } from "express";
-
-import type { GroupData } from "./groups.types.js";
-import type { GetUserGroupsRequstDTO } from "./groups.dto.js";
-import { getGroupsByUserId } from "./groups.repository.js";
+import type {
+  GetUserGroupsRequstDTO,
+  GetUserGroupsResponseDTO,
+} from "./groups.dto.js";
+import { getGroupsByUserId } from "./groups.service.js";
 
 export async function getUserGroups(
   req: GetUserGroupsRequstDTO,
-  res: Response<GroupData[]>,
+  res: GetUserGroupsResponseDTO,
 ): Promise<void> {
-  res.json(await getGroupsByUserId(req.params.userID));
+  const userID = req.userId;
+  if (!userID) {
+    res.status(401).send();
+    return;
+  }
+  try {
+    const groups = await getGroupsByUserId(userID);
+    res.status(200).json(groups);
+  } catch {
+    res.status(500).send("Unknown internal Server error");
+  }
 }

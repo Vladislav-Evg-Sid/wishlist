@@ -1,5 +1,9 @@
-import type { Request } from "express";
+import type { Request, Response } from "express";
 
 import type { GroupData } from "./groups.types.js";
+import type { NoParams } from "../../types/requests.js";
 
-export type GetUserGroupsRequstDTO = Request<{ userID: string }, GroupData[]>;
+type UserGroupsRes = GroupData[] | string;
+
+export type GetUserGroupsRequstDTO = Request<NoParams, UserGroupsRes>;
+export type GetUserGroupsResponseDTO = Response<UserGroupsRes>;

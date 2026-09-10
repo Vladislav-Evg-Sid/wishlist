@@ -9,14 +9,14 @@ export class GroupStore {
   currentGroup: GroupData | null = null;
   loading: boolean = false;
 
-  constructor(userID: string) {
+  constructor() {
     makeAutoObservable(this);
 
-    this.loadUserGroups(userID);
+    this.loadUserGroups();
   }
 
-  async loadUserGroups(userID: string) {
-    const userGroups = await getUserGroups(userID);
+  async loadUserGroups() {
+    const userGroups = await getUserGroups();
 
     runInAction(() => {
       this.groups = userGroups;

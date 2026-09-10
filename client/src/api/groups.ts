@@ -6,8 +6,8 @@ interface groupRes {
   title: string;
 }
 
-export default async function getUserGroups(userID: string): Promise<Groups> {
-  const response = await apiFetch(`/groups/${userID}`);
+export default async function getUserGroups(): Promise<Groups> {
+  const response = await apiFetch("/groups");
   if (!response.ok) {
     throw new Error(`${response.status}`);
   }
