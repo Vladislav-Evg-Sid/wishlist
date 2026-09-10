@@ -32,9 +32,9 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
       if (isRegistration) {
         alert("Функция регистрации ещё не готова");
       } else {
-        await authStore.login(email, password);
+        const isAuthorised = await authStore.login(email, password);
+        if (isAuthorised) navigate("/", { replace: true });
       }
-      navigate("/");
     };
     fetchAuth();
   }

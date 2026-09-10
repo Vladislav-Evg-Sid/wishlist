@@ -9,50 +9,60 @@ export class AuthStore {
   rootStore: RootStore;
   isAuthInitialized: boolean = false;
   accessToken: string | null = null;
+  private authorisationPromise: Promise<void> | null = null;
 
   constructor(rootStore: RootStore) {
-    makeAutoObservable(this);
+    makeAutoObservable<this, "authorisationPromise">(this, {
+      authorisationPromise: false,
+    });
     this.rootStore = rootStore;
     setAccessTokenGetter(() => this.accessToken);
     setAccessTokenSetter((accessToken: string | null) => {
-      this.accessToken = accessToken;
+      runInAction(() => {
+        this.accessToken = accessToken;
+      });
     });
   }
 
-  async authorise() {
+  authorise(): Promise<void> {
+    if (this.authorisationPromise) return this.authorisationPromise;
     this.isAuthInitialized = false;
-    try {
-      const user = await getCurrentUser();
-      runInAction(() => {
-        this.rootStore.userStore.currentUser = user;
-      });
-    } catch {
-      runInAction(() => {
-        this.rootStore.userStore.currentUser = undefined;
-      });
-    } finally {
-      runInAction(() => {
-        this.isAuthInitialized = true;
-      });
-    }
+    this.authorisationPromise = (async () => {
+      try {
+        const user = await getCurrentUser();
+        runInAction(() => {
+          this.rootStore.userStore.currentUser = user;
+          this.isAuthInitialized = true;
+        });
+      } catch {
+        runInAction(() => {
+          this.rootStore.userStore.currentUser = undefined;
+          this.isAuthInitialized = true;
+        });
+      }
+    })().finally(() => {
+      this.authorisationPromise = null;
+    });
+    return this.authorisationPromise;
   }
 
   async login(email: string, password: string) {
     try {
       const accessToken = await loginUser(email, password);
-      runInAction(async () => {
-        if (!accessToken) {
-          toast.error("Ошибка авторизации!\nНе получен токен", {
-            position: "top-right",
-            autoClose: 5000,
-            theme: "light",
-            transition: Bounce,
-          });
-          return;
-        }
+      if (!accessToken) {
+        toast.error("Ошибка авторизации!\nНе получен токен", {
+          position: "top-right",
+          autoClose: 5000,
+          theme: "light",
+          transition: Bounce,
+        });
+        return false;
+      }
+      runInAction(() => {
         this.accessToken = accessToken;
-        await this.authorise();
       });
+      await this.authorise();
+      return this.isAuthorised;
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {
@@ -84,6 +94,7 @@ export class AuthStore {
         console.error(error);
         return;
       });
+      return false;
     }
   }
 
