@@ -5,5 +5,12 @@ import type { NoParams } from "../../types/requests.js";
 
 type UserGroupsRes = GroupData[] | string;
 
-export type GetUserGroupsRequstDTO = Request<NoParams, UserGroupsRes>;
+export type GetUserGroupsRequestDTO = Request<NoParams, UserGroupsRes>;
 export type GetUserGroupsResponseDTO = Response<UserGroupsRes>;
+
+export interface CreateGroupRes {
+  group_name: string;
+}
+
+export type CreateGroupRequestDTO = Request<NoParams, string, CreateGroupRes>;
+export type CreateGroupResponseDTO = Response<string>;

@@ -1,9 +1,13 @@
 import express from "express";
 
-import { getUserGroups } from "./groups.controller.js";
+import {
+  getUserGroupsRequest,
+  createGroupRequest,
+} from "./groups.controller.js";
 
 const groupRouter = express.Router();
 
-groupRouter.get("/", getUserGroups);
+groupRouter.get("/", getUserGroupsRequest);
+groupRouter.post("/", createGroupRequest);
 
 export default groupRouter;

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -8,6 +9,7 @@ import GridElement from "../components/elements/GridElement";
 import { useStoreGroups } from "../hooks/useStore";
 import { GroupStoreProvider } from "../providers/storeProvider";
 import SideBar from "../components/elements/Sidebar";
+import CreateGroupDialog from "../components/elements/CreateGroupDialog";
 
 const GroupGrid = observer(() => {
   const groupStore = useStoreGroups();
@@ -28,6 +30,8 @@ const GroupGrid = observer(() => {
 });
 
 const GroupsPage = observer(() => {
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+
   return (
     <Box
       sx={{
@@ -92,6 +96,7 @@ const GroupsPage = observer(() => {
                   type="button"
                   variant="contained"
                   disableElevation
+                  onClick={() => setIsCreateGroupOpen(true)}
                   startIcon={<AddRoundedIcon />}
                   sx={{
                     flexShrink: 0,
@@ -126,6 +131,10 @@ const GroupsPage = observer(() => {
               />
             </Box>
             <GroupGrid />
+            <CreateGroupDialog
+              open={isCreateGroupOpen}
+              onClose={() => setIsCreateGroupOpen(false)}
+            />
           </Box>
         </GroupStoreProvider>
       </Box>

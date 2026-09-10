@@ -1,12 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { Bounce, toast } from "react-toastify";
 
-import getUserGroups from "../api/groups";
-import type { Groups, GroupData } from "../types/groups";
-import getWishlistsByGroup from "../api/wishlists";
+import { createGroup, getUserGroups } from "../api/groups";
+import type { Groups } from "../types/groups";
 
 export class GroupStore {
   groups: Groups = new Map();
-  currentGroup: GroupData | null = null;
   loading: boolean = false;
 
   constructor() {
@@ -23,15 +22,23 @@ export class GroupStore {
     });
   }
 
-  async loadGroupWishlist(groupId: string) {
-    const groupWishlists = await getWishlistsByGroup(groupId);
-
-    runInAction(() => {
-      this.currentGroup = {
-        id: groupId,
-        name: this.groups.get(groupId) ?? "",
-        wishlists: groupWishlists,
-      };
-    });
+  async createGroup(groupName: string) {
+    try {
+      await createGroup(groupName);
+      toast.success("Группа успешно создана", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+      this.loadUserGroups();
+    } catch {
+      toast.error("Ошибка при создании группы", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   }
 }
