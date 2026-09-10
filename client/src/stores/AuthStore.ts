@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import type { RootStore } from "./RootStore";
-import { getCurrentUser, loginUser } from "../api/auth";
+import { getCurrentUser, loginUser, registerUser } from "../api/auth";
 import { Bounce, toast } from "react-toastify";
 import { setAccessTokenGetter, setAccessTokenSetter } from "../api/baseApi";
 
@@ -46,7 +46,53 @@ export class AuthStore {
     return this.authorisationPromise;
   }
 
-  async login(email: string, password: string) {
+  async register(
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ): Promise<boolean> {
+    if (!username || !email || !password || !confirmPassword) {
+      toast.info("Все поля должны быть заполнены", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+      return false;
+    }
+    if (password !== confirmPassword) {
+      toast.info("Пароль и повтор должны совпадать", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+      return false;
+    }
+    try {
+      const accessToken = await registerUser(username, email, password);
+      if (!accessToken) {
+        toast.error("Ошибка!\nНе получен токен", {
+          position: "top-right",
+          autoClose: 5000,
+          theme: "light",
+          transition: Bounce,
+        });
+        return false;
+      }
+      runInAction(() => {
+        this.accessToken = accessToken;
+      });
+      await this.authorise();
+      return this.isAuthorised;
+    } catch (error) {
+      console.log(">>>", error);
+      return false;
+    }
+  }
+
+  async login(email: string, password: string): Promise<boolean> {
     try {
       const accessToken = await loginUser(email, password);
       if (!accessToken) {

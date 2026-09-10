@@ -29,12 +29,18 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   }
   function handleButtonClick() {
     const fetchAuth = async () => {
+      let isAuthorised = false;
       if (isRegistration) {
-        alert("Функция регистрации ещё не готова");
+        isAuthorised = await authStore.register(
+          username,
+          email,
+          password,
+          confirmPassword,
+        );
       } else {
-        const isAuthorised = await authStore.login(email, password);
-        if (isAuthorised) navigate("/", { replace: true });
+        isAuthorised = await authStore.login(email, password);
       }
+      if (isAuthorised) navigate("/", { replace: true });
     };
     fetchAuth();
   }
