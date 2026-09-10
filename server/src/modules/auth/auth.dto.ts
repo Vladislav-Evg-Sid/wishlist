@@ -8,27 +8,13 @@ import type {
 } from "./auth.types.js";
 
 // HTTP
-type AccessTokenRes =
-  | {
-      accessToken: string;
-    }
-  | string;
-
 type UserDataRes = UserData | string;
 
-export type CreateUserRequestDTO = Request<
-  NoParams,
-  AccessTokenRes,
-  UserRegisterData
->;
-export type CreateUserResponseDTO = Response<AccessTokenRes>;
+export type CreateUserRequestDTO = Request<NoParams, string, UserRegisterData>;
+export type CreateUserResponseDTO = Response<string>;
 
-export type LoginUserRequestDTO = Request<
-  NoParams,
-  AccessTokenRes,
-  UserLoginData
->;
-export type LoginUserResponseDTO = Response<AccessTokenRes>;
+export type LoginUserRequestDTO = Request<NoParams, string, UserLoginData>;
+export type LoginUserResponseDTO = Response<string>;
 
 export type GetUserDataRequestDTO = Request<NoParams, UserDataRes>;
 export type GetUserDataResponseDTO = Response<UserDataRes>;

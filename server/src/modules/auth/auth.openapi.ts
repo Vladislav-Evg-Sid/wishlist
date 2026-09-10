@@ -39,14 +39,9 @@ export const authPaths = {
         "201": {
           description: "Пользователь зарегестрирован",
           content: {
-            "application/json": {
+            "text/plain": {
               schema: {
-                type: "object",
-                properties: {
-                  accessToken: {
-                    type: "string",
-                  },
-                },
+                type: "string",
               },
             },
           },
@@ -97,14 +92,9 @@ export const authPaths = {
         "200": {
           description: "Пользователь успешно авторизован",
           content: {
-            "application/json": {
+            "text/plain": {
               schema: {
-                type: "object",
-                properties: {
-                  accessToken: {
-                    type: "string",
-                  },
-                },
+                type: "string",
               },
             },
           },
@@ -129,15 +119,9 @@ export const authPaths = {
         "200": {
           description: "Токены успешно обновлены",
           content: {
-            "application/json": {
+            "text/plain": {
               schema: {
-                type: "object",
-                required: ["accessToken"],
-                properties: {
-                  accessToken: {
-                    type: "string",
-                  },
-                },
+                type: "string",
               },
             },
           },

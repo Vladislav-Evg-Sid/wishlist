@@ -36,9 +36,7 @@ export async function registerUserRequest(
       sameSite: "strict",
     });
 
-    res.status(201).json({
-      accessToken,
-    });
+    res.status(201).send(accessToken);
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "User with this email already exists") {
@@ -69,9 +67,7 @@ export async function loginUserRequest(
       sameSite: "strict",
     });
 
-    res.status(200).json({
-      accessToken,
-    });
+    res.status(200).send(accessToken);
   } catch (error) {
     if (error instanceof Error) {
       if (
@@ -110,9 +106,7 @@ export async function refreshTokensRequest(
       sameSite: "strict",
     });
 
-    res.status(200).json({
-      accessToken,
-    });
+    res.status(200).send(accessToken);
   } catch {
     res.status(401).send("Invalid refresh token");
   }

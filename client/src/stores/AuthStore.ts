@@ -3,7 +3,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type { RootStore } from "./RootStore";
 import { getCurrentUser, loginUser } from "../api/auth";
 import { Bounce, toast } from "react-toastify";
-import { setAccessTokenGetter } from "../api/baseApi";
+import { setAccessTokenGetter, setAccessTokenSetter } from "../api/baseApi";
 
 export class AuthStore {
   rootStore: RootStore;
@@ -14,6 +14,9 @@ export class AuthStore {
     makeAutoObservable(this);
     this.rootStore = rootStore;
     setAccessTokenGetter(() => this.accessToken);
+    setAccessTokenSetter((accessToken: string | null) => {
+      this.accessToken = accessToken;
+    });
   }
 
   async authorise() {
