@@ -14,14 +14,10 @@ export function RootStoreProvider({ children }: RootStoreProviderProps) {
 
 interface GroupStoreProviderProps {
   children: React.ReactNode;
-  userID: string;
 }
 
-export function GroupStoreProvider({
-  userID,
-  children,
-}: GroupStoreProviderProps) {
-  const [groupContext] = useState(() => new GroupStore(userID));
+export function GroupStoreProvider({ children }: GroupStoreProviderProps) {
+  const [groupContext] = useState(() => new GroupStore());
 
   return (
     <GroupsStoreContext value={groupContext}>{children}</GroupsStoreContext>

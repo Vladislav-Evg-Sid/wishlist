@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite/src/observer.js";
 import { useNavigate } from "react-router-dom";
 
 import GridElement from "../components/elements/GridElement";
-import { useStore, useStoreGroups } from "../hooks/useStore";
+import { useStoreGroups } from "../hooks/useStore";
 import { GroupStoreProvider } from "../providers/storeProvider";
 import SideBar from "../components/elements/Sidebar";
 
@@ -27,8 +27,6 @@ const GroupGrid = observer(() => {
 });
 
 const GroupsPage = observer(() => {
-  const { userStore } = useStore();
-
   return (
     <Box
       sx={{
@@ -45,7 +43,7 @@ const GroupsPage = observer(() => {
         <SideBar />
       </Box>
       <Box sx={{ flex: 1, minWidth: 0, m: "1%" }}>
-        <GroupStoreProvider userID={userStore.currentUser?.id ?? ""}>
+        <GroupStoreProvider>
           <Typography variant="h3">Доступные группы</Typography>
           <GroupGrid />
         </GroupStoreProvider>
