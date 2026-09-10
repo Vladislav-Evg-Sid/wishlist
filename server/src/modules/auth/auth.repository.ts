@@ -23,31 +23,6 @@ export async function findUserByEmail(
     .first();
 }
 
-export async function findUserByJti(
-  jti: string,
-): Promise<UserData | undefined> {
-  return db<UserRaw, UserData>(TABLES.users)
-    .select({
-      id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
-      email: USER_COLUMNS.email,
-      username: USER_COLUMNS.username,
-      userHash: USER_COLUMNS.user_hash,
-    })
-    .join(
-      TABLES.refresh_tokens,
-      concatTableAndColumn(
-        TABLES.refresh_tokens,
-        REFRESH_TOKENS_COLUMNS.user_id,
-      ),
-      concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
-    )
-    .where({
-      [concatTableAndColumn(TABLES.refresh_tokens, REFRESH_TOKENS_COLUMNS.jti)]:
-        jti,
-    })
-    .first();
-}
-
 export async function findUserByID(id: string): Promise<User> {
   return db(TABLES.users)
     .select(

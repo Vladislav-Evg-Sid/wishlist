@@ -169,14 +169,14 @@ export async function getUserDataRequest(
   res: GetUserDataResponseDTO,
 ): Promise<void> {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const userID = req.userId;
 
-    if (!refreshToken) {
-      res.status(401).send("Refresh token not found");
+    if (!userID) {
+      res.status(401).send("Access token not found");
       return;
     }
 
-    const user = await getUserData(refreshToken);
+    const user = await getUserData(userID);
 
     res.status(200).json(user);
   } catch (error) {

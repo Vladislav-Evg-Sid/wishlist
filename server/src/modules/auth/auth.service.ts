@@ -13,7 +13,7 @@ import {
   createUser,
   findMaxUserHash,
   findUserByEmail,
-  findUserByJti,
+  findUserByID,
 } from "./auth.repository.js";
 import { config } from "../../config/env.js";
 import {
@@ -138,9 +138,8 @@ export async function revokeAllUserRefresh(refreshToken: string) {
   }
 }
 
-export async function getUserData(refreshToken: string): Promise<UserData> {
-  const payload = verifyRefreshToken(refreshToken);
-  const userData = await findUserByJti(payload.jti);
+export async function getUserData(userID: string): Promise<UserData> {
+  const userData = await findUserByID(userID);
   if (!userData) {
     throw new Error("Refresh token session not found");
   }

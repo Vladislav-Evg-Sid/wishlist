@@ -16,7 +16,6 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
-  console.log(url, accessToken);
 
   return fetch(`${baseApi}${url}`, {
     ...options,
