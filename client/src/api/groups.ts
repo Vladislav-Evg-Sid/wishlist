@@ -1,19 +1,12 @@
 import { apiFetch } from "./baseApi";
-import type { Groups } from "../types/groups";
+import type { GroupData } from "../types/groups";
 
-interface groupRes {
-  id: string;
-  title: string;
-}
-
-export async function getUserGroups(): Promise<Groups> {
+export async function getUserGroups(): Promise<GroupData[]> {
   const response = await apiFetch("/groups");
   if (!response.ok) {
     throw new Error(`${response.status}`);
   }
-  const groupData: groupRes[] = await response.json();
-
-  return new Map(groupData.map((group) => [group.id, group.title]));
+  return await response.json();
 }
 
 export async function createGroup(groupName: string): Promise<void> {

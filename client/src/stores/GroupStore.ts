@@ -2,10 +2,10 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Bounce, toast } from "react-toastify";
 
 import { createGroup, getUserGroups } from "../api/groups";
-import type { Groups } from "../types/groups";
+import type { GroupData } from "../types/groups";
 
 export class GroupStore {
-  groups: Groups = new Map();
+  groups: GroupData[] = [];
   loading: boolean = false;
 
   constructor() {

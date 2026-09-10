@@ -1,1 +1,4 @@
-export type Groups = Map<string, string>;
+export interface GroupData {
+  id: string;
+  title: string;
+}

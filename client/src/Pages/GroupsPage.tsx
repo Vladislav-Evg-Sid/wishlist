@@ -17,12 +17,12 @@ const GroupGrid = observer(() => {
 
   return (
     <Grid container spacing={2.5}>
-      {Array.from(groupStore.groups).map(([groupId, groupName]) => (
+      {groupStore.groups.map(({ id, title }) => (
         <GridElement
-          key={groupId}
+          key={id}
           Icon={GroupsIcon}
-          name={groupName}
-          onClick={() => navigate(`/group/${groupId}`)}
+          name={title}
+          onClick={() => navigate(`/group/${id}`)}
         />
       ))}
     </Grid>
