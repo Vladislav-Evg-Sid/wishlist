@@ -5,7 +5,7 @@ import { Bounce, toast } from "react-toastify";
 
 export class AuthStore {
   rootStore: RootStore;
-  isAuthInitializуed: boolean = false;
+  isAuthInitialized: boolean = false;
 
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
@@ -13,7 +13,7 @@ export class AuthStore {
   }
 
   async authorise() {
-    this.isAuthInitializуed = false;
+    this.isAuthInitialized = false;
     try {
       const user = await getCurrentUser();
       runInAction(() => {
@@ -25,7 +25,7 @@ export class AuthStore {
       });
     } finally {
       runInAction(() => {
-        this.isAuthInitializуed = true;
+        this.isAuthInitialized = true;
       });
     }
   }
