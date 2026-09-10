@@ -40,7 +40,7 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
       } else {
         isAuthorised = await authStore.login(email, password);
       }
-      if (isAuthorised) navigate("/", { replace: true });
+      if (isAuthorised) navigate("/group", { replace: true });
     };
     fetchAuth();
   }

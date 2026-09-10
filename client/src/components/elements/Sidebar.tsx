@@ -38,7 +38,7 @@ const SideBar = observer(() => {
           src={logoCompany}
           alt="Company Logo"
           style={{ width: "100%", maxWidth: 300, cursor: "pointer" }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/group")}
         />
         <Typography variant="h4" sx={{ color: "background.paper" }}>
           {APP_NAME}
@@ -52,7 +52,7 @@ const SideBar = observer(() => {
           width: "90%",
         }}
       >
-        <NavButton to="/" text="Группы" />
+        <NavButton to="/group" text="Группы" />
       </Box>
       <Button
         type="button"

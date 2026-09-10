@@ -9,7 +9,7 @@ import AuthPage from "../Pages/AuthPage";
     element: <>Авторизация. Доделать</>,
   },
   {
-    path: "/",
+    path: "/group",
     element: <GroupsPage />,
   },
   {
@@ -30,7 +30,7 @@ export default function RouteProvider() {
         path="/register"
         element={<AuthPage key="register" mode="register" />}
       />
-      <Route path="/" element={<GroupsPage />} />
+      <Route path="/group" element={<GroupsPage />} />
       <Route path="/group/:groupID" element={<WishlistsPage />} />
     </Routes>
   );
