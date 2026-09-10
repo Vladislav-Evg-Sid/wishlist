@@ -1,15 +1,33 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
+import { Bounce, toast } from "react-toastify";
 
-import type { RootStore } from "./RootStore";
-import type { Wishlist } from "../types/wishlists";
+import type { WishlistData } from "../types/wishlists";
+import { getGroupWishlists } from "../api/wishlists";
 
 export class WishlistStore {
-  rootStore: RootStore;
-  wishlists: Wishlist[] = [];
-  loading: boolean = false;
+  wishlists: WishlistData[] = [];
+  parantGroupID: string;
 
-  constructor(rootStore: RootStore) {
+  constructor(parantGroupID: string) {
     makeAutoObservable(this);
-    this.rootStore = rootStore;
+
+    this.parantGroupID = parantGroupID;
+  }
+
+  async loadGroupWishlists() {
+    try {
+      const groupWishlists = await getGroupWishlists(this.parantGroupID);
+
+      runInAction(() => {
+        this.wishlists = groupWishlists;
+      });
+    } catch {
+      toast.error("Ошибка при загрузке вишлистов", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   }
 }

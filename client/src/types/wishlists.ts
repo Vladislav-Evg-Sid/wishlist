@@ -1,4 +1,4 @@
-export interface Wishlist {
+export interface WishlistData {
   id: string;
-  name: string;
+  title: string;
 }

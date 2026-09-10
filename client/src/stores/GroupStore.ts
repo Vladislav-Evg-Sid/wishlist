@@ -6,7 +6,6 @@ import type { GroupData } from "../types/groups";
 
 export class GroupStore {
   groups: GroupData[] = [];
-  loading: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -15,11 +14,20 @@ export class GroupStore {
   }
 
   async loadUserGroups() {
-    const userGroups = await getUserGroups();
+    try {
+      const userGroups = await getUserGroups();
 
-    runInAction(() => {
-      this.groups = userGroups;
-    });
+      runInAction(() => {
+        this.groups = userGroups;
+      });
+    } catch {
+      toast.error("Ошибка при загрузке групп", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+    }
   }
 
   async createGroup(groupName: string) {
