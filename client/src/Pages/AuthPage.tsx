@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent } from "react";
 import { ToastContainer, Bounce } from "react-toastify";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import AuthLayout from "./AuthLayout";
 import { useStore } from "../hooks/useStore";
@@ -12,6 +12,7 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
   const isRegistration = mode === "register";
 
   function handleEmailChange(event: ChangeEvent<HTMLInputElement>) {
@@ -27,11 +28,15 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
     setConfirmPassword(event.target.value);
   }
   function handleButtonClick() {
-    if (isRegistration) {
-      alert("Функция регистрации ещё не готова");
-    } else {
-      authStore.login(email, password);
-    }
+    const fetchAuth = async () => {
+      if (isRegistration) {
+        alert("Функция регистрации ещё не готова");
+      } else {
+        await authStore.login(email, password);
+      }
+      navigate("/");
+    };
+    fetchAuth();
   }
 
   return (

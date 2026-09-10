@@ -8,6 +8,7 @@ import {
   revokeAllUserRefreshRequest,
   getUserDataRequest,
 } from "./auth.controller.js";
+import { requireAccessToken } from "../../middleware/require-access-token.middleware.js";
 
 const authRouter = express.Router();
 
@@ -16,6 +17,6 @@ authRouter.post("/login", loginUserRequest);
 authRouter.post("/refresh", refreshTokensRequest);
 authRouter.post("/logout", logoutUserRequest);
 authRouter.post("/logout/all-sessions", revokeAllUserRefreshRequest);
-authRouter.get("/me", getUserDataRequest);
+authRouter.get("/me", requireAccessToken, getUserDataRequest);
 
 export default authRouter;

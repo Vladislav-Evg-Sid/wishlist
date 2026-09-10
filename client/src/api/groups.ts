@@ -1,4 +1,4 @@
-import { baseApi } from "../env";
+import { apiFetch } from "./baseApi";
 import type { Groups } from "../types/groups";
 
 interface groupRes {
@@ -7,7 +7,7 @@ interface groupRes {
 }
 
 export default async function getUserGroups(userID: string): Promise<Groups> {
-  const response = await fetch(`${baseApi}/groups/${userID}`);
+  const response = await apiFetch(`/groups/${userID}`);
   if (!response.ok) {
     throw new Error(`${response.status}`);
   }

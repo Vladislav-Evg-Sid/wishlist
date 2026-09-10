@@ -1,15 +1,19 @@
 import { makeAutoObservable, runInAction } from "mobx";
+
 import type { RootStore } from "./RootStore";
 import { getCurrentUser, loginUser } from "../api/auth";
 import { Bounce, toast } from "react-toastify";
+import { setAccessTokenGetter } from "../api/baseApi";
 
 export class AuthStore {
   rootStore: RootStore;
   isAuthInitialized: boolean = false;
+  accessToken: string | null = null;
 
   constructor(rootStore: RootStore) {
     makeAutoObservable(this);
     this.rootStore = rootStore;
+    setAccessTokenGetter(() => this.accessToken);
   }
 
   async authorise() {
@@ -33,13 +37,18 @@ export class AuthStore {
   async login(email: string, password: string) {
     try {
       const accessToken = await loginUser(email, password);
-      runInAction(() => {
-        toast.success(`Ваш токен: ${accessToken}`, {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "light",
-          transition: Bounce,
-        });
+      runInAction(async () => {
+        if (!accessToken) {
+          toast.error("Ошибка авторизации!\nНе получен токен", {
+            position: "top-right",
+            autoClose: 5000,
+            theme: "light",
+            transition: Bounce,
+          });
+          return;
+        }
+        this.accessToken = accessToken;
+        await this.authorise();
       });
     } catch (error) {
       runInAction(() => {

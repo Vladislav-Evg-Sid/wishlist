@@ -1,8 +1,8 @@
-import { baseApi } from "../env";
+import { apiFetch } from "./baseApi";
 import type { User } from "../types/user";
 
 export async function getCurrentUser(): Promise<User | undefined> {
-  const response = await fetch(`${baseApi}/auth/me`);
+  const response = await apiFetch("/auth/me");
   if (!response.ok) {
     if (response.status === 401) {
       return;
@@ -16,7 +16,7 @@ export async function loginUser(
   email: string,
   password: string,
 ): Promise<void | string> {
-  const response = await fetch(`${baseApi}/auth/login`, {
+  const response = await apiFetch("/auth/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -16,6 +16,7 @@ const app = express();
 app.use(
   cors({
     origin: `http://${config.clientHost}:${config.clientPort}`,
+    credentials: true,
   }),
 );
 
