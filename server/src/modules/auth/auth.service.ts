@@ -118,7 +118,6 @@ export async function logoutUser(refreshToken: string) {
   if (refreshTokenData.revoked_at) {
     return;
   }
-
   await revokeRefreshToken(payload.jti);
   await blacklistRefreshToken(payload.jti, payload.exp);
 }

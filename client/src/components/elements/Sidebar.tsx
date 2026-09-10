@@ -1,15 +1,23 @@
 import { Box, Button, Typography } from "@mui/material";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
 import logoCompany from "../../assets/react.svg";
 import { NavButton } from "../gui/NavButton";
-import { useStore } from "../../hooks/useStore";
 import { APP_NAME } from "../../env";
+import { logoutUser } from "../../api/auth";
 
 const SideBar = observer(() => {
   const navigate = useNavigate();
-  const { authStore } = useStore();
+
+  const handleLogoutClick = () => {
+    const fetchLogout = async () => {
+      await logoutUser();
+      navigate("/auth");
+    };
+    fetchLogout();
+  };
 
   return (
     <Box
@@ -46,14 +54,35 @@ const SideBar = observer(() => {
       >
         <NavButton to="/" text="Группы" />
       </Box>
-      <Box
-        onClick={() => authStore.authorise()}
+      <Button
+        type="button"
+        startIcon={<LogoutRoundedIcon />}
+        onClick={handleLogoutClick}
         sx={{
-          justifySelf: "end",
+          mt: "auto",
+          mb: 2.5,
+          width: "90%",
+          justifyContent: "flex-start",
+          px: 2,
+          py: 1.5,
+          borderRadius: "12px",
+          color: "background.paper",
+          border: "1px solid rgba(255,255,255,0.25)",
+          textTransform: "none",
+          fontSize: 15,
+          fontWeight: 500,
+          "&:hover": {
+            bgcolor: "rgba(255,255,255,0.12)",
+            borderColor: "rgba(255,255,255,0.5)",
+          },
+          "&.Mui-focusVisible": {
+            outline: "2px solid white",
+            outlineOffset: 3,
+          },
         }}
       >
-        {authStore.isAuthorised || <Button variant="contained">Войти</Button>}
-      </Box>
+        Выйти
+      </Button>
     </Box>
   );
 });

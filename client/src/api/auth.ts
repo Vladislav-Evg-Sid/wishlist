@@ -2,9 +2,7 @@ import { apiFetch } from "./baseApi";
 import type { User } from "../types/user";
 
 export async function getCurrentUser(): Promise<User | undefined> {
-  console.log("auth/me fetch");
   const response = await apiFetch("/auth/me");
-  console.log("auth/me result");
   if (!response.ok) {
     if (response.status === 401) {
       return;
@@ -33,4 +31,8 @@ export async function loginUser(
   }
   const accessToken = await response.text();
   return accessToken;
+}
+
+export async function logoutUser() {
+  await apiFetch("/auth/logout", { method: "POST" });
 }
