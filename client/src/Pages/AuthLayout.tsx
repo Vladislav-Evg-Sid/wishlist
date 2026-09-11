@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 
 import { logoCompany } from "../env";
-import { APP_NAME } from "../env";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -47,23 +46,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
             component="img"
             src={logoCompany}
             alt=""
-            sx={{ width: { xs: 70, md: 112 }, mb: 2 }}
+            sx={{ width: { xs: 70, md: 300 }, mb: 2 }}
           />
-          <Typography
-            component="div"
-            sx={{
-              fontSize: { xs: 30, md: 40 },
-              fontWeight: 700,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {APP_NAME}
-          </Typography>
-          <Typography
-            sx={{ mt: 1.5, color: "rgba(255,255,255,0.7)", fontSize: 15 }}
-          >
-            Место для ваших желаний
-          </Typography>
         </Box>
       </Box>
       <Box

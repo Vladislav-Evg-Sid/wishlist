@@ -1,7 +1,6 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 
 import { logoCompany } from "../env";
-import { APP_NAME } from "../env";
 
 export default function LoadingPage() {
   return (
@@ -36,17 +35,6 @@ export default function LoadingPage() {
       >
         <Box component="img" src={logoCompany} alt="" sx={{ width: 58 }} />
       </Box>
-      <Typography
-        component="h1"
-        sx={{
-          fontSize: 28,
-          fontWeight: 700,
-          color: "text.primary",
-          letterSpacing: "-0.03em",
-        }}
-      >
-        {APP_NAME}
-      </Typography>
       <Typography sx={{ color: "text.secondary", mt: 1, mb: 3 }}>
         Получаем данные пользователя…
       </Typography>
