@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 
-import logoCompany from "../assets/react.svg";
+import { logoCompany } from "../env";
 import { APP_NAME } from "../env";
 
 export default function LoadingPage() {

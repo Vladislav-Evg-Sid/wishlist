@@ -3,7 +3,7 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 
-import logoCompany from "../../assets/react.svg";
+import { logoCompany } from "../../env";
 import { NavButton } from "../gui/NavButton";
 import { APP_NAME } from "../../env";
 import { logoutUser } from "../../api/auth";
