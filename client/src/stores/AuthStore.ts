@@ -129,6 +129,14 @@ export class AuthStore {
                 transition: Bounce,
               });
               return;
+            case "Failed to fetch":
+              toast.error("Недоступен сервис авторизации.\nПопробуйте позже", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              return;
           }
         }
         toast.error("Неизвестная ошибка авторизации", {
