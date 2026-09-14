@@ -34,8 +34,37 @@ export class AuthStore {
           this.rootStore.userStore.currentUser = user;
           this.isAuthInitialized = true;
         });
-      } catch {
+      } catch (error) {
         runInAction(() => {
+          if (error instanceof Error) {
+            switch (error.message) {
+              case "Failed to fetch":
+                toast.error(
+                  "Недоступен сервис авторизации.\nПопробуйте позже",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce,
+                  },
+                );
+                break;
+              default:
+                toast.error(
+                  "Неизвестная ошибка.\nНе удалось получить пользователя",
+                  {
+                    position: "top-right",
+                    autoClose: 5000,
+                    theme: "light",
+                    transition: Bounce,
+                  },
+                );
+                console.error(error.message);
+                break;
+            }
+          } else {
+            console.error(error);
+          }
           this.rootStore.userStore.currentUser = undefined;
           this.isAuthInitialized = true;
         });
@@ -87,7 +116,34 @@ export class AuthStore {
       await this.authorise();
       return this.isAuthorised;
     } catch (error) {
-      console.log(">>>", error);
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Недоступен сервис авторизации.\nПопробуйте позже", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              break;
+            default:
+              toast.error(
+                "Неизвестная ошибка.\nНе удалось создать пользователя",
+                {
+                  position: "top-right",
+                  autoClose: 5000,
+                  theme: "light",
+                  transition: Bounce,
+                },
+              );
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
+      });
       return false;
     }
   }
@@ -120,7 +176,7 @@ export class AuthStore {
                 theme: "light",
                 transition: Bounce,
               });
-              return;
+              break;
             case "Invalid password for this email":
               toast.error("Неверный пароль", {
                 position: "top-right",
@@ -128,7 +184,7 @@ export class AuthStore {
                 theme: "light",
                 transition: Bounce,
               });
-              return;
+              break;
             case "Failed to fetch":
               toast.error("Недоступен сервис авторизации.\nПопробуйте позже", {
                 position: "top-right",
@@ -136,17 +192,20 @@ export class AuthStore {
                 theme: "light",
                 transition: Bounce,
               });
-              return;
+              break;
+            default:
+              toast.error("Неизвестная ошибка.\nНе удалось авторизоваться", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              console.error(error.message);
+              break;
           }
+        } else {
+          console.log(error);
         }
-        toast.error("Неизвестная ошибка авторизации", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "light",
-          transition: Bounce,
-        });
-        console.error(error);
-        return;
       });
       return false;
     }

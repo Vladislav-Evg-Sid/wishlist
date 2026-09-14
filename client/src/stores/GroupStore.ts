@@ -20,12 +20,31 @@ export class GroupStore {
       runInAction(() => {
         this.groups = userGroups;
       });
-    } catch {
-      toast.error("Ошибка при загрузке групп", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              break;
+            default:
+              toast.error("Неизвестная ошибка.\nНе удалось загрузить группы", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
       });
     }
   }
@@ -40,12 +59,31 @@ export class GroupStore {
         transition: Bounce,
       });
       this.loadUserGroups();
-    } catch {
-      toast.error("Ошибка при создании группы", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              break;
+            default:
+              toast.error("Неизвестная ошибка.\nНе удалось создать группу", {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              });
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
       });
     }
   }
