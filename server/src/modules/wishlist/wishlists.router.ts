@@ -1,9 +1,10 @@
 import express from "express";
 
-import { getGroupWishlist } from "./wishlists.controller.js";
+import { getGroupWishlistRequest } from "./wishlists.controller.js";
 
 const wishlistRouter = express.Router();
 
-wishlistRouter.get("/:id", getGroupWishlist);
+wishlistRouter.get("/:groupID", getGroupWishlistRequest);
+// wishlistRouter.post("/:groupID", addWishlist);
 
 export default wishlistRouter;

@@ -1,34 +1,36 @@
 import type { Response } from "express";
 
 import type { WishlistData } from "./wishlists.types.js";
-import type { GetGroupWishlistRequestDTO } from "./wishlists.dto.js";
+import type {
+  GetGroupWishlistRequestDTO,
+  GetGroupWishlistResponseDTO,
+} from "./wishlists.dto.js";
+import { getGroupWishlists } from "./wishlists.service.js";
 
-export function getGroupWishlist(
+export async function getGroupWishlistRequest(
   req: GetGroupWishlistRequestDTO,
-  res: Response<WishlistData[]>,
-): void {
-  const groupID = req.params.id;
+  res: GetGroupWishlistResponseDTO,
+): Promise<void> {
+  const userID = req.userId;
+  if (!userID) {
+    res.status(401).send();
+    return;
+  }
+  const groupID = req.params.groupID;
 
-  switch (groupID) {
-    case "123":
-      res.json([
-        {
-          id: "123",
-          name: "Вишлист 1 группы 1",
-        },
-        {
-          id: "124",
-          name: "Вишлист 2 группы 1",
-        },
-      ]);
-    case "124":
-      res.json([
-        {
-          id: "125",
-          name: "Вишлист 1 группы 2",
-        },
-      ]);
-    default:
-      res.json([]);
+  try {
+    const wishlists = await getGroupWishlists(userID, groupID);
+
+    res.status(200).json(wishlists);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "User not a member or creator") {
+        res.status(403).send(error.message);
+        return;
+      }
+      res.status(500).send(error.message);
+      return;
+    }
+    res.status(500).send("Unknown internal Server error");
   }
 }

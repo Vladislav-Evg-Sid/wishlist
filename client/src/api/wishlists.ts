@@ -1,29 +1,16 @@
 import type { WishlistData } from "../types/wishlists";
+import { apiFetch } from "./baseApi";
 
 export async function getGroupWishlists(
   groupID: string,
 ): Promise<WishlistData[]> {
-  // Имитация запроса на бэк
-  switch (groupID) {
-    case "123":
-      return [];
-    default:
-      return [
-        {
-          id: "123",
-          title: "Вишлист 1 группы 1",
-        },
-        {
-          id: "124",
-          title: "Вишлист 2 группы 1",
-        },
-      ];
-    case "124":
-      return [
-        {
-          id: "125",
-          title: "Вишлист 1 группы 2",
-        },
-      ];
+  const response = await apiFetch(`/wishlists/${groupID}`);
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("User not a member or creator");
+    }
+    throw new Error(`${response.status}`);
   }
+
+  return await response.json();
 }

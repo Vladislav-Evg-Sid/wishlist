@@ -12,6 +12,7 @@ export class WishlistStore {
     makeAutoObservable(this);
 
     this.parantGroupID = parantGroupID;
+    this.loadGroupWishlists();
   }
 
   async loadGroupWishlists() {
@@ -21,13 +22,53 @@ export class WishlistStore {
       runInAction(() => {
         this.wishlists = groupWishlists;
       });
-    } catch {
-      toast.error("Ошибка при загрузке вишлистов", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              },
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "light",
+              transition: Bounce,
+            });
+            break;
+          default:
+            toast.error(
+              "Неизвестная ошибка.\nНе удалось получить вишлисты группы",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              },
+            );
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
     }
+  }
+
+  async createWishlist(wishlistName: string) {
+    toast.info(`Создание вишлиста ${wishlistName}`, {
+      position: "top-right",
+      autoClose: 5000,
+      theme: "light",
+      transition: Bounce,
+    });
   }
 }

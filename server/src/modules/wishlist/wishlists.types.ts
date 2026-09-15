@@ -1,5 +1,5 @@
 export interface GetGroupWishlistParams {
-  id: string;
+  groupID: string;
 }
 
 export interface WishlistData {

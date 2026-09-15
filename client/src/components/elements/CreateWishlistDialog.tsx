@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import ViewListRoundedIcon from "@mui/icons-material/ViewListRounded";
-// import { useStoreWishlists } from "../../hooks/useStore";
+import { useStoreWishlists } from "../../hooks/useStore";
 
 interface CreateWishlistDialogProps {
   open: boolean;
@@ -21,7 +21,7 @@ export default function CreateWishlistDialog({
   open,
   onClose,
 }: CreateWishlistDialogProps) {
-  // const wishlistStore = useStoreWishlists();
+  const wishlistStore = useStoreWishlists();
   const [wishlistName, setWishlistName] = useState("");
 
   function handleNameChange(event: ChangeEvent<HTMLInputElement>) {
@@ -32,10 +32,10 @@ export default function CreateWishlistDialog({
     onClose();
   }
 
-  // function handleCreate() {
-  // wishlistStore.createWishlist(wishlistName);
-  // onClose();
-  // }
+  function handleCreate() {
+    wishlistStore.createWishlist(wishlistName);
+    onClose();
+  }
 
   return (
     <Dialog
@@ -139,7 +139,7 @@ export default function CreateWishlistDialog({
         <Button
           type="button"
           variant="contained"
-          // onClick={handleCreate}
+          onClick={handleCreate}
           disableElevation
           disabled={!wishlistName.trim()}
         >
