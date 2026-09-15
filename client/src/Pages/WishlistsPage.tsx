@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
 import { ArrowBack } from "@mui/icons-material";
@@ -10,6 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useStoreWishlists } from "../hooks/useStore";
 import SideBar from "../components/elements/Sidebar";
 import { WishlistStoreProvider } from "../providers/storeProvider";
+import CreateWishlistDialog from "../components/elements/CreateWishlistDialog";
 
 const WishlistGrid = observer(() => {
   const wislistStore = useStoreWishlists();
@@ -31,6 +33,8 @@ const WishlistGrid = observer(() => {
 
 const WishlistPage = observer(() => {
   const { groupID } = useParams();
+  const [isCreateWishlistOpen, setIsCreateWishlistOpen] =
+    useState<boolean>(false);
   const navigate = useNavigate();
 
   return (
@@ -115,7 +119,7 @@ const WishlistPage = observer(() => {
                   type="button"
                   variant="contained"
                   disableElevation
-                  // onClick={() => setIsCreateGroupOpen(true)}
+                  onClick={() => setIsCreateWishlistOpen(true)}
                   startIcon={<PlaylistAddIcon />}
                   sx={{
                     flexShrink: 0,
@@ -150,10 +154,10 @@ const WishlistPage = observer(() => {
               />
             </Box>
             <WishlistGrid />
-            {/* <CreateGroupDialog
-              open={isCreateGroupOpen}
-              onClose={() => setIsCreateGroupOpen(false)}
-            /> */}
+            <CreateWishlistDialog
+              open={isCreateWishlistOpen}
+              onClose={() => setIsCreateWishlistOpen(false)}
+            />
           </Box>
         </WishlistStoreProvider>
       </Box>
