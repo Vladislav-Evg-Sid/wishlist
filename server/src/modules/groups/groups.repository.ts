@@ -1,11 +1,22 @@
 import { db } from "../../db/knex.js";
-import { GROUPS_COLUMNS, TABLES } from "../../db/schema.js";
+import {
+  GROUP_MEMBER_COLUMNS,
+  GROUPS_COLUMNS,
+  TABLES,
+} from "../../db/schema.js";
+import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { GroupData } from "./groups.types.js";
 
 export async function findGroupsByUserId(userID: string): Promise<GroupData[]> {
   return await db(TABLES.groups)
+    .leftJoin(
+      TABLES.group_member,
+      concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id),
+      concatTableAndColumn(TABLES.group_member, GROUP_MEMBER_COLUMNS.group_id),
+    )
     .select(GROUPS_COLUMNS.id, GROUPS_COLUMNS.title)
-    .where(GROUPS_COLUMNS.creator_id, userID);
+    .where(GROUPS_COLUMNS.creator_id, userID)
+    .orWhere(GROUP_MEMBER_COLUMNS.member_id, userID);
 }
 
 export async function createGroup(
