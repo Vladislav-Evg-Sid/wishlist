@@ -1,41 +1,13 @@
-import { useState } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
-import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
-import { ArrowBack } from "@mui/icons-material";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import { useParams } from "react-router-dom";
 import { observer } from "mobx-react-lite/src/observer.js";
+import { Box } from "@mui/material";
 
-import GridElement from "../components/elements/GridElement";
-import { useNavigate, useParams } from "react-router-dom";
-import { useStoreWishlists } from "../hooks/useStore";
 import SideBar from "../components/elements/Sidebar";
 import { WishlistStoreProvider } from "../providers/storeProvider";
-import CreateWishlistDialog from "../components/elements/CreateWishlistDialog";
-
-const WishlistGrid = observer(() => {
-  const wislistStore = useStoreWishlists();
-  const navigate = useNavigate();
-
-  return (
-    <Grid container spacing={2.5}>
-      {wislistStore.wishlists.map(({ id, title }) => (
-        <GridElement
-          key={id}
-          Icon={ViewListIcon}
-          name={title}
-          onClick={() => navigate(`/group/wishlist/${id}`)}
-        />
-      ))}
-    </Grid>
-  );
-});
+import WishlistMain from "../components/layout/wishlist/WishlistMain";
 
 const WishlistPage = observer(() => {
   const { groupID } = useParams();
-  const [isCreateWishlistOpen, setIsCreateWishlistOpen] =
-    useState<boolean>(false);
-  const navigate = useNavigate();
 
   return (
     <Box
@@ -74,91 +46,7 @@ const WishlistPage = observer(() => {
         }}
       >
         <WishlistStoreProvider groupID={groupID ?? ""}>
-          <Box sx={{ maxWidth: 1360, mx: "auto" }}>
-            <Box component="header" sx={{ mb: { xs: 4, md: 5 } }}>
-              <Button
-                type="button"
-                variant="contained"
-                disableElevation
-                onClick={() => navigate(-1)}
-                startIcon={<ArrowBack />}
-                sx={{
-                  flexShrink: 0,
-                  borderRadius: "12px",
-                  px: 2.5,
-                  py: 1.5,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 14,
-                }}
-              >
-                Назад
-              </Button>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: { xs: "flex-start", md: "center" },
-                  justifyContent: "space-between",
-                  flexDirection: { xs: "column", md: "row" },
-                  gap: 2.5,
-                }}
-              >
-                <Typography
-                  component="h1"
-                  sx={{
-                    color: "text.primary",
-                    fontSize: { xs: 30, md: 40 },
-                    fontWeight: 700,
-                    letterSpacing: "-0.045em",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Сюда вставить название группы
-                </Typography>
-                <Button
-                  type="button"
-                  variant="contained"
-                  disableElevation
-                  onClick={() => setIsCreateWishlistOpen(true)}
-                  startIcon={<PlaylistAddIcon />}
-                  sx={{
-                    flexShrink: 0,
-                    borderRadius: "12px",
-                    px: 2.5,
-                    py: 1.5,
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: 14,
-                  }}
-                >
-                  Добавить вишлист
-                </Button>
-              </Box>
-            </Box>
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2.5 }}
-            >
-              <FeaturedPlayListIcon
-                aria-hidden="true"
-                sx={{ color: "primary.main", fontSize: 20 }}
-              />
-              <Typography
-                component="h2"
-                sx={{ fontSize: 15, fontWeight: 600, color: "text.primary" }}
-              >
-                Ваши вишлисты
-              </Typography>
-              <Box
-                aria-hidden="true"
-                sx={{ flex: 1, height: "1px", bgcolor: "#E2E8F0", ml: 1 }}
-              />
-            </Box>
-            <WishlistGrid />
-            <CreateWishlistDialog
-              open={isCreateWishlistOpen}
-              onClose={() => setIsCreateWishlistOpen(false)}
-            />
-          </Box>
+          <WishlistMain />
         </WishlistStoreProvider>
       </Box>
     </Box>

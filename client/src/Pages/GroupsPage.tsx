@@ -1,33 +1,13 @@
 import { useState } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { observer } from "mobx-react-lite/src/observer.js";
-import { useNavigate } from "react-router-dom";
 
-import GridElement from "../components/elements/GridElement";
-import { useStoreGroups } from "../hooks/useStore";
 import { GroupStoreProvider } from "../providers/storeProvider";
 import SideBar from "../components/elements/Sidebar";
 import CreateGroupDialog from "../components/elements/CreateGroupDialog";
-
-const GroupGrid = observer(() => {
-  const groupStore = useStoreGroups();
-  const navigate = useNavigate();
-
-  return (
-    <Grid container spacing={2.5}>
-      {groupStore.groups.map(({ id, title }) => (
-        <GridElement
-          key={id}
-          Icon={GroupsIcon}
-          name={title}
-          onClick={() => navigate(`/group/${id}`)}
-        />
-      ))}
-    </Grid>
-  );
-});
+import GroupGrid from "../components/layout/group/GroupGrid";
 
 const GroupsPage = observer(() => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);

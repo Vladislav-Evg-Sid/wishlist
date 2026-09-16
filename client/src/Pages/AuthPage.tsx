@@ -2,7 +2,7 @@ import { useState, type ChangeEvent } from "react";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
-import AuthLayout from "./AuthLayout";
+import AuthLayout from "../components/layout/auth/AuthLayout";
 import { useStore } from "../hooks/useStore";
 
 export default function AuthPage({ mode }: { mode: "login" | "register" }) {

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Box } from "@mui/material";
 
-import { logoCompany } from "../env";
+import { logoCompany } from "../../../env";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
