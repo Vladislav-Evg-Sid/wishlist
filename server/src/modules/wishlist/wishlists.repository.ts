@@ -6,7 +6,7 @@ import {
   WISHILST_COLUMNS,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
-import type { WishlistData } from "./wishlists.types.js";
+import type { CreateWishlistData, WishlistData } from "./wishlists.types.js";
 
 export async function checkWishlistUserAccess(
   userID: string,
@@ -42,7 +42,20 @@ export async function findGroupWishlists(
   return db(TABLES.wishlist)
     .select({
       id: WISHILST_COLUMNS.id,
-      name: WISHILST_COLUMNS.title,
+      title: WISHILST_COLUMNS.title,
     })
     .where({ [WISHILST_COLUMNS.group_id]: groupID });
+}
+
+export async function createWishlist(
+  wishlist: CreateWishlistData,
+): Promise<string> {
+  const wishlistID = await db(TABLES.wishlist)
+    .insert({
+      [WISHILST_COLUMNS.creator_id]: wishlist.creatorID,
+      [WISHILST_COLUMNS.group_id]: wishlist.groupID,
+      [WISHILST_COLUMNS.title]: wishlist.name,
+    })
+    .returning(WISHILST_COLUMNS.id);
+  return String(wishlistID[0]);
 }

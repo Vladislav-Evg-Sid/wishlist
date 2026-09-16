@@ -1,8 +1,9 @@
 import {
   checkWishlistUserAccess,
+  createWishlist,
   findGroupWishlists,
 } from "./wishlists.repository.js";
-import type { WishlistData } from "./wishlists.types.js";
+import type { CreateWishlistData, WishlistData } from "./wishlists.types.js";
 
 export async function getGroupWishlists(
   userID: string,
@@ -14,4 +15,16 @@ export async function getGroupWishlists(
   }
 
   return findGroupWishlists(groupID);
+}
+
+export async function addWishlist(wishlist: CreateWishlistData): Promise<void> {
+  const userAccess = await checkWishlistUserAccess(
+    wishlist.creatorID,
+    wishlist.groupID,
+  );
+  if (!userAccess) {
+    throw new Error("User not a member or creator");
+  }
+
+  await createWishlist(wishlist);
 }
