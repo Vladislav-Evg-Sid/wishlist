@@ -10,7 +10,7 @@ export async function getGroupsByUserId(userID: string): Promise<GroupData[]> {
   return findGroupsByUserId(userID);
 }
 
-export async function setGroup(
+export async function addGroup(
   userID: string,
   groupData: CreateGroup,
 ): Promise<void> {

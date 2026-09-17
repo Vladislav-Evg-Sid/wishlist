@@ -6,7 +6,7 @@ import type {
   GetUserGroupsRequestDTO,
   GetUserGroupsResponseDTO,
 } from "./groups.dto.js";
-import { getGroupsByUserId, setGroup, getGroupInfo } from "./groups.service.js";
+import { getGroupsByUserId, addGroup, getGroupInfo } from "./groups.service.js";
 
 export async function getUserGroupsRequest(
   req: GetUserGroupsRequestDTO,
@@ -25,7 +25,7 @@ export async function getUserGroupsRequest(
   }
 }
 
-export async function createGroupRequest(
+export async function addGroupRequest(
   req: CreateGroupRequestDTO,
   res: CreateGroupResponseDTO,
 ): Promise<void> {
@@ -36,7 +36,7 @@ export async function createGroupRequest(
   }
   const groupData = req.body;
   try {
-    await setGroup(userID, { groupName: groupData.group_name });
+    await addGroup(userID, { groupName: groupData.group_name });
     res.status(201).send("Successfully created");
   } catch (error) {
     if (error instanceof Error) {
