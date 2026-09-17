@@ -6,3 +6,8 @@ export interface GroupData {
 export interface CreateGroup {
   groupName: string;
 }
+
+export interface GroupInfo {
+  title: string;
+  isCreator: boolean;
+}

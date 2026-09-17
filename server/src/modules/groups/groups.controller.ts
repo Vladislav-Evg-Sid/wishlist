@@ -1,10 +1,12 @@
 import type {
   CreateGroupRequestDTO,
   CreateGroupResponseDTO,
+  GetGroupInfoRequestDTO,
+  GetGroupInfoResponseDTO,
   GetUserGroupsRequestDTO,
   GetUserGroupsResponseDTO,
 } from "./groups.dto.js";
-import { getGroupsByUserId, setGroup } from "./groups.service.js";
+import { getGroupsByUserId, setGroup, getGroupInfo } from "./groups.service.js";
 
 export async function getUserGroupsRequest(
   req: GetUserGroupsRequestDTO,
@@ -39,6 +41,35 @@ export async function createGroupRequest(
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).send(error.message);
+      return;
+    }
+    res.status(500).send("Unknown internal Server error");
+  }
+}
+
+export async function getGroupInfoRequest(
+  req: GetGroupInfoRequestDTO,
+  res: GetGroupInfoResponseDTO,
+): Promise<void> {
+  const userID = req.userId;
+  if (!userID) {
+    res.status(401).send();
+    return;
+  }
+  const groupID = req.params.groupID;
+
+  try {
+    const { title, isCreator } = await getGroupInfo(userID, groupID);
+
+    res.status(200).json({ title, is_creator: isCreator });
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "User not a member or creator") {
+        res.status(403).send(error.message);
+        return;
+      }
+      res.status(500).send(error.message);
+      return;
     }
     res.status(500).send("Unknown internal Server error");
   }

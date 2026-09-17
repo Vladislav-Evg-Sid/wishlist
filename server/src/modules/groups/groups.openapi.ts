@@ -81,4 +81,55 @@ export const groupsPaths = {
       },
     },
   },
+  "/groups/{groupID}": {
+    get: {
+      tags: ["groups"],
+      summary: "Получить информацию о группе",
+
+      parameters: [
+        {
+          in: "path",
+          name: "groupID",
+          required: true,
+
+          schema: {
+            type: "integer",
+          },
+        },
+      ],
+
+      responses: {
+        "200": {
+          description: "Информация получена",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  title: {
+                    type: "string",
+                  },
+                  is_creator: {
+                    type: "boolean",
+                  },
+                },
+              },
+            },
+          },
+
+          "401": {
+            description: "Неавтоирзован",
+          },
+
+          "403": {
+            description: "User not a member or creator",
+          },
+
+          "500": {
+            description: "Внутренняя ошибка сервера",
+          },
+        },
+      },
+    },
+  },
 };

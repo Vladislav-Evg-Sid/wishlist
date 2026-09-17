@@ -6,8 +6,10 @@ import { ArrowBack } from "@mui/icons-material";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 
 import CreateWishlistDialog from "../../elements/CreateWishlistDialog";
+import { useStoreWishlists } from "../../../hooks/useStore";
 
 const WishlistHeader = observer(() => {
+  const wishlistStore = useStoreWishlists();
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] =
     useState<boolean>(false);
   const navigate = useNavigate();
@@ -51,7 +53,8 @@ const WishlistHeader = observer(() => {
             lineHeight: 1.2,
           }}
         >
-          Сюда вставить название группы
+          {wishlistStore.parantGroupTitle ||
+            "Не удалось загрузить название группы"}
         </Typography>
         <Button
           type="button"

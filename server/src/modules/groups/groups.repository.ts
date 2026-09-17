@@ -5,6 +5,7 @@ import {
   TABLES,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
+import type { GroupInfoRaw } from "./groups.dto.js";
 import type { GroupData } from "./groups.types.js";
 
 export async function findGroupsByUserId(userID: string): Promise<GroupData[]> {
@@ -30,4 +31,14 @@ export async function createGroup(
     })
     .returning(GROUPS_COLUMNS.id);
   return String(groupID[0]);
+}
+
+export async function findGroupInfo(groupID: string): Promise<GroupInfoRaw> {
+  return db(TABLES.groups)
+    .select({
+      title: GROUPS_COLUMNS.title,
+      creatorID: GROUPS_COLUMNS.creator_id,
+    })
+    .where(GROUPS_COLUMNS.id, groupID)
+    .first();
 }
