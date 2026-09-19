@@ -60,10 +60,16 @@ const OrdersSummary = observer(() => {
             <Icon sx={{ fontSize: 22 }} />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography component="strong" sx={{ mr: 0.75, fontSize: 22, fontWeight: 700 }}>
+            <Typography
+              component="strong"
+              sx={{ mr: 0.75, fontSize: 22, fontWeight: 700 }}
+            >
               {values[key]}
             </Typography>
-            <Typography component="span" sx={{ color: "text.secondary", fontSize: 13 }}>
+            <Typography
+              component="span"
+              sx={{ color: "text.secondary", fontSize: 13 }}
+            >
               {label}
             </Typography>
           </Box>
