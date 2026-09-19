@@ -1,5 +1,6 @@
 import { apiFetch } from "./baseApi";
 import type { GroupData, GroupInfo } from "../types/groups";
+import type { GroupUsersList } from "../types/wishlists";
 
 export async function getUserGroups(): Promise<GroupData[]> {
   const response = await apiFetch("/groups");
@@ -38,4 +39,23 @@ export async function getGroupInfo(groupID: string): Promise<GroupInfo> {
     title: groupInfoRaw.title,
     isCreator: groupInfoRaw.is_creator,
   };
+}
+
+export async function getGroupUsers(groupID: string): Promise<GroupUsersList> {
+  const response = await apiFetch(`/groups/${groupID}/users`);
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("User not a member or creator");
+    }
+    throw new Error(`${response.status}`);
+  }
+  if (
+    response.status === 404 &&
+    response.statusText === "Group's creator not found"
+  ) {
+    throw new Error(response.statusText);
+  }
+
+  return await response.json();
 }

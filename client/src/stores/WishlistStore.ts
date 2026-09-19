@@ -3,7 +3,7 @@ import { Bounce, toast } from "react-toastify";
 
 import type { GroupUsersList, WishlistData } from "../types/wishlists";
 import { createWishlist, getGroupWishlists } from "../api/wishlists";
-import { getGroupInfo } from "../api/groups";
+import { getGroupInfo, getGroupUsers } from "../api/groups";
 
 export class WishlistStore {
   wishlists: WishlistData[] = [];
@@ -18,6 +18,7 @@ export class WishlistStore {
     this.parantGroupID = parantGroupID;
     this.loadGroupWishlists();
     this.loadParantGroupInfo();
+    this.loadParantGroupUsers();
   }
 
   async loadParantGroupInfo() {
@@ -50,7 +51,60 @@ export class WishlistStore {
             break;
           default:
             toast.error(
-              "Неизвестная ошибка.\nНе удалось получить вишлисты группы",
+              "Неизвестная ошибка.\nНе удалось получить данные о группе",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              },
+            );
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
+  }
+
+  async loadParantGroupUsers() {
+    try {
+      const users = await getGroupUsers(this.parantGroupID);
+      this.parantGroupUsers = users;
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+              {
+                position: "top-right",
+                autoClose: 5000,
+                theme: "light",
+                transition: Bounce,
+              },
+            );
+            break;
+          case "Group's creator not found":
+            toast.error("Ошибка! Не обнаружен создатель группы!", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "light",
+              transition: Bounce,
+            });
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "light",
+              transition: Bounce,
+            });
+            break;
+          default:
+            toast.error(
+              "Неизвестная ошибка.\nНе удалось получить участников группы",
               {
                 position: "top-right",
                 autoClose: 5000,

@@ -132,4 +132,67 @@ export const groupsPaths = {
       },
     },
   },
+  "/groups/{groupID}/users": {
+    get: {
+      tags: ["groups"],
+      summary: "Получить пользователей группы",
+
+      parameters: [
+        {
+          in: "path",
+          name: "groupID",
+          required: true,
+
+          schema: {
+            type: "integer",
+          },
+        },
+      ],
+
+      responses: {
+        "200": {
+          description: "Пользователи получены",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  creator: {
+                    name: {
+                      type: "string",
+                    },
+                    hash: {
+                      type: "number",
+                    },
+                  },
+                  users: [
+                    {
+                      name: {
+                        type: "string",
+                      },
+                      hash: {
+                        type: "number",
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+
+          "401": {
+            description: "Неавтоирзован",
+          },
+
+          "403": {
+            description: "User not a member or creator",
+          },
+
+          "500": {
+            description: "Внутренняя ошибка сервера",
+          },
+        },
+      },
+    },
+  },
 };

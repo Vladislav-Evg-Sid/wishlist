@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import type { GroupData } from "./groups.types.js";
+import type { GroupData, GroupUsersList } from "./groups.types.js";
 import type { NoParams } from "../../types/requests.js";
 
 // HTTP
@@ -27,6 +27,14 @@ export type GetGroupInfoRequestDTO = Request<
   GetGroupInfoRes
 >;
 export type GetGroupInfoResponseDTO = Response<GetGroupInfoRes>;
+
+type GetGroupUsersRequesRes = GroupUsersList | string;
+
+export type GetGroupUsersRequestDTO = Request<
+  GetGroupInfoParams,
+  GetGroupUsersRequesRes
+>;
+export type getGroupUsersResponseDTO = Response<GetGroupUsersRequesRes>;
 
 // DB
 export interface GroupInfoRaw {

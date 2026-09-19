@@ -204,7 +204,7 @@ export class AuthStore {
               break;
           }
         } else {
-          console.log(error);
+          console.error(error);
         }
       });
       return false;

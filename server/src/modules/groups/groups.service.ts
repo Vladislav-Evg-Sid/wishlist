@@ -3,8 +3,15 @@ import {
   findGroupsByUserId,
   createGroup,
   findGroupInfo,
+  findGroupCreator,
+  findGroupMembers,
 } from "./groups.repository.js";
-import type { CreateGroup, GroupData, GroupInfo } from "./groups.types.js";
+import type {
+  CreateGroup,
+  GroupData,
+  GroupInfo,
+  GroupUsersList,
+} from "./groups.types.js";
 
 export async function getGroupsByUserId(userID: string): Promise<GroupData[]> {
   return findGroupsByUserId(userID);
@@ -31,5 +38,28 @@ export async function getGroupInfo(
   return {
     title,
     isCreator: creatorID === userID,
+  };
+}
+
+export async function getGroupUsers(
+  userID: string,
+  groupID: string,
+): Promise<GroupUsersList> {
+  const userAccess = await checkGroupUserAccess(userID, groupID);
+  if (!userAccess) {
+    throw new Error("User not a member or creator");
+  }
+  const creator = await findGroupCreator(groupID);
+  if (!creator) {
+    throw new Error("Group's creator not found");
+  }
+  const members = await findGroupMembers(groupID);
+  const filteredMembers = members.filter(
+    ({ name, hash }) => name !== null && hash != null,
+  );
+
+  return {
+    creator,
+    members: filteredMembers,
   };
 }

@@ -3,10 +3,17 @@ import type {
   CreateGroupResponseDTO,
   GetGroupInfoRequestDTO,
   GetGroupInfoResponseDTO,
+  GetGroupUsersRequestDTO,
+  getGroupUsersResponseDTO,
   GetUserGroupsRequestDTO,
   GetUserGroupsResponseDTO,
 } from "./groups.dto.js";
-import { getGroupsByUserId, addGroup, getGroupInfo } from "./groups.service.js";
+import {
+  getGroupsByUserId,
+  addGroup,
+  getGroupInfo,
+  getGroupUsers,
+} from "./groups.service.js";
 
 export async function getUserGroupsRequest(
   req: GetUserGroupsRequestDTO,
@@ -67,6 +74,37 @@ export async function getGroupInfoRequest(
       if (error.message === "User not a member or creator") {
         res.status(403).send(error.message);
         return;
+      }
+      res.status(500).send(error.message);
+      return;
+    }
+    res.status(500).send("Unknown internal Server error");
+  }
+}
+
+export async function getGroupUsersRequest(
+  req: GetGroupUsersRequestDTO,
+  res: getGroupUsersResponseDTO,
+): Promise<void> {
+  const userID = req.userId;
+  if (!userID) {
+    res.status(401).send();
+    return;
+  }
+  const groupID = req.params.groupID;
+
+  try {
+    const users = await getGroupUsers(userID, groupID);
+
+    res.status(200).json(users);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "User not a member or creator") {
+        res.status(403).send(error.message);
+        return;
+      }
+      if (error.message === "Group's creator not found") {
+        res.status(404).send(error.message);
       }
       res.status(500).send(error.message);
       return;
