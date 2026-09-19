@@ -9,7 +9,7 @@ import {
 import type { RootStore } from "../stores/RootStore.ts";
 import { GroupStore } from "../stores/GroupStore.ts";
 import { WishlistStore } from "../stores/WishlistStore.ts";
-import { OrderStore } from "../stores/OrderStore.ts";
+import type OrderStore from "../stores/OrderStore.ts";
 
 export function useStore(): RootStore {
   const store = useContext(RootStoreContext);

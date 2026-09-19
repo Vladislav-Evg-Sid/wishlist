@@ -9,7 +9,7 @@ import {
 } from "../context/store.context";
 import { GroupStore } from "../stores/GroupStore";
 import { WishlistStore } from "../stores/WishlistStore";
-import { OrderStore } from "../stores/OrderStore";
+import OrderStore from "../stores/OrderStore";
 
 interface StoreProviderProps {
   children: React.ReactNode;
