@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { Bounce, toast } from "react-toastify";
 
-import type { WishlistData } from "../types/wishlists";
+import type { GroupUsersList, WishlistData } from "../types/wishlists";
 import { createWishlist, getGroupWishlists } from "../api/wishlists";
 import { getGroupInfo } from "../api/groups";
 
@@ -10,6 +10,7 @@ export class WishlistStore {
   parantGroupID: string;
   parantGroupTitle: string = "";
   isParantGroupCreator: boolean = false;
+  parantGroupUsers: GroupUsersList | null = null;
 
   constructor(parantGroupID: string) {
     makeAutoObservable(this);

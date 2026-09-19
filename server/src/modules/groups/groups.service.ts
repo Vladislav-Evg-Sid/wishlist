@@ -26,10 +26,10 @@ export async function getGroupInfo(
   if (!userAccess) {
     throw new Error("User not a member or creator");
   }
-  const { title, creatorId } = await findGroupInfo(groupID);
+  const { title, creatorID } = await findGroupInfo(groupID);
 
   return {
     title,
-    isCreator: creatorId === userID,
+    isCreator: creatorID === userID,
   };
 }

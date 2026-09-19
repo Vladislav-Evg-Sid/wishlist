@@ -31,5 +31,5 @@ export type GetGroupInfoResponseDTO = Response<GetGroupInfoRes>;
 // DB
 export interface GroupInfoRaw {
   title: string;
-  creatorId: string;
+  creatorID: string;
 }
