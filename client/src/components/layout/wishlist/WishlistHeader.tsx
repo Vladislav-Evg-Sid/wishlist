@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";

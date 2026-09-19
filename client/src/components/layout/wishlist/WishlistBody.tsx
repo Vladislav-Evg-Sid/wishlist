@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 import { Grid } from "@mui/material";
 import ViewListIcon from "@mui/icons-material/ViewList";
 
@@ -17,7 +17,11 @@ const WishlistBody = observer(() => {
           key={id}
           Icon={ViewListIcon}
           name={title}
-          onClick={() => navigate(`/group/wishlist/${id}`)}
+          onClick={() =>
+            navigate(`/group/wishlist/${id}`, {
+              state: { wishlistTitle: title },
+            })
+          }
         />
       ))}
     </Grid>

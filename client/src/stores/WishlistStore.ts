@@ -202,15 +202,12 @@ export class WishlistStore {
             });
             break;
           default:
-            toast.error(
-              "Неизвестная ошибка.\nНе удалось получить вишлисты группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
-            );
+            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "light",
+              transition: Bounce,
+            });
             console.error(error.message);
             break;
         }

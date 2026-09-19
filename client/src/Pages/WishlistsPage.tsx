@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 import { Box } from "@mui/material";
 
 import SideBar from "../components/elements/Sidebar";

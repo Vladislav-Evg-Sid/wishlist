@@ -18,7 +18,7 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 
 import { useStoreWishlists } from "../../hooks/useStore";
 import type { GroupUser } from "../../types/wishlists";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 
 import { GroupStoreProvider } from "../providers/storeProvider";
 import SideBar from "../components/elements/Sidebar";

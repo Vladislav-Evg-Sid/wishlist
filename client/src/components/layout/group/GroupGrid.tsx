@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { observer } from "mobx-react-lite/src/observer.js";
+import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 
 import { useStoreGroups } from "../../../hooks/useStore";
