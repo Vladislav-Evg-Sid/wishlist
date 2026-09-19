@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import WishlistsPage from "../Pages/WishlistsPage";
 import GroupsPage from "../Pages/GroupsPage";
 import AuthPage from "../Pages/AuthPage";
+import OrdersPage from "../Pages/OrdersPage";
 
 /*export const router = createBrowserRouter([
   {
@@ -32,6 +33,7 @@ export default function RouteProvider() {
       />
       <Route path="/group" element={<GroupsPage />} />
       <Route path="/group/:groupID" element={<WishlistsPage />} />
+      <Route path="/group/wishlist/:wishlistID" element={<OrdersPage />} />
     </Routes>
   );
 }

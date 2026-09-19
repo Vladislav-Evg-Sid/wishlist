@@ -3,11 +3,13 @@ import { useContext } from "react";
 import {
   GroupsStoreContext,
   RootStoreContext,
+  OrderStoreContext,
   WishlistStoreContext,
 } from "../context/store.context.ts";
 import type { RootStore } from "../stores/RootStore.ts";
 import { GroupStore } from "../stores/GroupStore.ts";
 import { WishlistStore } from "../stores/WishlistStore.ts";
+import { OrderStore } from "../stores/OrderStore.ts";
 
 export function useStore(): RootStore {
   const store = useContext(RootStoreContext);
@@ -34,6 +36,16 @@ export function useStoreWishlists(): WishlistStore {
 
   if (!store) {
     throw new Error("useStore must be used inside WishlistStoreProvider");
+  }
+
+  return store;
+}
+
+export function useStoreOrders(): OrderStore {
+  const store = useContext(OrderStoreContext);
+
+  if (!store) {
+    throw new Error("useStoreOrders must be used inside OrderStoreProvider");
   }
 
   return store;
