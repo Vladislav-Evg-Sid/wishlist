@@ -59,6 +59,8 @@ export async function addCardRequest(
       href: cardRaw.href,
       creatorID: userID,
     });
+
+    res.status(201).send();
   } catch (error) {
     if (error instanceof Error) {
       if (

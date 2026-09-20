@@ -3,7 +3,7 @@ import { Bounce, toast } from "react-toastify";
 
 import type { OrderData } from "../types/orders";
 import { addOrder, getWishlistOrders } from "../api/orders";
-import type { WishIconValue } from "../components/gui/WishIcons";
+import type { WishIconValue } from "../constants/wishIcons";
 
 export class OrderStore {
   orders: OrderData[] = [];
@@ -70,15 +70,24 @@ export class OrderStore {
     cardName: string,
     description: string,
     icon: WishIconValue,
-    href: string | null,
+    href: string,
   ) {
+    if (!cardName) {
+      toast.info("Введите название записи", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+      return;
+    }
     try {
       await addOrder({
         title: cardName,
         description: description,
         wishlistID: this.parantWishlistID,
         icon: icon,
-        href: href ?? "",
+        href: href,
       });
       toast.success("Запись создана", {
         position: "top-right",
@@ -110,15 +119,12 @@ export class OrderStore {
             });
             break;
           default:
-            toast.error(
-              "Неизвестная ошибка.\nНе удалось получить вишлисты группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
-            );
+            toast.error("Неизвестная ошибка.\nНе удалось создать запись", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "light",
+              transition: Bounce,
+            });
             console.error(error.message);
             break;
         }

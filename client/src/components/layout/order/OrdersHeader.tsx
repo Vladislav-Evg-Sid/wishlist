@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
@@ -5,9 +6,11 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 import { useStoreOrders } from "../../../hooks/useStore";
+import CreateOrderDialog from "../../elements/CreateOrderDialog";
 
 const OrdersHeader = observer(() => {
   const orderStore = useStoreOrders();
+  const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -87,7 +90,7 @@ const OrdersHeader = observer(() => {
           variant="contained"
           disableElevation
           startIcon={<AddRoundedIcon />}
-          onClick={() => alert("Функция добавления записи пока не доступна")}
+          onClick={() => setIsCreateOrderOpen(true)}
           sx={{
             width: { xs: "100%", sm: "auto" },
             flexShrink: 0,
@@ -102,6 +105,10 @@ const OrdersHeader = observer(() => {
           Добавить запись
         </Button>
       </Box>
+      <CreateOrderDialog
+        open={isCreateOrderOpen}
+        onClose={() => setIsCreateOrderOpen(false)}
+      />
     </Box>
   );
 });

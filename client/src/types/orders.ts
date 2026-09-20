@@ -1,4 +1,4 @@
-import type { WishIconValue } from "../components/gui/WishIcons";
+import type { WishIconValue } from "../constants/wishIcons";
 import type { User } from "./user";
 
 type Status = "Свободно" | "Забронировано" | "Подарено";
@@ -17,6 +17,6 @@ export interface OrderDataInsert {
   title: string;
   description: string;
   wishlistID: string;
-  icon: string;
+  icon: WishIconValue;
   href: string;
 }

@@ -1,7 +1,7 @@
 import { Avatar, Box, Chip, Link, Typography } from "@mui/material";
-import CardGiftcardRoundedIcon from "@mui/icons-material/CardGiftcardRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 
+import { getWishIcon } from "../../../constants/wishIcons";
 import type { OrderData } from "../../../types/orders";
 
 const statusStyles = {
@@ -33,8 +33,7 @@ function getSourceName(href: string) {
 }
 
 function OrderVisual({ icon }: Pick<OrderData, "icon">) {
-  // TODO: Переделать
-  const canRenderAsText = typeof icon === "string" || typeof icon === "number";
+  const wishIcon = getWishIcon(icon);
 
   return (
     <Box
@@ -51,7 +50,7 @@ function OrderVisual({ icon }: Pick<OrderData, "icon">) {
         fontSize: 27,
       }}
     >
-      {canRenderAsText ? String(icon) : <CardGiftcardRoundedIcon />}
+      {wishIcon.symbol}
     </Box>
   );
 }

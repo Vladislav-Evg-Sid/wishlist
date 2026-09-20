@@ -44,11 +44,11 @@ export async function findWishlistCards(
 }
 
 export async function createCard(card: CardDataInsert): Promise<string> {
-  return db(CARD_COLUMNS)
+  return db(TABLES.card)
     .insert({
       [CARD_COLUMNS.title]: card.title,
       [CARD_COLUMNS.description]: card.description,
-      [CARD_COLUMNS.status]: card.status,
+      [CARD_COLUMNS.icon]: card.icon,
       [CARD_COLUMNS.href]: card.href,
       [CARD_COLUMNS.wishlist_id]: card.wishlistID,
       [CARD_COLUMNS.creator_id]: card.creatorID,
