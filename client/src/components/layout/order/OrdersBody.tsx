@@ -41,6 +41,7 @@ const OrdersBody = observer(() => {
   const [author, setAuthor] = useState<string>("");
   const [shop, setShop] = useState<string>("");
   const [sort, setSort] = useState<Sort>("date-desc");
+  const [expandedOrderID, setExpandedOrderID] = useState<string | null>(null);
 
   const authors = useMemo(
     () =>
@@ -203,7 +204,16 @@ const OrdersBody = observer(() => {
           }}
         >
           {visibleOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              isExpanded={expandedOrderID === order.id}
+              onToggle={() =>
+                setExpandedOrderID((currentID) =>
+                  currentID === order.id ? null : order.id,
+                )
+              }
+            />
           ))}
         </Box>
       ) : (

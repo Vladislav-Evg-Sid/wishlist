@@ -134,6 +134,32 @@ export class OrderStore {
     }
   }
 
+  // TODO: подключить методы API и обновлять orders после успешных действий.
+  deleteOrder(orderID: string) {
+    void orderID;
+    toast.info("Функция удаления записи пока не доступна");
+  }
+
+  editOrder(orderID: string) {
+    void orderID;
+    toast.info("Функция редактирования записи пока не доступна");
+  }
+
+  reserveOrder(orderID: string) {
+    void orderID;
+    toast.info("Функция бронирования записи пока не доступна");
+  }
+
+  cancelOrderReservation(orderID: string) {
+    void orderID;
+    toast.info("Функция снятия брони пока не доступна");
+  }
+
+  markOrderAsGifted(orderID: string) {
+    void orderID;
+    toast.info("Функция отметки подарка пока не доступна");
+  }
+
   get countOrders(): number {
     return this.orders.length;
   }
