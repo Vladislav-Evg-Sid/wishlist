@@ -45,8 +45,9 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.raw(`
     CREATE TYPE statuses AS ENUM (
-      'Новая',
-      'Завершена'
+      'Свободно',
+      'Забронировано',
+      'Подарено'
     )
   `);
 
@@ -60,7 +61,13 @@ export async function up(knex: Knex): Promise<void> {
       .inTable("wishlist");
     table.text("description").notNullable();
     table.specificType("status", "statuses").notNullable();
+    table.string("icon").notNullable();
+    table.string("href");
     table.uuid("creator_id").notNullable().references("id").inTable("users");
+    table
+      .timestamp("created_at", { useTz: true })
+      .notNullable()
+      .defaultTo(knex.fn.now());
   });
 }
 

@@ -3,13 +3,14 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 
 import { logger } from "./middleware/logger.middleware.js";
-import groupRouter from "./modules/groups/groups.router.js";
-import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
-import authRouter from "./modules/auth/auth.routes.js";
-import cookieParser from "cookie-parser";
 import { requireAccessToken } from "./middleware/require-access-token.middleware.js";
+import cookieParser from "cookie-parser";
+import authRouter from "./modules/auth/auth.routes.js";
+import groupRouter from "./modules/groups/groups.router.js";
+import wishlistRouter from "./modules/wishlist/wishlists.router.js";
+import orderRouter from "./modules/orders/orders.router.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/auth", authRouter);
 app.use("/groups", requireAccessToken, groupRouter);
 app.use("/wishlists", requireAccessToken, wishlistRouter);
+app.use("/orders", requireAccessToken, orderRouter);
 
 // 404
 app.use((req, res) => {

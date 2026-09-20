@@ -46,6 +46,9 @@ export const CARD_COLUMNS = {
   wishlist_id: "wishlist_id",
   description: "description",
   status: "status",
+  icon: "icon",
+  href: "href",
+  created_at: "created_at",
   creator_id: "creator_id",
 } as const;
 
