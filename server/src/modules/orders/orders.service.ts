@@ -1,9 +1,10 @@
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
 import {
+  createCard,
   findGroupIDByWishlistID,
   findWishlistCards,
 } from "./orders.repository.js";
-import type { CardData } from "./orders.types.js";
+import type { CardData, CardDataInsert } from "./orders.types.js";
 
 export async function getWishlistCards(
   userID: string,
@@ -37,4 +38,18 @@ export async function getWishlistCards(
       href: card.href ?? "",
     }),
   );
+}
+
+export async function addCard(card: CardDataInsert): Promise<void> {
+  const groupID = await findGroupIDByWishlistID(card.wishlistID);
+  if (!groupID) {
+    throw new Error("Not found wishlist's group");
+  }
+
+  const userAccess = await checkGroupUserAccess(card.creatorID, groupID);
+  if (!userAccess) {
+    throw new Error("User not a member or creator");
+  }
+
+  await createCard(card);
 }

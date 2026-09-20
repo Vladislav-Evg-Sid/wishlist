@@ -7,6 +7,7 @@ import {
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { CardDataRaw } from "./orders.dto.js";
+import type { CardDataInsert } from "./orders.types.js";
 
 export async function findGroupIDByWishlistID(
   wishlistID: string,
@@ -40,4 +41,17 @@ export async function findWishlistCards(
       href: CARD_COLUMNS.href,
     })
     .where(CARD_COLUMNS.wishlist_id, wishlistID);
+}
+
+export async function createCard(card: CardDataInsert): Promise<string> {
+  return db(CARD_COLUMNS)
+    .insert({
+      [CARD_COLUMNS.title]: card.title,
+      [CARD_COLUMNS.description]: card.description,
+      [CARD_COLUMNS.status]: card.status,
+      [CARD_COLUMNS.href]: card.href,
+      [CARD_COLUMNS.wishlist_id]: card.wishlistID,
+      [CARD_COLUMNS.creator_id]: card.creatorID,
+    })
+    .returning(CARD_COLUMNS.id);
 }

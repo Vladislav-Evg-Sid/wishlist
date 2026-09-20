@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import type { CardData, status } from "./orders.types.js";
+import type { NoParams } from "../../types/requests.js";
 
 // HTTP
 interface GetWishlistCardsParams {
@@ -13,6 +14,17 @@ export type GetWishlistCardsRequestDTO = Request<
   GetWishlistCardsRes
 >;
 export type GetWishlistCardsResponseDTO = Response<GetWishlistCardsRes>;
+
+interface AddCardBody {
+  title: string;
+  description: string;
+  wishlist_id: string;
+  icon: string;
+  href: string;
+}
+
+export type AddCardRequestDTO = Request<NoParams, string, AddCardBody>;
+export type AddCardResponseDTO = Response<string>;
 
 // DB
 export interface CardDataRaw {

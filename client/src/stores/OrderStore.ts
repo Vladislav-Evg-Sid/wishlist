@@ -2,7 +2,8 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Bounce, toast } from "react-toastify";
 
 import type { OrderData } from "../types/orders";
-import { getWishlistOrders } from "../api/orders";
+import { addOrder, getWishlistOrders } from "../api/orders";
+import type { WishIconValue } from "../components/gui/WishIcons";
 
 export class OrderStore {
   orders: OrderData[] = [];
@@ -65,16 +66,26 @@ export class OrderStore {
     }
   }
 
-  async createWishlist(wishlistName: string) {
-    void wishlistName;
+  async createOrder(
+    cardName: string,
+    description: string,
+    icon: WishIconValue,
+    href: string | null,
+  ) {
     try {
-      // await createWishlist(this.parantGroupID, wishlistName);
-      // toast.success("Вишлист создан", {
-      //   position: "top-right",
-      //   autoClose: 5000,
-      //   theme: "light",
-      //   transition: Bounce,
-      // });
+      await addOrder({
+        title: cardName,
+        description: description,
+        wishlistID: this.parantWishlistID,
+        icon: icon,
+        href: href ?? "",
+      });
+      toast.success("Запись создана", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
       this.loadWishlistOrders();
     } catch (error) {
       if (error instanceof Error) {

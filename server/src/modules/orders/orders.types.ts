@@ -16,3 +16,12 @@ export interface CardData {
   author: User;
   href: string;
 }
+
+export interface CardDataInsert {
+  title: string;
+  description: string;
+  wishlistID: string;
+  icon: string;
+  href: string;
+  creatorID: string;
+}

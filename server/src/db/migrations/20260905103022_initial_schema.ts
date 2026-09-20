@@ -60,7 +60,10 @@ export async function up(knex: Knex): Promise<void> {
       .references("id")
       .inTable("wishlist");
     table.text("description").notNullable();
-    table.specificType("status", "statuses").notNullable();
+    table
+      .specificType("status", "statuses")
+      .notNullable()
+      .defaultTo("Свободно");
     table.string("icon").notNullable();
     table.string("href");
     table.uuid("creator_id").notNullable().references("id").inTable("users");
