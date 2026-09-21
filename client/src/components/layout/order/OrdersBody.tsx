@@ -224,6 +224,7 @@ const OrdersBody = observer(() => {
         <Box
           sx={{
             display: "grid",
+            gridAutoFlow: "row dense",
             gridTemplateColumns: {
               xs: "1fr",
               md: "repeat(2, minmax(0, 1fr))",
