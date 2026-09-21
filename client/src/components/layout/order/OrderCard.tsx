@@ -33,6 +33,7 @@ const statusStyles = {
 interface OrderCardProps {
   order: OrderData;
   isExpanded: boolean;
+  isAnimating: boolean;
   onToggle: () => void;
 }
 
@@ -75,13 +76,21 @@ function stopPropagation(event: MouseEvent) {
 function OrderVisual({
   icon,
   large = false,
-}: Pick<OrderData, "icon"> & { large?: boolean }) {
+  transitionName,
+  isAnimating,
+}: Pick<OrderData, "icon"> & {
+  large?: boolean;
+  transitionName: string;
+  isAnimating: boolean;
+}) {
   const wishIcon = getWishIcon(icon);
 
   return (
     <Box
       aria-hidden="true"
       sx={{
+        viewTransitionName: isAnimating ? transitionName : "none",
+        viewTransitionClass: "order-shared",
         display: "grid",
         placeItems: "center",
         width: large ? { xs: 54, sm: 64 } : 54,
@@ -101,12 +110,27 @@ function OrderVisual({
 function Author({
   order,
   withDate = false,
+  transitionPrefix,
+  isAnimating,
 }: {
   order: OrderData;
   withDate?: boolean;
+  transitionPrefix: string;
+  isAnimating: boolean;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+    <Box
+      sx={{
+        viewTransitionName: isAnimating
+          ? `${transitionPrefix}-author`
+          : "none",
+        viewTransitionClass: "order-shared",
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        minWidth: 0,
+      }}
+    >
       <Avatar
         sx={{
           width: 32,
@@ -132,7 +156,16 @@ function Author({
           {order.author.name} #{order.author.hash}
         </Typography>
         {withDate && (
-          <Typography sx={{ color: "text.secondary", fontSize: 12 }}>
+          <Typography
+            sx={{
+              viewTransitionName: isAnimating
+                ? `${transitionPrefix}-date`
+                : "none",
+              viewTransitionClass: "order-shared",
+              color: "text.secondary",
+              fontSize: 12,
+            }}
+          >
             Создано {formatDate(order.createdAt, true)}
           </Typography>
         )}
@@ -145,8 +178,14 @@ function OrderActions({ order }: { order: OrderData }) {
   const orderStore = useStoreOrders();
   const { userStore } = useStore();
   const currentUser = userStore.currentUser;
-  const isAuthor = currentUser?.id === order.author.id;
-  const isReservationOwner = currentUser?.id === order.reservedBy?.id;
+  const isAuthor = Boolean(
+    currentUser && String(currentUser.id) === String(order.author.id),
+  );
+  const isReservationOwner = Boolean(
+    currentUser &&
+      order.reservedBy &&
+      String(currentUser.id) === String(order.reservedBy.id),
+  );
   const buttonSx = {
     borderRadius: "11px",
     textTransform: "none",
@@ -246,9 +285,14 @@ function OrderActions({ order }: { order: OrderData }) {
 const OrderCard = observer(function OrderCard({
   order,
   isExpanded,
+  isAnimating,
   onToggle,
 }: OrderCardProps) {
   const sourceName = getSourceName(order.href);
+  const transitionPrefix = `order-${String(order.id).replace(
+    /[^a-zA-Z0-9_-]/g,
+    "-",
+  )}`;
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (!isExpanded && (event.key === "Enter" || event.key === " ")) {
@@ -266,6 +310,10 @@ const OrderCard = observer(function OrderCard({
       onClick={!isExpanded ? onToggle : undefined}
       onKeyDown={handleKeyDown}
       sx={{
+        viewTransitionName: isAnimating
+          ? `${transitionPrefix}-shell`
+          : "none",
+        viewTransitionClass: "order-shell",
         gridColumn: isExpanded ? "1 / -1" : "auto",
         display: "flex",
         flexDirection: "column",
@@ -308,11 +356,20 @@ const OrderCard = observer(function OrderCard({
               borderBottom: "1px solid #EDF1F5",
             }}
           >
-            <OrderVisual icon={order.icon} large />
+            <OrderVisual
+              icon={order.icon}
+              large
+              transitionName={`${transitionPrefix}-icon`}
+              isAnimating={isAnimating}
+            />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 component="h3"
                 sx={{
+                  viewTransitionName: isAnimating
+                    ? `${transitionPrefix}-title`
+                    : "none",
+                  viewTransitionClass: "order-shared",
                   mb: 1,
                   fontSize: { xs: 20, sm: 24 },
                   fontWeight: 700,
@@ -325,6 +382,10 @@ const OrderCard = observer(function OrderCard({
                 label={order.status}
                 size="small"
                 sx={{
+                  viewTransitionName: isAnimating
+                    ? `${transitionPrefix}-status-expanded`
+                    : "none",
+                  viewTransitionClass: "order-status-in",
                   ...statusStyles[order.status],
                   fontSize: 12,
                   fontWeight: 700,
@@ -332,13 +393,22 @@ const OrderCard = observer(function OrderCard({
               />
             </Box>
             <Tooltip title="Свернуть">
-              <IconButton
-                type="button"
-                aria-label="Свернуть запись"
-                onClick={onToggle}
+              <Box
+                sx={{
+                  viewTransitionName: isAnimating
+                    ? `${transitionPrefix}-toggle`
+                    : "none",
+                  viewTransitionClass: "order-shared",
+                }}
               >
-                <CloseFullscreenRoundedIcon />
-              </IconButton>
+                <IconButton
+                  type="button"
+                  aria-label="Свернуть запись"
+                  onClick={onToggle}
+                >
+                  <CloseFullscreenRoundedIcon />
+                </IconButton>
+              </Box>
             </Tooltip>
           </Box>
 
@@ -353,7 +423,17 @@ const OrderCard = observer(function OrderCard({
               pt: 2.5,
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <Box
+              sx={{
+                viewTransitionName: isAnimating
+                  ? `${transitionPrefix}-description`
+                  : "none",
+                viewTransitionClass: "order-enter-late",
+                display: "flex",
+                flexDirection: "column",
+                minWidth: 0,
+              }}
+            >
               <Typography
                 sx={{
                   mb: 1,
@@ -377,12 +457,21 @@ const OrderCard = observer(function OrderCard({
                 {order.description || "Автор не добавил описание к этой записи."}
               </Typography>
               <Box sx={{ mt: { xs: 3, md: 4 } }}>
-                <Author order={order} withDate />
+                <Author
+                  order={order}
+                  withDate
+                  transitionPrefix={transitionPrefix}
+                  isAnimating={isAnimating}
+                />
               </Box>
             </Box>
 
             <Box
               sx={{
+                viewTransitionName: isAnimating
+                  ? `${transitionPrefix}-actions`
+                  : "none",
+                viewTransitionClass: "order-enter-right",
                 display: "flex",
                 flexDirection: "column",
                 gap: 2.5,
@@ -454,11 +543,19 @@ const OrderCard = observer(function OrderCard({
               gap: 1.5,
             }}
           >
-            <OrderVisual icon={order.icon} />
+            <OrderVisual
+              icon={order.icon}
+              transitionName={`${transitionPrefix}-icon`}
+              isAnimating={isAnimating}
+            />
             <Chip
               label={order.status}
               size="small"
               sx={{
+                viewTransitionName: isAnimating
+                  ? `${transitionPrefix}-status-compact`
+                  : "none",
+                viewTransitionClass: "order-status-out",
                 ...statusStyles[order.status],
                 height: 29,
                 borderRadius: "999px",
@@ -471,6 +568,10 @@ const OrderCard = observer(function OrderCard({
           <Typography
             component="h3"
             sx={{
+              viewTransitionName: isAnimating
+                ? `${transitionPrefix}-title`
+                : "none",
+              viewTransitionClass: "order-shared",
               mt: 2.25,
               mb: 0.75,
               fontSize: 17,
@@ -480,7 +581,16 @@ const OrderCard = observer(function OrderCard({
           >
             {order.title}
           </Typography>
-          <Typography sx={{ color: "text.secondary", fontSize: 13 }}>
+          <Typography
+            sx={{
+              viewTransitionName: isAnimating
+                ? `${transitionPrefix}-date`
+                : "none",
+              viewTransitionClass: "order-shared",
+              color: "text.secondary",
+              fontSize: 13,
+            }}
+          >
             {formatDate(order.createdAt)}
           </Typography>
           <Box
@@ -493,9 +603,17 @@ const OrderCard = observer(function OrderCard({
               borderTop: "1px solid #EDF1F5",
             }}
           >
-            <Author order={order} />
+            <Author
+              order={order}
+              transitionPrefix={transitionPrefix}
+              isAnimating={isAnimating}
+            />
             <Box
               sx={{
+                viewTransitionName: isAnimating
+                  ? `${transitionPrefix}-toggle`
+                  : "none",
+                viewTransitionClass: "order-shared",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 0.25,

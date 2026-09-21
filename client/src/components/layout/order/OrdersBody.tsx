@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { observer } from "mobx-react-lite";
 import {
   Box,
@@ -13,6 +14,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import InputAdornment from "@mui/material/InputAdornment";
 
 import { useStoreOrders } from "../../../hooks/useStore";
+import type { OrderID } from "../../../types/orders";
 import OrderCard from "./OrderCard";
 
 type Sort = "date-desc" | "date-asc" | "title-asc" | "title-desc";
@@ -41,7 +43,10 @@ const OrdersBody = observer(() => {
   const [author, setAuthor] = useState<string>("");
   const [shop, setShop] = useState<string>("");
   const [sort, setSort] = useState<Sort>("date-desc");
-  const [expandedOrderID, setExpandedOrderID] = useState<string | null>(null);
+  const [expandedOrderID, setExpandedOrderID] = useState<OrderID | null>(null);
+  const [transitionOrderID, setTransitionOrderID] = useState<OrderID | null>(
+    null,
+  );
 
   const authors = useMemo(
     () =>
@@ -77,6 +82,30 @@ const OrdersBody = observer(() => {
         return sort === "date-asc" ? aTime - bTime : bTime - aTime;
       });
   }, [author, orderStore.orders, search, shop, sort, status]);
+
+  function toggleOrder(orderID: OrderID) {
+    if (transitionOrderID !== null) return;
+
+    const update = () => {
+      flushSync(() => {
+        setExpandedOrderID((currentID) =>
+          currentID === orderID ? null : orderID,
+        );
+      });
+    };
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (!reduceMotion && typeof document.startViewTransition === "function") {
+      flushSync(() => setTransitionOrderID(orderID));
+      const transition = document.startViewTransition(update);
+      void transition.finished.finally(() => setTransitionOrderID(null));
+      return;
+    }
+
+    update();
+  }
 
   return (
     <>
@@ -208,11 +237,8 @@ const OrdersBody = observer(() => {
               key={order.id}
               order={order}
               isExpanded={expandedOrderID === order.id}
-              onToggle={() =>
-                setExpandedOrderID((currentID) =>
-                  currentID === order.id ? null : order.id,
-                )
-              }
+              isAnimating={transitionOrderID === order.id}
+              onToggle={() => toggleOrder(order.id)}
             />
           ))}
         </Box>

@@ -25,8 +25,10 @@ export class WishlistStore {
     try {
       const { isCreator, title } = await getGroupInfo(this.parantGroupID);
 
-      this.isParantGroupCreator = isCreator;
-      this.parantGroupTitle = title;
+      runInAction(() => {
+        this.isParantGroupCreator = isCreator;
+        this.parantGroupTitle = title;
+      });
     } catch (error) {
       if (error instanceof Error) {
         switch (error.message) {
@@ -71,7 +73,9 @@ export class WishlistStore {
   async loadParantGroupUsers() {
     try {
       const users = await getGroupUsers(this.parantGroupID);
-      this.parantGroupUsers = users;
+      runInAction(() => {
+        this.parantGroupUsers = users;
+      });
     } catch (error) {
       if (error instanceof Error) {
         switch (error.message) {

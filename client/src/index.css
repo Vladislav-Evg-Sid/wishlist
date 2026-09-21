@@ -17,3 +17,138 @@ body,
 body {
   min-width: 320px;
 }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(.order-shell) {
+  z-index: 1;
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-group(.order-shared) {
+  z-index: 2;
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(.order-shared),
+::view-transition-new(.order-shared) {
+  height: 100%;
+  object-fit: none;
+  object-position: left top;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(.order-enter-late),
+::view-transition-old(.order-enter-right) {
+  animation: order-fade-out 120ms ease both;
+}
+
+::view-transition-new(.order-enter-late) {
+  animation: order-fade-up 210ms ease-out 140ms both;
+}
+
+::view-transition-new(.order-enter-right) {
+  animation: order-fade-right 220ms ease-out 150ms both;
+}
+
+::view-transition-old(.order-status-out) {
+  animation: order-status-to-right 190ms ease-in both;
+}
+
+::view-transition-new(.order-status-in) {
+  animation: order-status-from-left 200ms ease-out 140ms both;
+}
+
+::view-transition-old(.order-status-in) {
+  animation: order-status-to-left 190ms ease-in both;
+}
+
+::view-transition-new(.order-status-out) {
+  animation: order-status-from-right 200ms ease-out 140ms both;
+}
+
+@keyframes order-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes order-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes order-fade-right {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes order-status-to-right {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+}
+
+@keyframes order-status-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes order-status-to-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes order-status-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+}

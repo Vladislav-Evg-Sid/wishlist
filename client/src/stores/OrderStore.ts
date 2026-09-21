@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { Bounce, toast } from "react-toastify";
 
-import type { OrderData } from "../types/orders";
+import type { OrderData, OrderID } from "../types/orders";
 import { addOrder, getWishlistOrders } from "../api/orders";
 import type { WishIconValue } from "../constants/wishIcons";
 
@@ -135,27 +135,27 @@ export class OrderStore {
   }
 
   // TODO: подключить методы API и обновлять orders после успешных действий.
-  deleteOrder(orderID: string) {
+  deleteOrder(orderID: OrderID) {
     void orderID;
     toast.info("Функция удаления записи пока не доступна");
   }
 
-  editOrder(orderID: string) {
+  editOrder(orderID: OrderID) {
     void orderID;
     toast.info("Функция редактирования записи пока не доступна");
   }
 
-  reserveOrder(orderID: string) {
+  reserveOrder(orderID: OrderID) {
     void orderID;
     toast.info("Функция бронирования записи пока не доступна");
   }
 
-  cancelOrderReservation(orderID: string) {
+  cancelOrderReservation(orderID: OrderID) {
     void orderID;
     toast.info("Функция снятия брони пока не доступна");
   }
 
-  markOrderAsGifted(orderID: string) {
+  markOrderAsGifted(orderID: OrderID) {
     void orderID;
     toast.info("Функция отметки подарка пока не доступна");
   }
