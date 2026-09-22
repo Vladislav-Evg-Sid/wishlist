@@ -48,6 +48,7 @@ export const CARD_COLUMNS = {
   status: "status",
   icon: "icon",
   href: "href",
+  reserved_by: "reserved_by",
   created_at: "created_at",
   creator_id: "creator_id",
 } as const;

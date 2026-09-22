@@ -32,12 +32,14 @@ export async function findWishlistCards(
       id: concatTableAndColumn(TABLES.card, CARD_COLUMNS.id),
       title: CARD_COLUMNS.title,
       icon: CARD_COLUMNS.icon,
+      description: CARD_COLUMNS.description,
       created_at: concatTableAndColumn(TABLES.card, CARD_COLUMNS.created_at),
       status: CARD_COLUMNS.status,
       author_id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
       author_name: USER_COLUMNS.username,
       author_email: USER_COLUMNS.email,
       author_hash: USER_COLUMNS.user_hash,
+      reserd_by: CARD_COLUMNS.reserved_by,
       href: CARD_COLUMNS.href,
     })
     .where(CARD_COLUMNS.wishlist_id, wishlistID);

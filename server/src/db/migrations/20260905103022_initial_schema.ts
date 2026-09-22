@@ -64,6 +64,7 @@ export async function up(knex: Knex): Promise<void> {
       .specificType("status", "statuses")
       .notNullable()
       .defaultTo("Свободно");
+    table.uuid("reserved_by").references("id").inTable("users");
     table.string("icon").notNullable();
     table.string("href");
     table.uuid("creator_id").notNullable().references("id").inTable("users");

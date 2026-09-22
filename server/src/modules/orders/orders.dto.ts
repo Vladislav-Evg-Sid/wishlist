@@ -30,6 +30,7 @@ export type AddCardResponseDTO = Response<string>;
 export interface CardDataRaw {
   id: string;
   title: string;
+  description: string;
   icon: string;
   created_at: string | Date;
   status: status;
@@ -37,5 +38,6 @@ export interface CardDataRaw {
   author_name: string;
   author_email: string;
   author_hash: number;
+  reserved_by: string | null;
   href: string | null;
 }

@@ -12,8 +12,7 @@ export interface OrderData {
   createdAt: string | Date;
   status: Status;
   author: User;
-  // TODO: заполнить на API для определения пользователя, установившего бронь
-  reservedBy?: User | null;
+  reservedBy: string | null;
   href: string;
 }
 

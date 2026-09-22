@@ -21,12 +21,14 @@ export async function getWishlistCards(
   }
 
   const cardsRaw = await findWishlistCards(wishlistID);
+  console.log(cardsRaw[0]?.description);
 
   return cardsRaw.map(
     (card): CardData => ({
       id: card.id,
       title: card.title,
       icon: card.icon,
+      description: card.description,
       createdAt: card.created_at,
       status: card.status,
       author: {
@@ -35,6 +37,7 @@ export async function getWishlistCards(
         hash: card.author_hash,
         email: card.author_email,
       },
+      reservedBy: card.reserved_by,
       href: card.href ?? "",
     }),
   );
