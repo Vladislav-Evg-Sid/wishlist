@@ -121,9 +121,7 @@ function Author({
   return (
     <Box
       sx={{
-        viewTransitionName: isAnimating
-          ? `${transitionPrefix}-author`
-          : "none",
+        viewTransitionName: isAnimating ? `${transitionPrefix}-author` : "none",
         viewTransitionClass: "order-shared",
         display: "flex",
         alignItems: "center",
@@ -183,8 +181,8 @@ function OrderActions({ order }: { order: OrderData }) {
   );
   const isReservationOwner = Boolean(
     currentUser &&
-      order.reservedBy &&
-      String(currentUser.id) === String(order.reservedBy.id),
+    order.reservedBy &&
+    String(currentUser.id) === String(order.reservedBy),
   );
   const buttonSx = {
     borderRadius: "11px",
@@ -310,9 +308,7 @@ const OrderCard = observer(function OrderCard({
       onClick={!isExpanded ? onToggle : undefined}
       onKeyDown={handleKeyDown}
       sx={{
-        viewTransitionName: isAnimating
-          ? `${transitionPrefix}-shell`
-          : "none",
+        viewTransitionName: isAnimating ? `${transitionPrefix}-shell` : "none",
         viewTransitionClass: "order-shell",
         gridColumn: isExpanded ? "1 / -1" : "auto",
         display: "flex",
@@ -454,7 +450,8 @@ const OrderCard = observer(function OrderCard({
                   whiteSpace: "pre-wrap",
                 }}
               >
-                {order.description || "Автор не добавил описание к этой записи."}
+                {order.description ||
+                  "Автор не добавил описание к этой записи."}
               </Typography>
               <Box sx={{ mt: { xs: 3, md: 4 } }}>
                 <Author
@@ -519,7 +516,9 @@ const OrderCard = observer(function OrderCard({
                     >
                       {sourceName}
                     </Box>
-                    <OpenInNewRoundedIcon sx={{ flexShrink: 0, fontSize: 16 }} />
+                    <OpenInNewRoundedIcon
+                      sx={{ flexShrink: 0, fontSize: 16 }}
+                    />
                   </Link>
                 ) : (
                   <Typography sx={{ color: "text.secondary", fontSize: 14 }}>
