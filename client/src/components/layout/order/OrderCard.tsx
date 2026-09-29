@@ -22,7 +22,7 @@ import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutl
 
 import { getWishIcon } from "../../../constants/wishIcons";
 import { useStore, useStoreOrders } from "../../../hooks/useStore";
-import type { OrderData } from "../../../types/orders";
+import type { OrderData, OrderDataChange } from "../../../types/orders";
 
 const statusStyles = {
   Свободно: { bgcolor: "#E8F7EF", color: "#177447" },
@@ -35,6 +35,7 @@ interface OrderCardProps {
   isExpanded: boolean;
   isAnimating: boolean;
   onToggle: () => void;
+  onInitEdit: (orderData: OrderDataChange) => void;
 }
 
 function formatDate(value: string | Date, withTime = false) {
@@ -172,7 +173,13 @@ function Author({
   );
 }
 
-function OrderActions({ order }: { order: OrderData }) {
+function OrderActions({
+  order,
+  onInitEdit,
+}: {
+  order: OrderData;
+  onInitEdit: () => void;
+}) {
   const orderStore = useStoreOrders();
   const { userStore } = useStore();
   const currentUser = userStore.currentUser;
@@ -197,7 +204,7 @@ function OrderActions({ order }: { order: OrderData }) {
           type="button"
           variant="outlined"
           startIcon={<EditOutlinedIcon />}
-          onClick={() => orderStore.editOrder(order.id)}
+          onClick={onInitEdit}
           sx={buttonSx}
         >
           Редактировать
@@ -285,6 +292,7 @@ const OrderCard = observer(function OrderCard({
   isExpanded,
   isAnimating,
   onToggle,
+  onInitEdit,
 }: OrderCardProps) {
   const sourceName = getSourceName(order.href);
   const transitionPrefix = `order-${String(order.id).replace(
@@ -298,6 +306,16 @@ const OrderCard = observer(function OrderCard({
       onToggle();
     }
   }
+
+  const handleInitEdit = () => {
+    onInitEdit({
+      currentID: order.id,
+      title: order.title,
+      icon: order.icon,
+      description: order.description ?? "",
+      href: order.href,
+    });
+  };
 
   return (
     <Box
@@ -527,7 +545,7 @@ const OrderCard = observer(function OrderCard({
                 )}
               </Box>
               <Box onClick={stopPropagation} sx={{ mt: "auto" }}>
-                <OrderActions order={order} />
+                <OrderActions order={order} onInitEdit={handleInitEdit} />
               </Box>
             </Box>
           </Box>

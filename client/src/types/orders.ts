@@ -23,3 +23,11 @@ export interface OrderDataInsert {
   icon: WishIconValue;
   href: string;
 }
+
+export interface OrderDataChange {
+  currentID: OrderID;
+  title: string;
+  icon: WishIconValue;
+  description: string;
+  href: string;
+}

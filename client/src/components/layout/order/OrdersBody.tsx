@@ -14,8 +14,9 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import InputAdornment from "@mui/material/InputAdornment";
 
 import { useStoreOrders } from "../../../hooks/useStore";
-import type { OrderID } from "../../../types/orders";
+import type { OrderDataChange, OrderID } from "../../../types/orders";
 import OrderCard from "./OrderCard";
+import CreateOrderDialog from "../../elements/CreateOrderDialog";
 
 type Sort = "date-desc" | "date-asc" | "title-asc" | "title-desc";
 
@@ -47,6 +48,10 @@ const OrdersBody = observer(() => {
   const [transitionOrderID, setTransitionOrderID] = useState<OrderID | null>(
     null,
   );
+  const [isEditOrderOpen, setIsEditOrderOpen] = useState(false);
+  const [changingOrderData, setChangingOrderData] = useState<
+    OrderDataChange | undefined
+  >(undefined);
 
   const authors = useMemo(
     () =>
@@ -83,7 +88,7 @@ const OrdersBody = observer(() => {
       });
   }, [author, orderStore.orders, search, shop, sort, status]);
 
-  function toggleOrder(orderID: OrderID) {
+  const toggleOrder = (orderID: OrderID) => {
     if (transitionOrderID !== null) return;
 
     const update = () => {
@@ -105,7 +110,12 @@ const OrdersBody = observer(() => {
     }
 
     update();
-  }
+  };
+
+  const handleInitEdit = (orderData: OrderDataChange) => {
+    setIsEditOrderOpen(true);
+    setChangingOrderData(orderData);
+  };
 
   return (
     <>
@@ -240,6 +250,7 @@ const OrdersBody = observer(() => {
               isExpanded={expandedOrderID === order.id}
               isAnimating={transitionOrderID === order.id}
               onToggle={() => toggleOrder(order.id)}
+              onInitEdit={handleInitEdit}
             />
           ))}
         </Box>
@@ -264,6 +275,11 @@ const OrdersBody = observer(() => {
           </Typography>
         </Box>
       )}
+      <CreateOrderDialog
+        open={isEditOrderOpen}
+        onClose={() => setIsEditOrderOpen(false)}
+        changingData={changingOrderData}
+      />
     </>
   );
 });

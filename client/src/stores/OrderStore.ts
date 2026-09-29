@@ -140,8 +140,18 @@ export class OrderStore {
     toast.info("Функция удаления записи пока не доступна");
   }
 
-  editOrder(orderID: OrderID) {
+  editOrder(
+    orderID: OrderID,
+    cardName: string,
+    description: string,
+    icon: WishIconValue,
+    href: string,
+  ) {
     void orderID;
+    void cardName;
+    void description;
+    void icon;
+    void href;
     toast.info("Функция редактирования записи пока не доступна");
   }
 

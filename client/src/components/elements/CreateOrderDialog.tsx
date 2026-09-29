@@ -1,4 +1,9 @@
-import { useState, type ChangeEvent, type SyntheticEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type SyntheticEvent,
+} from "react";
 import {
   Autocomplete,
   Box,
@@ -19,10 +24,12 @@ import {
   type WishIcon,
 } from "../../constants/wishIcons";
 import { useStoreOrders } from "../../hooks/useStore";
+import type { OrderDataChange } from "../../types/orders";
 
 interface CreateOrderDialogProps {
   open: boolean;
   onClose: () => void;
+  changingData?: OrderDataChange;
 }
 
 function isValidHref(value: string) {
@@ -46,49 +53,68 @@ const fieldSx = {
 export default function CreateOrderDialog({
   open,
   onClose,
+  changingData,
 }: CreateOrderDialogProps) {
   const orderStore = useStoreOrders();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [href, setHref] = useState("");
-  const [icon, setIcon] = useState<WishIcon>(getWishIcon(DEFAULT_WISH_ICON));
+  const [title, setTitle] = useState(changingData?.title ?? "");
+  const [description, setDescription] = useState(
+    changingData?.description ?? "",
+  );
+  const [href, setHref] = useState(changingData?.href ?? "");
+  const [icon, setIcon] = useState<WishIcon>(
+    getWishIcon(changingData?.icon ?? DEFAULT_WISH_ICON),
+  );
   const [hrefTouched, setHrefTouched] = useState(false);
-  const hrefIsValid = isValidHref(href);
 
-  function resetFields() {
+  const hrefIsValid = isValidHref(href);
+  const isCreating = !changingData;
+
+  const resetFields = () => {
     setTitle("");
     setDescription("");
     setHref("");
     setIcon(getWishIcon(DEFAULT_WISH_ICON));
     setHrefTouched(false);
-  }
+  };
 
-  function handleIconChange(_event: SyntheticEvent, value: WishIcon | null) {
+  useEffect(() => {
+    setTitle(changingData?.title ?? "");
+    setDescription(changingData?.description ?? "");
+    setHref(changingData?.href ?? "");
+    setIcon(getWishIcon(changingData?.icon ?? DEFAULT_WISH_ICON));
+  }, [changingData]);
+
+  const handleIconChange = (_event: SyntheticEvent, value: WishIcon | null) => {
     setIcon(value ?? getWishIcon(DEFAULT_WISH_ICON));
-  }
+  };
 
-  function handleHrefChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleHrefChange = (event: ChangeEvent<HTMLInputElement>) => {
     setHref(event.target.value);
-  }
+  };
 
-  function handleClose() {
+  const handleClose = () => {
     onClose();
-  }
+  };
 
-  async function handleCreate() {
-    if (!hrefIsValid) {
-      setHrefTouched(true);
-      return;
+  const handleCreate = async () => {
+    if (isCreating) {
+      await orderStore.createOrder(
+        title.trim(),
+        description.trim(),
+        icon.value,
+        href.trim(),
+      );
+    } else {
+      await orderStore.editOrder(
+        changingData.currentID,
+        title.trim(),
+        description.trim(),
+        icon.value,
+        href.trim(),
+      );
     }
-
-    await orderStore.createOrder(
-      title.trim(),
-      description.trim(),
-      icon.value,
-      href.trim(),
-    );
     onClose();
-  }
+  };
 
   return (
     <Dialog
@@ -139,14 +165,15 @@ export default function CreateOrderDialog({
         >
           <AddShoppingCartRoundedIcon sx={{ fontSize: 28 }} />
         </Box>
-        Новая запись
+        {isCreating ? "Новая запись" : "Обновление записи"}
       </DialogTitle>
       <DialogContent sx={{ px: { xs: 2.5, sm: 3.5 }, pb: 1 }}>
         <Typography
           id="create-order-description"
           sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.7, mb: 3 }}
         >
-          Добавьте желание, ссылку на него и выберите подходящую иконку.
+          {isCreating ? "Добавьте" : "Измените"} желание, ссылку на него и
+          выберите подходящую иконку.
         </Typography>
         <Box sx={{ display: "grid", gap: 2 }}>
           <TextField
@@ -268,7 +295,7 @@ export default function CreateOrderDialog({
           disableElevation
           disabled={!title.trim() || !hrefIsValid}
         >
-          Создать
+          {isCreating ? "Создать" : "Сохранить"}
         </Button>
       </DialogActions>
     </Dialog>
