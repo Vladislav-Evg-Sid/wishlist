@@ -117,7 +117,26 @@ export class OrderStore {
       });
       toast.success("Запись обновлена");
       this.loadWishlistOrders();
-    } catch {}
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось обновить запись");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
   reserveOrder(orderID: OrderID) {
