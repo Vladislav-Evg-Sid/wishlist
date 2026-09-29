@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { Bounce, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import type { GroupUsersList, WishlistData } from "../types/wishlists";
 import { createWishlist, getGroupWishlists } from "../api/wishlists";
@@ -35,31 +35,14 @@ export class WishlistStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
             toast.error(
               "Неизвестная ошибка.\nНе удалось получить данные о группе",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             console.error(error.message);
             break;
@@ -82,39 +65,17 @@ export class WishlistStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Group's creator not found":
-            toast.error("Ошибка! Не обнаружен создатель группы!", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Ошибка! Не обнаружен создатель группы!");
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
             toast.error(
               "Неизвестная ошибка.\nНе удалось получить участников группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             console.error(error.message);
             break;
@@ -138,31 +99,14 @@ export class WishlistStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
             toast.error(
               "Неизвестная ошибка.\nНе удалось получить вишлисты группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             console.error(error.message);
             break;
@@ -176,12 +120,7 @@ export class WishlistStore {
   async createWishlist(wishlistName: string) {
     try {
       await createWishlist(this.parantGroupID, wishlistName);
-      toast.success("Вишлист создан", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.success("Вишлист создан");
       this.loadGroupWishlists();
     } catch (error) {
       if (error instanceof Error) {
@@ -189,29 +128,13 @@ export class WishlistStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
-            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
             console.error(error.message);
             break;
         }

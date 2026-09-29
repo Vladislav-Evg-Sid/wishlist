@@ -1,8 +1,8 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { Bounce, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import type { OrderData, OrderID } from "../types/orders";
-import { addOrder, getWishlistOrders } from "../api/orders";
+import { addOrder, editOrder, getWishlistOrders } from "../api/orders";
 import type { WishIconValue } from "../constants/wishIcons";
 
 export class OrderStore {
@@ -31,31 +31,14 @@ export class OrderStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
             toast.error(
               "Неизвестная ошибка.\nНе удалось получить записи вишлиста",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             console.error(error.message);
             break;
@@ -73,12 +56,7 @@ export class OrderStore {
     href: string,
   ) {
     if (!cardName) {
-      toast.info("Введите название записи", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.info("Введите название записи");
       return;
     }
     try {
@@ -89,12 +67,7 @@ export class OrderStore {
         icon: icon,
         href: href,
       });
-      toast.success("Запись создана", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.success("Запись создана");
       this.loadWishlistOrders();
     } catch (error) {
       if (error instanceof Error) {
@@ -102,29 +75,13 @@ export class OrderStore {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
-              {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              },
             );
             break;
           case "Failed to fetch":
-            toast.error("Сервис недоступен.\nПопробуйте позже", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
-            toast.error("Неизвестная ошибка.\nНе удалось создать запись", {
-              position: "top-right",
-              autoClose: 5000,
-              theme: "light",
-              transition: Bounce,
-            });
+            toast.error("Неизвестная ошибка.\nНе удалось создать запись");
             console.error(error.message);
             break;
         }
@@ -134,25 +91,33 @@ export class OrderStore {
     }
   }
 
-  // TODO: подключить методы API и обновлять orders после успешных действий.
   deleteOrder(orderID: OrderID) {
     void orderID;
     toast.info("Функция удаления записи пока не доступна");
   }
 
-  editOrder(
+  async editOrder(
     orderID: OrderID,
     cardName: string,
     description: string,
     icon: WishIconValue,
     href: string,
   ) {
-    void orderID;
-    void cardName;
-    void description;
-    void icon;
-    void href;
-    toast.info("Функция редактирования записи пока не доступна");
+    if (!cardName) {
+      toast.info("название записи не может быть пустым");
+      return;
+    }
+    try {
+      await editOrder({
+        currentID: orderID,
+        title: cardName,
+        icon,
+        description,
+        href,
+      });
+      toast.success("Запись обновлена");
+      this.loadWishlistOrders();
+    } catch {}
   }
 
   reserveOrder(orderID: OrderID) {

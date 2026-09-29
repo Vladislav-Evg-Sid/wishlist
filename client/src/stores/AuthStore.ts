@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 
 import type { RootStore } from "./RootStore";
 import { getCurrentUser, loginUser, registerUser } from "../api/auth";
-import { Bounce, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { setAccessTokenGetter, setAccessTokenSetter } from "../api/baseApi";
 
 export class AuthStore {
@@ -39,25 +39,11 @@ export class AuthStore {
           if (error instanceof Error) {
             switch (error.message) {
               case "Failed to fetch":
-                toast.error(
-                  "Недоступен сервис авторизации.\nПопробуйте позже",
-                  {
-                    position: "top-right",
-                    autoClose: 5000,
-                    theme: "light",
-                    transition: Bounce,
-                  },
-                );
+                toast.error("Недоступен сервис авторизации.\nПопробуйте позже");
                 break;
               default:
                 toast.error(
                   "Неизвестная ошибка.\nНе удалось получить пользователя",
-                  {
-                    position: "top-right",
-                    autoClose: 5000,
-                    theme: "light",
-                    transition: Bounce,
-                  },
                 );
                 console.error(error.message);
                 break;
@@ -82,32 +68,17 @@ export class AuthStore {
     confirmPassword: string,
   ): Promise<boolean> {
     if (!username || !email || !password || !confirmPassword) {
-      toast.info("Все поля должны быть заполнены", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.info("Все поля должны быть заполнены");
       return false;
     }
     if (password !== confirmPassword) {
-      toast.info("Пароль и повтор должны совпадать", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.info("Пароль и повтор должны совпадать");
       return false;
     }
     try {
       const accessToken = await registerUser(username, email, password);
       if (!accessToken) {
-        toast.error("Ошибка!\nНе получен токен", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "light",
-          transition: Bounce,
-        });
+        toast.error("Ошибка!\nНе получен токен");
         return false;
       }
       runInAction(() => {
@@ -120,22 +91,11 @@ export class AuthStore {
         if (error instanceof Error) {
           switch (error.message) {
             case "Failed to fetch":
-              toast.error("Недоступен сервис авторизации.\nПопробуйте позже", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Недоступен сервис авторизации.\nПопробуйте позже");
               break;
             default:
               toast.error(
                 "Неизвестная ошибка.\nНе удалось создать пользователя",
-                {
-                  position: "top-right",
-                  autoClose: 5000,
-                  theme: "light",
-                  transition: Bounce,
-                },
               );
               console.error(error.message);
               break;
@@ -152,12 +112,7 @@ export class AuthStore {
     try {
       const accessToken = await loginUser(email, password);
       if (!accessToken) {
-        toast.error("Ошибка авторизации!\nНе получен токен", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "light",
-          transition: Bounce,
-        });
+        toast.error("Ошибка авторизации!\nНе получен токен");
         return false;
       }
       runInAction(() => {
@@ -170,36 +125,16 @@ export class AuthStore {
         if (error instanceof Error) {
           switch (error.message) {
             case "Invalid email":
-              toast.error("Неверная почта", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Неверная почта");
               break;
             case "Invalid password for this email":
-              toast.error("Неверный пароль", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Неверный пароль");
               break;
             case "Failed to fetch":
-              toast.error("Недоступен сервис авторизации.\nПопробуйте позже", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Недоступен сервис авторизации.\nПопробуйте позже");
               break;
             default:
-              toast.error("Неизвестная ошибка.\nНе удалось авторизоваться", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Неизвестная ошибка.\nНе удалось авторизоваться");
               console.error(error.message);
               break;
           }

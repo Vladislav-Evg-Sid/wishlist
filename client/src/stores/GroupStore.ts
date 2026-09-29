@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { Bounce, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import { createGroup, getUserGroups } from "../api/groups";
 import type { GroupData } from "../types/groups";
@@ -25,20 +25,10 @@ export class GroupStore {
         if (error instanceof Error) {
           switch (error.message) {
             case "Failed to fetch":
-              toast.error("Сервис недоступен.\nПопробуйте позже", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Сервис недоступен.\nПопробуйте позже");
               break;
             default:
-              toast.error("Неизвестная ошибка.\nНе удалось загрузить группы", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Неизвестная ошибка.\nНе удалось загрузить группы");
               console.error(error.message);
               break;
           }
@@ -52,32 +42,17 @@ export class GroupStore {
   async createGroup(groupName: string) {
     try {
       await createGroup(groupName);
-      toast.success("Группа успешно создана", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "light",
-        transition: Bounce,
-      });
+      toast.success("Группа успешно создана");
       this.loadUserGroups();
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {
           switch (error.message) {
             case "Failed to fetch":
-              toast.error("Сервис недоступен.\nПопробуйте позже", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Сервис недоступен.\nПопробуйте позже");
               break;
             default:
-              toast.error("Неизвестная ошибка.\nНе удалось создать группу", {
-                position: "top-right",
-                autoClose: 5000,
-                theme: "light",
-                transition: Bounce,
-              });
+              toast.error("Неизвестная ошибка.\nНе удалось создать группу");
               console.error(error.message);
               break;
           }
