@@ -22,7 +22,7 @@ const checkGroupUserAccessMock =
 // Мокаем импорты этих функций
 jest.unstable_mockModule("./orders.repository.js", () => ({
   findGroupIDByWishlistID: findGroupIDByWishlistIDMock,
-  findWishlistCardsMock: findWishlistCardsMock,
+  findWishlistCards: findWishlistCardsMock,
   createCard: createCardMock,
 }));
 

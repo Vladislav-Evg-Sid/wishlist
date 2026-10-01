@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "db:migrate": "knex migrate:latest --env development",
     "db:seed": "knex seed:run --env development",
     "dev:docker": "npm run db:migrate && npm run db:seed && npm run dev",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:unit:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test": "npm run test:unit"
   },
   "keywords": [],
   "author": "",
@@ -32,11 +34,14 @@
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/swagger-ui-express": "^4.1.8",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
     "tsx": "^4.23.12",
-    "typescript": "^7.0.2"
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "type": "module",
   "description": ""
