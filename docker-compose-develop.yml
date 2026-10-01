@@ -11,7 +11,7 @@ services:
     ports:
       - "${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}"
     networks:
-      - wishlist-network
+      - wishlist-server-network
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 10s
@@ -26,7 +26,7 @@ services:
     command: redis-server --appendonly yes --bind 0.0.0.0
     restart: unless-stopped
     networks:
-      - wishlist-network
+      - wishlist-server-network
 
   backend:
     container_name: wishlist-server
@@ -52,7 +52,8 @@ services:
       JWT_REFRESH_TTL: ${JWT_REFRESH_TTL}
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS}
     networks:
-      - wishlist-network
+      - wishlist-server-network
+      - wishlist-connect-network
     depends_on:
       db:
         condition: service_healthy
@@ -83,7 +84,7 @@ services:
     depends_on:
       - backend
     networks:
-      - wishlist-network
+      - wishlist-connect-network
     develop:
       watch:
         - action: sync+restart
@@ -97,7 +98,9 @@ services:
           path: ./client/package-lock.json
 
 networks:
-  wishlist-network:
+  wishlist-server-network:
+    driver: bridge
+  wishlist-connect-network:
     driver: bridge
 
 volumes:
