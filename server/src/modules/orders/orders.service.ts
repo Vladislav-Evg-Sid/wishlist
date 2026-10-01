@@ -21,7 +21,6 @@ export async function getWishlistCards(
   }
 
   const cardsRaw = await findWishlistCards(wishlistID);
-  console.log(cardsRaw[0]?.description);
 
   return cardsRaw.map(
     (card): CardData => ({

@@ -16,7 +16,7 @@ export async function findGroupIDByWishlistID(
     .select(WISHILST_COLUMNS.group_id)
     .where(WISHILST_COLUMNS.id, wishlistID)
     .first();
-  return groupID.group_id;
+  return groupID?.group_id ?? null;
 }
 
 export async function findWishlistCards(
@@ -39,7 +39,7 @@ export async function findWishlistCards(
       author_name: USER_COLUMNS.username,
       author_email: USER_COLUMNS.email,
       author_hash: USER_COLUMNS.user_hash,
-      reserd_by: CARD_COLUMNS.reserved_by,
+      reserved_by: CARD_COLUMNS.reserved_by,
       href: CARD_COLUMNS.href,
     })
     .where(CARD_COLUMNS.wishlist_id, wishlistID);
