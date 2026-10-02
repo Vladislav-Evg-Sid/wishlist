@@ -1,10 +1,12 @@
+import type { UUID } from "../../types/shared.js";
+
 export interface WishlistData {
-  id: string;
+  id: UUID;
   title: string;
 }
 
 export interface CreateWishlistData {
-  groupID: string;
-  creatorID: string;
+  groupID: UUID;
+  creatorID: UUID;
   name: string;
 }

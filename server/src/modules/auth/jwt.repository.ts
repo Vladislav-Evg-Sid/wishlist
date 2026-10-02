@@ -1,9 +1,10 @@
 import { db } from "../../db/knex.js";
 import { TABLES, REFRESH_TOKENS_COLUMNS } from "../../db/schema.js";
+import type { UUID } from "../../types/shared.js";
 import type { RefreshTokenRaw } from "./auth.dto.js";
 
 type CreateRefreshTokenData = {
-  userId: string;
+  userId: UUID;
   jti: string;
   expiresAt: Date;
   userAgent: string | undefined;
@@ -44,7 +45,7 @@ export async function revokeRefreshToken(jti: string): Promise<void> {
     });
 }
 
-export async function revokeAllUserRefreshTokens(userId: string) {
+export async function revokeAllUserRefreshTokens(userId: UUID) {
   return db(TABLES.refresh_tokens)
     .where({
       [REFRESH_TOKENS_COLUMNS.user_id]: userId,

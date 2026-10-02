@@ -1,9 +1,10 @@
 import { db } from "../../../src/db/knex";
 import { TABLES, CARD_COLUMNS, WISHILST_COLUMNS } from "../../../src/db/schema";
+import { UUID } from "../../../src/types/shared";
 import { createWishlist } from "./wishlists";
 
 interface InsertedCard {
-  id: string;
+  id: number;
   [CARD_COLUMNS.title]: string;
   [CARD_COLUMNS.description]: string;
   [CARD_COLUMNS.icon]: string;
@@ -13,8 +14,8 @@ interface InsertedCard {
 }
 
 export async function createCardWithParantWishlistID(
-  parantWishlistID: string,
-  creatorID?: string,
+  parantWishlistID: UUID,
+  creatorID?: UUID,
   cardCount: number = 1,
 ): Promise<InsertedCard[]> {
   if (!creatorID) {
@@ -39,7 +40,7 @@ export async function createCardWithParantWishlistID(
       [CARD_COLUMNS.creator_id]: creatorID,
     });
   }
-  const cardIDs: { id: string }[] = await db(TABLES.card)
+  const cardIDs: { id: number }[] = await db(TABLES.card)
     .insert(cards)
     .returning(CARD_COLUMNS.id);
 
@@ -48,7 +49,7 @@ export async function createCardWithParantWishlistID(
 
 export async function createCards(
   cardCount: number = 1,
-): Promise<{ cards: InsertedCard[]; wishlistID: string; creatorID: string }> {
+): Promise<{ cards: InsertedCard[]; wishlistID: UUID; creatorID: UUID }> {
   const { creatorID, wishlistID } = await createWishlist();
   const cards = await createCardWithParantWishlistID(
     wishlistID,

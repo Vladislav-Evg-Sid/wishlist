@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "@jest/globals";
 
 import {
@@ -10,11 +9,12 @@ import { createWishlist } from "../../../tests/integration/fixtures/wishlists.js
 import { db } from "../../db/knex.js";
 import { CARD_COLUMNS, TABLES, USER_COLUMNS } from "../../db/schema.js";
 import { createCards } from "../../../tests/integration/fixtures/card.js";
+import { UUID } from "../../types/shared.js";
 
 describe("orders repository", () => {
   describe("findGroupIDByWishlistID", () => {
     test("returns null when wishlist does not exist", async () => {
-      const wishlistID = randomUUID();
+      const wishlistID = "00000000-0000-0000-0000-000000000000" as UUID;
 
       const groupID = await findGroupIDByWishlistID(wishlistID);
 
@@ -66,7 +66,7 @@ describe("orders repository", () => {
 
     test("create card with not existing creator", async () => {
       const { wishlistID } = await createWishlist();
-      const creatorID = randomUUID();
+      const creatorID = "00000000-0000-0000-0000-000000000000" as UUID;
       const card = {
         ...cardRaw,
         creatorID,
@@ -81,7 +81,7 @@ describe("orders repository", () => {
 
     test("create card with not existing wishlist", async () => {
       const { creatorID } = await createWishlist();
-      const wishlistID = randomUUID();
+      const wishlistID = "00000000-0000-0000-0000-000000000000" as UUID;
       const card = {
         ...cardRaw,
         creatorID,
@@ -97,7 +97,7 @@ describe("orders repository", () => {
 
   describe("findWishlistCards", () => {
     test("founding unknown wishlist's card", async () => {
-      const wishlistID = randomUUID();
+      const wishlistID = "00000000-0000-0000-0000-000000000000" as UUID;
 
       const cards = await findWishlistCards(wishlistID);
 

@@ -6,10 +6,11 @@ import {
   USER_COLUMNS,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
+import type { UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.dto.js";
 import type { GroupData, GroupUser } from "./groups.types.js";
 
-export async function findGroupsByUserId(userID: string): Promise<GroupData[]> {
+export async function findGroupsByUserId(userID: UUID): Promise<GroupData[]> {
   return await db(TABLES.groups)
     .leftJoin(
       TABLES.group_member,
@@ -22,7 +23,7 @@ export async function findGroupsByUserId(userID: string): Promise<GroupData[]> {
 }
 
 export async function createGroup(
-  userID: string,
+  userID: UUID,
   groupName: string,
 ): Promise<string> {
   const groupID = await db(TABLES.groups)
@@ -34,7 +35,7 @@ export async function createGroup(
   return String(groupID[0]);
 }
 
-export async function findGroupInfo(groupID: string): Promise<GroupInfoRaw> {
+export async function findGroupInfo(groupID: UUID): Promise<GroupInfoRaw> {
   return db(TABLES.groups)
     .select({
       title: GROUPS_COLUMNS.title,
@@ -45,7 +46,7 @@ export async function findGroupInfo(groupID: string): Promise<GroupInfoRaw> {
 }
 
 export async function findGroupCreator(
-  groupID: string,
+  groupID: UUID,
 ): Promise<GroupUser | undefined> {
   return db(TABLES.groups)
     .leftJoin(
@@ -61,7 +62,7 @@ export async function findGroupCreator(
     .first();
 }
 
-export async function findGroupMembers(groupID: string): Promise<GroupUser[]> {
+export async function findGroupMembers(groupID: UUID): Promise<GroupUser[]> {
   return db(TABLES.groups)
     .leftJoin(
       TABLES.group_member,

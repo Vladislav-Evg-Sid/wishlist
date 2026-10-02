@@ -4,8 +4,9 @@ import {
   TABLES,
   USER_COLUMNS,
 } from "../../../src/db/schema.js";
+import { UUID } from "../../../src/types/shared.js";
 
-export async function createUser(): Promise<string> {
+export async function createUser(): Promise<UUID> {
   const userIDs = await db(TABLES.users)
     .insert({
       [USER_COLUMNS.username]: "Vlad",

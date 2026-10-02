@@ -1,10 +1,11 @@
 import { db } from "../db/knex.js";
 import { GROUP_MEMBER_COLUMNS, GROUPS_COLUMNS, TABLES } from "../db/schema.js";
+import type { UUID } from "../types/shared.js";
 import { concatTableAndColumn } from "./dbUtils.js";
 
 export async function checkGroupUserAccess(
-  userID: string,
-  groupID: string,
+  userID: UUID,
+  groupID: UUID,
 ): Promise<boolean> {
   const group = await db(TABLES.groups)
     .leftJoin(

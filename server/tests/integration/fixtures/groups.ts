@@ -1,10 +1,9 @@
 import { db } from "../../../src/db/knex";
 import { TABLES, GROUPS_COLUMNS } from "../../../src/db/schema";
+import { UUID } from "../../../src/types/shared";
 import { createUser } from "./users";
 
-export async function createGroupWithCreatorID(
-  creatorID: string,
-): Promise<string> {
+export async function createGroupWithCreatorID(creatorID: UUID): Promise<UUID> {
   const groupIDs = await db(TABLES.groups)
     .insert({
       [GROUPS_COLUMNS.title]: "Vlad's group",
@@ -15,8 +14,8 @@ export async function createGroupWithCreatorID(
 }
 
 export async function createGroup(): Promise<{
-  creatorID: string;
-  groupID: string;
+  creatorID: UUID;
+  groupID: UUID;
 }> {
   const creatorID = await createUser();
   const groupID = await createGroupWithCreatorID(creatorID);

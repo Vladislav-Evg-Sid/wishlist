@@ -1,7 +1,9 @@
+import type { UUID } from "./shared.ts";
+
 declare global {
   namespace Express {
     interface Request {
-      userId?: string;
+      userId?: UUID;
     }
   }
 }

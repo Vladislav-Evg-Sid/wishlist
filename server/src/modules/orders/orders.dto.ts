@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
 import type { CardData, status } from "./orders.types.js";
 import type { NoParams } from "../../types/requests.js";
+import type { UUID } from "../../types/shared.js";
 
 // HTTP
 interface GetWishlistCardsParams {
-  wishlistID: string;
+  wishlistID: UUID;
 }
 
 type GetWishlistCardsRes = CardData[] | string;
@@ -18,7 +19,7 @@ export type GetWishlistCardsResponseDTO = Response<GetWishlistCardsRes>;
 interface AddCardBody {
   title: string;
   description: string;
-  wishlist_id: string;
+  wishlist_id: UUID;
   icon: string;
   href: string;
 }
@@ -28,13 +29,13 @@ export type AddCardResponseDTO = Response<string>;
 
 // DB
 export interface CardDataRaw {
-  id: string;
+  id: number;
   title: string;
   description: string;
   icon: string;
   created_at: string | Date;
   status: status;
-  author_id: string;
+  author_id: UUID;
   author_name: string;
   author_email: string;
   author_hash: number;

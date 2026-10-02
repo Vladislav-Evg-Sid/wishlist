@@ -3,21 +3,22 @@ import crypto from "node:crypto";
 
 import { config } from "../../config/env.js";
 import type { AccessTokenPayload, RefreshTokenPayload } from "./auth.types.js";
+import type { UUID } from "../../types/shared.js";
 
-export function createAccessToken(userId: string) {
+export function createAccessToken(userID: UUID) {
   return jwt.sign(
     {
       type: "access",
     },
     config.jwt.accessSecret,
     {
-      subject: userId,
+      subject: userID,
       expiresIn: config.jwt.accessTTL,
     },
   );
 }
 
-export function createRefreshToken(userId: string) {
+export function createRefreshToken(userID: UUID) {
   const jti = crypto.randomUUID();
 
   const token = jwt.sign(
@@ -26,7 +27,7 @@ export function createRefreshToken(userId: string) {
     },
     config.jwt.refreshSecret,
     {
-      subject: userId,
+      subject: userID,
       jwtid: jti,
       expiresIn: config.jwt.refreshTTL,
     },

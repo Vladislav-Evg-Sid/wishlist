@@ -1,14 +1,16 @@
+import type { UUID } from "../../types/shared.js";
+
 export type status = "Свободно" | "Забронировано" | "Подарено";
 
 interface User {
-  id: string;
+  id: UUID;
   name: string;
   email: string;
   hash: number;
 }
 
 export interface CardData {
-  id: string;
+  id: number;
   title: string;
   description: string;
   icon: string;
@@ -22,8 +24,8 @@ export interface CardData {
 export interface CardDataInsert {
   title: string;
   description: string;
-  wishlistID: string;
+  wishlistID: UUID;
   icon: string;
   href: string;
-  creatorID: string;
+  creatorID: UUID;
 }

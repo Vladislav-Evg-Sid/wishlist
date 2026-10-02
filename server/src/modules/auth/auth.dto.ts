@@ -6,6 +6,7 @@ import type {
   UserLoginData,
   UserData,
 } from "./auth.types.js";
+import type { UUID } from "../../types/shared.js";
 
 // HTTP
 type UserDataRes = UserData | string;
@@ -21,7 +22,7 @@ export type GetUserDataResponseDTO = Response<UserDataRes>;
 
 // DB
 export interface UserRaw {
-  id: string;
+  id: UUID;
   username: string;
   user_hash: number;
   email: string;
@@ -31,8 +32,8 @@ export interface UserRaw {
 }
 
 export type RefreshTokenRaw = {
-  id: string;
-  user_id: string;
+  id: UUID;
+  user_id: UUID;
   jti: string;
   created_at: Date;
   expires_at: Date;

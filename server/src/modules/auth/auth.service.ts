@@ -23,15 +23,16 @@ import {
   revokeRefreshToken,
 } from "./jwt.repository.js";
 import type { UserData } from "./auth.types.js";
+import type { UUID } from "../../types/shared.js";
 
-async function issueTokens(userId: string, userAgent?: string) {
-  const accessToken = createAccessToken(userId);
-  const { token: refreshToken, jti } = createRefreshToken(userId);
+async function issueTokens(userID: UUID, userAgent?: string) {
+  const accessToken = createAccessToken(userID);
+  const { token: refreshToken, jti } = createRefreshToken(userID);
 
   const refreshPayload = verifyRefreshToken(refreshToken);
 
   await createRefreshTokenRecord({
-    userId,
+    userId: userID,
     jti,
     expiresAt: new Date(refreshPayload.exp * 1000),
     userAgent,
@@ -137,7 +138,7 @@ export async function revokeAllUserRefresh(refreshToken: string) {
   }
 }
 
-export async function getUserData(userID: string): Promise<UserData> {
+export async function getUserData(userID: UUID): Promise<UserData> {
   const userData = await findUserByID(userID);
   if (!userData) {
     throw new Error("Refresh token session not found");

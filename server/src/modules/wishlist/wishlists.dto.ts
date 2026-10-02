@@ -2,9 +2,10 @@ import type { Request, Response } from "express";
 
 import { type WishlistData } from "./wishlists.types.js";
 import type { NoParams } from "../../types/requests.js";
+import type { UUID } from "../../types/shared.js";
 
 interface GetGroupWishlistParams {
-  groupID: string;
+  groupID: UUID;
 }
 
 type WishlistDataRes = WishlistData[] | string;
@@ -16,7 +17,7 @@ export type GetGroupWishlistRequestDTO = Request<
 export type GetGroupWishlistResponseDTO = Response<WishlistDataRes>;
 
 interface CreateWishlistBody {
-  group_id: string;
+  group_id: UUID;
   title: string;
 }
 

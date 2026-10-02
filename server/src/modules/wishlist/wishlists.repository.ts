@@ -1,9 +1,10 @@
 import { db } from "../../db/knex.js";
 import { TABLES, WISHILST_COLUMNS } from "../../db/schema.js";
+import type { UUID } from "../../types/shared.js";
 import type { CreateWishlistData, WishlistData } from "./wishlists.types.js";
 
 export async function findGroupWishlists(
-  groupID: string,
+  groupID: UUID,
 ): Promise<WishlistData[]> {
   return db(TABLES.wishlist)
     .select({

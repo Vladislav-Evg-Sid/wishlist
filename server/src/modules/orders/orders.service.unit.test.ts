@@ -9,15 +9,16 @@ import {
 
 import type { CardDataRaw } from "./orders.dto.js";
 import type { CardDataInsert } from "./orders.types.js";
+import { UUID } from "../../types/shared.js";
 
 // Мокаем функции
 const createCardMock = jest.fn<(card: CardDataInsert) => Promise<string>>();
 const findGroupIDByWishlistIDMock =
-  jest.fn<(wishlistID: string) => Promise<string | null>>();
+  jest.fn<(wishlistID: UUID) => Promise<string | null>>();
 const findWishlistCardsMock =
-  jest.fn<(wishlistID: string) => Promise<CardDataRaw[]>>();
+  jest.fn<(wishlistID: UUID) => Promise<CardDataRaw[]>>();
 const checkGroupUserAccessMock =
-  jest.fn<(userID: string, groupID: string) => Promise<boolean>>();
+  jest.fn<(userID: UUID, groupID: UUID) => Promise<boolean>>();
 
 // Мокаем импорты этих функций
 jest.unstable_mockModule("./orders.repository.js", () => ({
@@ -41,6 +42,10 @@ beforeAll(async () => {
 });
 
 describe("orders service", () => {
+  const userID: UUID = "00000000-0000-0000-0000-000000000000" as UUID;
+  const wishlistID: UUID = "00000000-0000-0000-0000-000000000001" as UUID;
+  const cardID = 1;
+  const groupID: UUID = "00000000-0000-0000-0000-000000000003" as UUID;
   describe("getWishlistCards", () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -49,38 +54,35 @@ describe("orders service", () => {
     test("throw when wishlist's group does not exist", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(null);
 
-      await expect(getWishlistCards("user-1", "wishlist-1")).rejects.toThrow(
+      await expect(getWishlistCards(userID, wishlistID)).rejects.toThrow(
         "Not found wishlist's group",
       );
 
-      expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith("wishlist-1");
+      expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith(wishlistID);
       expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
       expect(findWishlistCardsMock).not.toHaveBeenCalled();
     });
 
     test("throw with user not a member or creator", async () => {
-      findGroupIDByWishlistIDMock.mockResolvedValue("group-1");
+      findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(getWishlistCards("user-1", "wishlist-1")).rejects.toThrow(
+      await expect(getWishlistCards(userID, wishlistID)).rejects.toThrow(
         "User not a member or creator",
       );
 
-      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(
-        "user-1",
-        "group-1",
-      );
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, wishlistID);
       expect(findWishlistCardsMock).not.toHaveBeenCalled();
     });
 
     const rawCard: CardDataRaw = {
-      id: "card-1",
+      id: cardID,
       title: "Наушники",
       description: "Хорошие наушники",
       icon: "headphones",
       created_at: new Date("2026-10-01T00:00:00Z"),
       status: "Свободно",
-      author_id: "user-1",
+      author_id: userID,
       author_name: "Vlad",
       author_email: "vlad@example.com",
       author_hash: 123,
@@ -89,11 +91,11 @@ describe("orders service", () => {
     };
 
     test("returns mapped wishlist cards", async () => {
-      findGroupIDByWishlistIDMock.mockResolvedValue("group-1");
+      findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(true);
       findWishlistCardsMock.mockResolvedValue([rawCard]);
 
-      const result = await getWishlistCards("user-1", "wishlist-1");
+      const result = await getWishlistCards(userID, wishlistID);
 
       expect(result).toEqual([
         {
@@ -104,7 +106,7 @@ describe("orders service", () => {
           createdAt: new Date("2026-10-01T00:00:00Z"),
           status: "Свободно",
           author: {
-            id: "user-1",
+            id: userID,
             name: "Vlad",
             email: "vlad@example.com",
             hash: 123,
@@ -113,11 +115,8 @@ describe("orders service", () => {
           href: "",
         },
       ]);
-      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(
-        "user-1",
-        "group-1",
-      );
-      expect(findWishlistCardsMock).toHaveBeenCalledWith("wishlist-1");
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
+      expect(findWishlistCardsMock).toHaveBeenCalledWith(wishlistID);
     });
   });
 
@@ -129,10 +128,10 @@ describe("orders service", () => {
     const newCard: CardDataInsert = {
       title: "Книга",
       description: "Какая-нибудь книга",
-      wishlistID: "wishlist-1",
+      wishlistID: wishlistID,
       icon: "book",
       href: "https://example.com",
-      creatorID: "user-1",
+      creatorID: userID,
     };
 
     test("throw when wishlist's group does not exist", async () => {
@@ -142,37 +141,31 @@ describe("orders service", () => {
         "Not found wishlist's group",
       );
 
-      expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith("wishlist-1");
+      expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith(wishlistID);
       expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
       expect(createCardMock).not.toHaveBeenCalled();
     });
 
     test("throw when user not a member or creator", async () => {
-      findGroupIDByWishlistIDMock.mockResolvedValue("group-1");
+      findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(false);
 
       await expect(addCard(newCard)).rejects.toThrow(
         "User not a member or creator",
       );
 
-      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(
-        "user-1",
-        "group-1",
-      );
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(createCardMock).not.toHaveBeenCalled();
     });
 
     test("creates card when user has access", async () => {
-      findGroupIDByWishlistIDMock.mockResolvedValue("group-1");
+      findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(true);
       createCardMock.mockResolvedValue("card-1");
 
       await addCard(newCard);
 
-      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(
-        "user-1",
-        "group-1",
-      );
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(createCardMock).toHaveBeenCalledWith(newCard);
       expect(createCardMock).toHaveBeenCalledTimes(1);
     });

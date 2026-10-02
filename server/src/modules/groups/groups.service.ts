@@ -1,4 +1,5 @@
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
+import type { UUID } from "../../types/shared.js";
 import {
   findGroupsByUserId,
   createGroup,
@@ -13,12 +14,12 @@ import type {
   GroupUsersList,
 } from "./groups.types.js";
 
-export async function getGroupsByUserId(userID: string): Promise<GroupData[]> {
+export async function getGroupsByUserId(userID: UUID): Promise<GroupData[]> {
   return findGroupsByUserId(userID);
 }
 
 export async function addGroup(
-  userID: string,
+  userID: UUID,
   groupData: CreateGroup,
 ): Promise<void> {
   const groupName = groupData.groupName;
@@ -26,8 +27,8 @@ export async function addGroup(
 }
 
 export async function getGroupInfo(
-  userID: string,
-  groupID: string,
+  userID: UUID,
+  groupID: UUID,
 ): Promise<GroupInfo> {
   const userAccess = await checkGroupUserAccess(userID, groupID);
   if (!userAccess) {
@@ -42,8 +43,8 @@ export async function getGroupInfo(
 }
 
 export async function getGroupUsers(
-  userID: string,
-  groupID: string,
+  userID: UUID,
+  groupID: UUID,
 ): Promise<GroupUsersList> {
   const userAccess = await checkGroupUserAccess(userID, groupID);
   if (!userAccess) {

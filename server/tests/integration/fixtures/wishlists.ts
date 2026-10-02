@@ -4,12 +4,13 @@ import {
   TABLES,
   WISHILST_COLUMNS,
 } from "../../../src/db/schema";
+import { UUID } from "../../../src/types/shared";
 import { createGroup } from "./groups";
 
 export async function createWishlistWithParantGroupID(
-  parantGroupID: string,
-  creatorID?: string,
-): Promise<string> {
+  parantGroupID: UUID,
+  creatorID?: UUID,
+): Promise<UUID> {
   if (!creatorID) {
     let creatorID = db(TABLES.groups)
       .select(GROUPS_COLUMNS.creator_id)
@@ -31,9 +32,9 @@ export async function createWishlistWithParantGroupID(
 }
 
 export async function createWishlist(): Promise<{
-  creatorID: string;
-  groupID: string;
-  wishlistID: string;
+  creatorID: UUID;
+  groupID: UUID;
+  wishlistID: UUID;
 }> {
   const { creatorID, groupID } = await createGroup();
   const wishlistID = await createWishlistWithParantGroupID(groupID, creatorID);

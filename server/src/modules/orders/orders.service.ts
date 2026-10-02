@@ -1,4 +1,5 @@
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
+import type { UUID } from "../../types/shared.js";
 import {
   createCard,
   findGroupIDByWishlistID,
@@ -7,8 +8,8 @@ import {
 import type { CardData, CardDataInsert } from "./orders.types.js";
 
 export async function getWishlistCards(
-  userID: string,
-  wishlistID: string,
+  userID: UUID,
+  wishlistID: UUID,
 ): Promise<CardData[]> {
   const groupID = await findGroupIDByWishlistID(wishlistID);
   if (!groupID) {

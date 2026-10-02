@@ -5,6 +5,7 @@ import {
   USER_COLUMNS,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
+import type { UUID } from "../../types/shared.js";
 import type { UserRaw } from "./auth.dto.js";
 import type { User, UserData } from "./auth.types.js";
 
@@ -23,7 +24,7 @@ export async function findUserByEmail(
     .first();
 }
 
-export async function findUserByID(id: string): Promise<User> {
+export async function findUserByID(id: UUID): Promise<User> {
   return db(TABLES.users)
     .select(
       USER_COLUMNS.id,

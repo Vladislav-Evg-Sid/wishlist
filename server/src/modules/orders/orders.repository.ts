@@ -6,12 +6,13 @@ import {
   WISHILST_COLUMNS,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
+import type { UUID } from "../../types/shared.js";
 import type { CardDataRaw } from "./orders.dto.js";
 import type { CardDataInsert } from "./orders.types.js";
 
 export async function findGroupIDByWishlistID(
-  wishlistID: string,
-): Promise<string | null> {
+  wishlistID: UUID,
+): Promise<UUID | null> {
   const groupID = await db(TABLES.wishlist)
     .select(WISHILST_COLUMNS.group_id)
     .where(WISHILST_COLUMNS.id, wishlistID)
@@ -20,7 +21,7 @@ export async function findGroupIDByWishlistID(
 }
 
 export async function findWishlistCards(
-  wishlistID: string,
+  wishlistID: UUID,
 ): Promise<CardDataRaw[]> {
   return db(TABLES.card)
     .join(

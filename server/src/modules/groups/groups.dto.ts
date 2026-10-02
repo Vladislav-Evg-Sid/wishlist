@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 
 import type { GroupData, GroupUsersList } from "./groups.types.js";
 import type { NoParams } from "../../types/requests.js";
+import type { UUID } from "../../types/shared.js";
 
 // HTTP
 type UserGroupsRes = GroupData[] | string;
@@ -17,7 +18,7 @@ export type CreateGroupRequestDTO = Request<NoParams, string, CreateGroupBody>;
 export type CreateGroupResponseDTO = Response<string>;
 
 interface GetGroupInfoParams {
-  groupID: string;
+  groupID: UUID;
 }
 
 type GetGroupInfoRes = string | { title: string; is_creator: boolean };
@@ -39,5 +40,5 @@ export type getGroupUsersResponseDTO = Response<GetGroupUsersRequesRes>;
 // DB
 export interface GroupInfoRaw {
   title: string;
-  creatorID: string;
+  creatorID: UUID;
 }
