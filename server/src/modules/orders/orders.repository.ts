@@ -45,8 +45,8 @@ export async function findWishlistCards(
     .where(CARD_COLUMNS.wishlist_id, wishlistID);
 }
 
-export async function createCard(card: CardDataInsert): Promise<string> {
-  return db(TABLES.card)
+export async function createCard(card: CardDataInsert): Promise<number> {
+  const cardIDs = await db(TABLES.card)
     .insert({
       [CARD_COLUMNS.title]: card.title,
       [CARD_COLUMNS.description]: card.description,
@@ -56,4 +56,5 @@ export async function createCard(card: CardDataInsert): Promise<string> {
       [CARD_COLUMNS.creator_id]: card.creatorID,
     })
     .returning(CARD_COLUMNS.id);
+  return cardIDs[0][CARD_COLUMNS.id];
 }
