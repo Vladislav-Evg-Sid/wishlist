@@ -12,4 +12,8 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+
+  testMatch: ["**/*.integration.test.ts"],
+  setupFiles: ["<rootDir>/tests/integration/load-env.ts"],
+  setupFilesAfterEnv: ["<rootDir>/tests/integration/setup.ts"],
 };
