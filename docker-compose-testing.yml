@@ -1,0 +1,28 @@
+services:
+  db-test:
+    image: postgres:15
+    container_name: wishlist-db-test
+    env_file:
+      - ./server/.env.test
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data-test:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:${DB_CONTAINER_PORT}"
+    networks:
+      - wishlist-server-testing-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  wishlist-server-testing-network:
+    driver: bridge
+
+volumes:
+  db-data-test:

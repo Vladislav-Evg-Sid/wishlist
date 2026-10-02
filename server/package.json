@@ -21,6 +21,7 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "dotenv": "^18.0.5",
     "express": "^5.2.1",
     "jest": "^30.5.2",
     "jsonwebtoken": "^9.0.3",
