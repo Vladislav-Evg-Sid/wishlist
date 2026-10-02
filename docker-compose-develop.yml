@@ -22,7 +22,7 @@ services:
     image: redis:7.2-alpine
     container_name: wishlist-redis
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}"
     command: redis-server --appendonly yes --bind 0.0.0.0
     restart: unless-stopped
     networks:
@@ -34,7 +34,7 @@ services:
       context: ./server
       dockerfile: Dockerfile.dev
     ports:
-      - "${SERVER_HOST_PORT}:3000"
+      - "${SERVER_HOST_PORT}:${SERVER_CONTAINER_PORT}"
     environment:
       NODE_ENV: ${NODE_ENV}
       DB_HOST: ${POSTGRES_HOST}
@@ -44,7 +44,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       PORT: ${SERVER_HOST_PORT}
       CLIENT_HOST: ${CLIENT_HOST}
-      CLIENT_PORT: ${CLIENT_HOST_PORT}
+      CLIENT_PORT: ${CLIENT_CONTAINER_PORT}
       REDIS_PORT: ${REDIS_PORT}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -77,10 +77,10 @@ services:
       context: ./client
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"
+      - "${CLIENT_HOST_PORT}:${CLIENT_CONTAINER_PORT}"
     environment:
       VITE_SERVER_HOST: ${SERVER_HOST}
-      VITE_SERVER_PORT: ${SERVER_HOST_PORT}
+      VITE_SERVER_PORT: ${SERVER_CONTAINER_PORT}
     depends_on:
       - backend
     networks:
