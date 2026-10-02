@@ -13,7 +13,7 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 
-  testMatch: ["**/*.integration.test.ts"],
+  testMatch: ["<rootDir>/src/**/*.integration.test.ts"],
   setupFiles: ["<rootDir>/tests/integration/load-env.ts"],
   setupFilesAfterEnv: ["<rootDir>/tests/integration/setup.ts"],
 };

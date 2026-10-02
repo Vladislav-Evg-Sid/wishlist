@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, test } from "@jest/globals";
 
-import { findGroupIDByWishlistID } from "../../src/modules/orders/orders.repository.js";
+import { findGroupIDByWishlistID } from "./orders.repository.js";
 
 describe("orders repository", () => {
   describe("findGroupIDByWishlistID", () => {

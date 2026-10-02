@@ -13,5 +13,5 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 
-  testMatch: ["<rootDir>/src/**/*.test.ts"],
+  testMatch: ["<rootDir>/src/**/*.unit.test.ts"],
 };
