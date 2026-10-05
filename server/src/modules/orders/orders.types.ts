@@ -18,7 +18,7 @@ export interface CardData {
   status: status;
   author: User;
   href: string;
-  reservedBy: string | null;
+  reservedBy: UUID | null;
 }
 
 export interface CardDataInsert {

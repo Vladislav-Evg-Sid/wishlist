@@ -4,10 +4,22 @@ import {
   addCardRequest,
   getWishlistCardsRequest,
 } from "./orders.controller.js";
+import {
+  validateBody,
+  validateParams,
+} from "../../middleware/httpValidation.js";
+import {
+  addCardBodySchema,
+  getWishlistCardsParamsSchema,
+} from "./orders.schemas.js";
 
 const orderRouter = express.Router();
 
-orderRouter.get("/:wishlistID", getWishlistCardsRequest);
-orderRouter.post("/", addCardRequest);
+orderRouter.get(
+  "/:wishlist_id",
+  validateParams(getWishlistCardsParamsSchema),
+  getWishlistCardsRequest,
+);
+orderRouter.post("/", validateBody(addCardBodySchema), addCardRequest);
 
 export default orderRouter;

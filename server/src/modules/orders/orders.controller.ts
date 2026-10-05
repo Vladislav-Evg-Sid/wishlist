@@ -3,7 +3,7 @@ import type {
   AddCardResponseDTO,
   GetWishlistCardsRequestDTO,
   GetWishlistCardsResponseDTO,
-} from "./orders.dto.js";
+} from "./orders.http.dto.js";
 import { addCard, getWishlistCards } from "./orders.service.js";
 
 export async function getWishlistCardsRequest(
@@ -15,7 +15,7 @@ export async function getWishlistCardsRequest(
     res.status(401).send();
     return;
   }
-  const wishlistID = req.params.wishlistID;
+  const { wishlistID } = res.locals.validateParams;
 
   try {
     const cards = await getWishlistCards(userID, wishlistID);
@@ -48,15 +48,11 @@ export async function addCardRequest(
     return;
   }
 
-  const cardRaw = req.body;
+  const cardData = res.locals.validateBody;
 
   try {
     await addCard({
-      title: cardRaw.title,
-      description: cardRaw.description,
-      wishlistID: cardRaw.wishlist_id,
-      icon: cardRaw.icon,
-      href: cardRaw.href,
+      ...cardData,
       creatorID: userID,
     });
 
