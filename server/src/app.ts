@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
+import cookieParser from "cookie-parser";
 
 import { logger } from "./middleware/logger.middleware.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
 import { requireAccessToken } from "./middleware/require-access-token.middleware.js";
-import cookieParser from "cookie-parser";
 import authRouter from "./modules/auth/auth.routes.js";
 import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";

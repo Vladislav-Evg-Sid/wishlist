@@ -1,4 +1,5 @@
 import type { JwtPayload } from "jsonwebtoken";
+
 import type { UUID } from "../../types/shared.js";
 
 export type AccessTokenPayload = JwtPayload & {

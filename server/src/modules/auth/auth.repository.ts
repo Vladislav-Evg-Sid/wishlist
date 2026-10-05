@@ -1,10 +1,5 @@
 import { db } from "../../db/knex.js";
-import {
-  REFRESH_TOKENS_COLUMNS,
-  TABLES,
-  USER_COLUMNS,
-} from "../../db/schema.js";
-import { concatTableAndColumn } from "../../shared/dbUtils.js";
+import { TABLES, USER_COLUMNS } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
 import type { UserRaw } from "./auth.dto.js";
 import type { User, UserData } from "./auth.types.js";
