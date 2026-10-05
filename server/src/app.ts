@@ -3,7 +3,7 @@ import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
 
-import { logger } from "./middleware/logger.middleware.js";
+import { loggerMidleware } from "./middleware/logger.middleware.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
 import { requireAccessToken } from "./middleware/require-access-token.middleware.js";
@@ -23,7 +23,7 @@ app.use(
 );
 
 // Midlware
-app.use(express.json(), cookieParser(), logger);
+app.use(express.json(), cookieParser(), loggerMidleware);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));

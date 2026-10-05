@@ -7,6 +7,7 @@ export const config = {
   port: Number(process.env.PORT ?? 8000),
   clientHost: process.env.CLIENT_HOST ?? "frontend",
   clientPort: Number(process.env.CLIENT_HOST_PORT ?? 5173),
+  logLevel: process.env.LOG_LEVEL ?? "info",
 
   db: {
     client: process.env.DB_CLIENT ?? "pg",

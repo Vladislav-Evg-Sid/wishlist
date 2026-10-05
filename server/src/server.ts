@@ -1,18 +1,19 @@
 import app from "./app.js";
 import { config } from "./config/env.js";
+import { logger } from "./config/logger.js";
 import { db } from "./db/knex.js";
 import { redis } from "./redis/redis.js";
 
 await db.raw("select 1");
-console.log("Database connected");
+logger.info("Database connected");
 
 await redis.connect();
-console.log("Redis connected");
+logger.info("Redis connected");
 
 // Startup
 const server = app.listen(config.port, () => {
-  console.log(`Server started: http://localhost:${config.port}`);
-  console.log(`Swagger: http://localhost:${config.port}/api-docs`);
+  logger.info(`Server started: http://localhost:${config.port}`);
+  logger.info(`Swagger: http://localhost:${config.port}/api-docs`);
 });
 
 let isShuttingDown = false;
@@ -24,10 +25,10 @@ async function shutdown(signal: string): Promise<void> {
 
   isShuttingDown = true;
 
-  console.log(`Received ${signal}. Shutting down...`);
+  logger.info(`Received ${signal}. Shutting down...`);
 
   const shutdownTimeout = setTimeout(() => {
-    console.error("Graceful shutdown timeout exceeded");
+    logger.warn("Graceful shutdown timeout exceeded");
     process.exit(1);
   }, 10_000);
   shutdownTimeout.unref();
@@ -47,9 +48,9 @@ async function shutdown(signal: string): Promise<void> {
     await db.destroy();
     await redis.quit();
 
-    console.log("Shutdown completed");
+    logger.info("Shutdown completed");
   } catch (error) {
-    console.error("Shutdown failed", error);
+    logger.fatal(`Shutdown failed: ${error}`);
     process.exitCode = 1;
   }
 }

@@ -1,7 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
+import { logger } from "../config/logger.js";
 
-export function logger(req: Request, res: Response, next: NextFunction) {
-  console.log(req.method, req.url);
+export function loggerMidleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  logger.info(
+    { method: req.method, url: req.url },
+    `${req.method}: ${req.url}`,
+  );
 
   next();
 }
