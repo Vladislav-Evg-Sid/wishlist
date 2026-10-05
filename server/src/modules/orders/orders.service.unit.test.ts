@@ -7,12 +7,12 @@ import {
   test,
 } from "@jest/globals";
 
-import type { CardDataRaw } from "./orders.dto.js";
+import type { CardDataRaw } from "./orders.repository.dto.js";
 import type { CardDataInsert } from "./orders.types.js";
-import { UUID } from "../../types/shared.js";
+import type { UUID } from "../../types/shared.js";
 
 // Мокаем функции
-const createCardMock = jest.fn<(card: CardDataInsert) => Promise<string>>();
+const createCardMock = jest.fn<(card: CardDataInsert) => Promise<number>>();
 const findGroupIDByWishlistIDMock =
   jest.fn<(wishlistID: UUID) => Promise<string | null>>();
 const findWishlistCardsMock =
@@ -71,7 +71,7 @@ describe("orders service", () => {
         "User not a member or creator",
       );
 
-      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, wishlistID);
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findWishlistCardsMock).not.toHaveBeenCalled();
     });
 
@@ -99,7 +99,7 @@ describe("orders service", () => {
 
       expect(result).toEqual([
         {
-          id: "card-1",
+          id: cardID,
           title: "Наушники",
           description: "Хорошие наушники",
           icon: "headphones",
@@ -161,7 +161,7 @@ describe("orders service", () => {
     test("creates card when user has access", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(true);
-      createCardMock.mockResolvedValue("card-1");
+      createCardMock.mockResolvedValue(cardID);
 
       await addCard(newCard);
 
