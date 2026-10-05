@@ -11,7 +11,7 @@ import authRouter from "./modules/auth/auth.routes.js";
 import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import orderRouter from "./modules/orders/orders.router.js";
-import { errorHandler } from "./middleware/errorHandler.js";
+import { errorHandler } from "./middleware/errorHandler.middleware.js";
 
 const app = express();
 

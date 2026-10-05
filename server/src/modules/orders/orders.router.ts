@@ -7,7 +7,7 @@ import {
 import {
   validateBody,
   validateParams,
-} from "../../middleware/httpValidation.js";
+} from "../../middleware/httpValidation.middleware.js";
 import {
   addCardBodySchema,
   getWishlistCardsParamsSchema,
