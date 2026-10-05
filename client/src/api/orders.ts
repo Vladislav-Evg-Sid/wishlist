@@ -10,10 +10,7 @@ export async function getWishlistOrders(
 ): Promise<OrderData[]> {
   const response = await apiFetch(`/orders/${wishlistID}`);
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    throw new Error(`${await response.text()}`);
   }
 
   return response.json();

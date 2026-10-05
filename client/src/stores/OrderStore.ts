@@ -33,6 +33,9 @@ export class OrderStore {
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
             );
             break;
+          case "Not found wishlist's group":
+            toast.error("Вишлист или группа не существует");
+            break;
           case "Failed to fetch":
             toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
