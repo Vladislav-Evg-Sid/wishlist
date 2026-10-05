@@ -1,4 +1,5 @@
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
+import { ForbidenError } from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
 import {
   findGroupsByUserId,
@@ -32,7 +33,7 @@ export async function getGroupInfo(
 ): Promise<GroupInfo> {
   const userAccess = await checkGroupUserAccess(userID, groupID);
   if (!userAccess) {
-    throw new Error("User not a member or creator");
+    throw new ForbidenError("User not a member or creator");
   }
   const { title, creatorID } = await findGroupInfo(groupID);
 
@@ -48,11 +49,11 @@ export async function getGroupUsers(
 ): Promise<GroupUsersList> {
   const userAccess = await checkGroupUserAccess(userID, groupID);
   if (!userAccess) {
-    throw new Error("User not a member or creator");
+    throw new ForbidenError("User not a member or creator");
   }
   const creator = await findGroupCreator(groupID);
   if (!creator) {
-    throw new Error("Group's creator not found");
+    throw new ForbidenError("Group's creator not found");
   }
   const members = await findGroupMembers(groupID);
   const filteredMembers = members.filter(

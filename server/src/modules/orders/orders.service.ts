@@ -1,4 +1,5 @@
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
+import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
 import {
   createCard,
@@ -13,12 +14,12 @@ export async function getWishlistCards(
 ): Promise<CardData[]> {
   const groupID = await findGroupIDByWishlistID(wishlistID);
   if (!groupID) {
-    throw new Error("Not found wishlist's group");
+    throw new NotFoundError("Not found wishlist's group");
   }
 
   const userAccess = await checkGroupUserAccess(userID, groupID);
   if (!userAccess) {
-    throw new Error("User not a member or creator");
+    throw new ForbidenError("User not a member or creator");
   }
 
   const cardsRaw = await findWishlistCards(wishlistID);
@@ -46,12 +47,12 @@ export async function getWishlistCards(
 export async function addCard(card: CardDataInsert): Promise<void> {
   const groupID = await findGroupIDByWishlistID(card.wishlistID);
   if (!groupID) {
-    throw new Error("Not found wishlist's group");
+    throw new NotFoundError("Not found wishlist's group");
   }
 
   const userAccess = await checkGroupUserAccess(card.creatorID, groupID);
   if (!userAccess) {
-    throw new Error("User not a member or creator");
+    throw new ForbidenError("User not a member or creator");
   }
 
   await createCard(card);

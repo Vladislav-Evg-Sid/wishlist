@@ -4,6 +4,7 @@ import {
   TABLES,
   WISHILST_COLUMNS,
 } from "../../../src/db/schema";
+import { NotFoundError } from "../../../src/shared/errors";
 import { UUID } from "../../../src/types/shared";
 import { createGroup } from "./groups";
 
@@ -17,7 +18,7 @@ export async function createWishlistWithParantGroupID(
       .where(GROUPS_COLUMNS.id, parantGroupID);
 
     if (!creatorID) {
-      throw new Error("This group not exist");
+      throw new NotFoundError("This group not exist");
     }
   }
 

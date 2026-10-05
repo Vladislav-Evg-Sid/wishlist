@@ -11,6 +11,7 @@ import authRouter from "./modules/auth/auth.routes.js";
 import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import orderRouter from "./modules/orders/orders.router.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -33,11 +34,7 @@ app.use("/groups", requireAccessToken, groupRouter);
 app.use("/wishlists", requireAccessToken, wishlistRouter);
 app.use("/orders", requireAccessToken, orderRouter);
 
-// 404
-app.use((req, res) => {
-  res.status(404).json({
-    message: "Route not found",
-  });
-});
+// Errors
+app.use(errorHandler);
 
 export default app;

@@ -1,3 +1,4 @@
+import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 import type {
   AddCardRequestDTO,
   AddCardResponseDTO,
@@ -17,25 +18,8 @@ export async function getWishlistCardsRequest(
   }
   const { wishlistID } = res.locals.validateParams;
 
-  try {
-    const cards = await getWishlistCards(userID, wishlistID);
-
-    res.status(200).json(cards);
-  } catch (error) {
-    if (error instanceof Error) {
-      if (
-        ["User not a member or creator", "Not found wishlist's group"].includes(
-          error.message,
-        )
-      ) {
-        res.status(403).send(error.message);
-        return;
-      }
-      res.status(500).send(error.message);
-      return;
-    }
-    res.status(500).send("Unknown internal Server error");
-  }
+  const cards = await getWishlistCards(userID, wishlistID);
+  res.status(200).json(cards);
 }
 
 export async function addCardRequest(
@@ -49,27 +33,10 @@ export async function addCardRequest(
   }
 
   const cardData = res.locals.validateBody;
+  await addCard({
+    ...cardData,
+    creatorID: userID,
+  });
 
-  try {
-    await addCard({
-      ...cardData,
-      creatorID: userID,
-    });
-
-    res.status(201).send();
-  } catch (error) {
-    if (error instanceof Error) {
-      if (
-        ["User not a member or creator", "Not found wishlist's group"].includes(
-          error.message,
-        )
-      ) {
-        res.status(403).send(error.message);
-        return;
-      }
-      res.status(500).send(error.message);
-      return;
-    }
-    res.status(500).send("Unknown internal Server error");
-  }
+  res.status(201).send();
 }

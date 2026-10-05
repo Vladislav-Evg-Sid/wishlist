@@ -2,6 +2,7 @@ import { db } from "../../../src/db/knex";
 import { TABLES, CARD_COLUMNS, WISHILST_COLUMNS } from "../../../src/db/schema";
 import { UUID } from "../../../src/types/shared";
 import { createWishlist } from "./wishlists";
+import { NotFoundError } from "./../../../src/shared/errors";
 
 interface InsertedCard {
   id: number;
@@ -26,7 +27,7 @@ export async function createCardWithParantWishlistID(
   }
 
   if (!creatorID) {
-    throw new Error("This wishlist not exist");
+    throw new NotFoundError("This wishlist not exist");
   }
 
   const cards = [];

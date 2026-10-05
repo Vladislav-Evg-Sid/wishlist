@@ -24,6 +24,12 @@ import {
 } from "./jwt.repository.js";
 import type { UserData } from "./auth.types.js";
 import type { UUID } from "../../types/shared.js";
+import {
+  DataConflictError,
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../../shared/errors.js";
 
 async function issueTokens(userID: UUID, userAgent?: string) {
   const accessToken = createAccessToken(userID);
@@ -48,16 +54,16 @@ export async function refreshTokens(refreshToken: string) {
   const payload = verifyRefreshToken(refreshToken);
   const blacklisted = await isRefreshBlacklisted(payload.jti);
   if (blacklisted) {
-    throw new Error("Refresh token revoked");
+    throw new UnauthorizedError("Refresh token revoked");
   }
 
   const refreshTokenData = await findRefreshTokenByJti(payload.jti);
   if (!refreshTokenData) {
-    throw new Error("Refresh token session not found");
+    throw new UnauthorizedError("Refresh token session not found");
   }
 
   if (refreshTokenData.revoked_at) {
-    throw new Error("Refresh token revoked");
+    throw new UnauthorizedError("Refresh token revoked");
   }
 
   await blacklistRefreshToken(payload.jti, payload.exp);
@@ -79,7 +85,7 @@ export async function registerUser(
 ) {
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
-    throw new Error("User with this email already exists");
+    throw new DataConflictError("User with this email already exists");
   }
 
   const passwordHash = await bcrypt.hash(password, config.auth.bcryptRounds);
@@ -87,7 +93,7 @@ export async function registerUser(
   const user = await createUser(name, email, passwordHash, userHash);
 
   if (!user) {
-    throw new Error("Can't create user");
+    throw new InternalServerError("Can't create user");
   }
   return issueTokens(user.id, userAgent);
 }
@@ -99,12 +105,12 @@ export async function loginUser(
 ) {
   const user = await findUserByEmail(email);
   if (!user) {
-    throw new Error("Invalid email");
+    throw new NotFoundError("Invalid email");
   }
 
   const passwordValid = await bcrypt.compare(password, user.passwordHash);
   if (!passwordValid) {
-    throw new Error("Invalid password for this email");
+    throw new NotFoundError("Invalid password for this email");
   }
 
   return issueTokens(user.id, userAgent);
@@ -114,7 +120,7 @@ export async function logoutUser(refreshToken: string) {
   const payload = verifyRefreshToken(refreshToken);
   const refreshTokenData = await findRefreshTokenByJti(payload.jti);
   if (!refreshTokenData) {
-    throw new Error("Refresh token session not found");
+    throw new UnauthorizedError("Refresh token session not found");
   }
   if (refreshTokenData.revoked_at) {
     return;
@@ -127,7 +133,7 @@ export async function revokeAllUserRefresh(refreshToken: string) {
   const payload = verifyRefreshToken(refreshToken);
   const refreshTokenData = await findRefreshTokenByJti(payload.jti);
   if (!refreshTokenData) {
-    throw new Error("Refresh token session not found");
+    throw new NotFoundError("Refresh token session not found");
   }
 
   const allUserActiveRefresh = await revokeAllUserRefreshTokens(
@@ -141,7 +147,7 @@ export async function revokeAllUserRefresh(refreshToken: string) {
 export async function getUserData(userID: UUID): Promise<UserData> {
   const userData = await findUserByID(userID);
   if (!userData) {
-    throw new Error("Refresh token session not found");
+    throw new NotFoundError("Refresh token session not found");
   }
   return userData;
 }

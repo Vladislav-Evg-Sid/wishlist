@@ -17,21 +17,9 @@ export async function getGroupWishlistRequest(
   }
   const groupID = req.params.groupID;
 
-  try {
-    const wishlists = await getGroupWishlists(userID, groupID);
+  const wishlists = await getGroupWishlists(userID, groupID);
 
-    res.status(200).json(wishlists);
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "User not a member or creator") {
-        res.status(403).send(error.message);
-        return;
-      }
-      res.status(500).send(error.message);
-      return;
-    }
-    res.status(500).send("Unknown internal Server error");
-  }
+  res.status(200).json(wishlists);
 }
 
 export async function addWishlistRequest(
@@ -45,22 +33,10 @@ export async function addWishlistRequest(
   }
   const wishlistDataRaw = req.body;
 
-  try {
-    await addWishlist({
-      creatorID: userID,
-      groupID: wishlistDataRaw.group_id,
-      name: wishlistDataRaw.title,
-    });
-    res.status(201).send();
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "User not a member or creator") {
-        res.status(403).send(error.message);
-        return;
-      }
-      res.status(500).send(error.message);
-      return;
-    }
-    res.status(500).send("Unknown internal Server error");
-  }
+  await addWishlist({
+    creatorID: userID,
+    groupID: wishlistDataRaw.group_id,
+    name: wishlistDataRaw.title,
+  });
+  res.status(201).send();
 }
