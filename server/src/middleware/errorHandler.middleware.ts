@@ -10,7 +10,7 @@ export function errorHandler(
   next: NextFunction,
 ) {
   if (error instanceof AppError) {
-    logger.warn(
+    req.log.warn(
       {
         errorCode: error.code,
         message: error.message,
@@ -26,7 +26,7 @@ export function errorHandler(
     return;
   }
 
-  logger.error(
+  req.log.error(
     {
       error: error,
       method: req.method,

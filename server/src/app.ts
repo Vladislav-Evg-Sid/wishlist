@@ -1,9 +1,9 @@
-import express from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
 
-import { loggerMidleware } from "./middleware/logger.middleware.js";
+import { httpLogger } from "./middleware/logger.middleware.js";
 import { swaggerDocument } from "./config/swagger.js";
 import { config } from "./config/env.js";
 import { requireAccessToken } from "./middleware/require-access-token.middleware.js";
@@ -12,6 +12,7 @@ import groupRouter from "./modules/groups/groups.router.js";
 import wishlistRouter from "./modules/wishlist/wishlists.router.js";
 import orderRouter from "./modules/orders/orders.router.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { NotFoundError } from "./shared/errors.js";
 
 const app = express();
 
@@ -23,7 +24,7 @@ app.use(
 );
 
 // Midlware
-app.use(express.json(), cookieParser(), loggerMidleware);
+app.use(express.json(), cookieParser(), httpLogger);
 
 // Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -35,6 +36,9 @@ app.use("/wishlists", requireAccessToken, wishlistRouter);
 app.use("/orders", requireAccessToken, orderRouter);
 
 // Errors
+app.use((req, res, next) => {
+  next(new NotFoundError("URL not found"));
+});
 app.use(errorHandler);
 
 export default app;
