@@ -1,7 +1,21 @@
-import { db } from "../../../src/db/knex";
-import { TABLES, GROUPS_COLUMNS } from "../../../src/db/schema";
-import { UUID } from "../../../src/types/shared";
-import { createUser } from "./users";
+import { db } from "../../../src/db/knex.js";
+import {
+  TABLES,
+  GROUPS_COLUMNS,
+  GROUP_MEMBER_COLUMNS,
+} from "../../../src/db/schema.js";
+import type { UUID } from "../../../src/types/shared.js";
+import { createUser } from "./users.js";
+
+export async function addGroupMember(
+  groupID: UUID,
+  memberID: UUID,
+): Promise<void> {
+  await db(TABLES.group_member).insert({
+    [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+    [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+  });
+}
 
 export async function createGroupWithCreatorID(creatorID: UUID): Promise<UUID> {
   const groupIDs = await db(TABLES.groups)

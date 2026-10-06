@@ -1,8 +1,15 @@
-import { db } from "../../../src/db/knex";
-import { TABLES, CARD_COLUMNS, WISHILST_COLUMNS } from "../../../src/db/schema";
-import { UUID } from "../../../src/types/shared";
-import { createWishlist } from "./wishlists";
-import { NotFoundError } from "./../../../src/shared/errors";
+import { db } from "../../../src/db/knex.js";
+import {
+  TABLES,
+  CARD_COLUMNS,
+  WISHILST_COLUMNS,
+} from "../../../src/db/schema.js";
+import type { UUID } from "../../../src/types/shared.js";
+import { createWishlist } from "./wishlists.js";
+import {
+  InternalServerError,
+  NotFoundError,
+} from "./../../../src/shared/errors.js";
 
 interface InsertedCard {
   id: number;
@@ -20,10 +27,11 @@ export async function createCardWithParantWishlistID(
   cardCount: number = 1,
 ): Promise<InsertedCard[]> {
   if (!creatorID) {
-    creatorID = await db(TABLES.wishlist)
+    const wishlist = await db(TABLES.wishlist)
       .select(WISHILST_COLUMNS.creator_id)
       .where(WISHILST_COLUMNS.id, parantWishlistID)
       .first();
+    creatorID = wishlist?.[WISHILST_COLUMNS.creator_id];
   }
 
   if (!creatorID) {
@@ -45,7 +53,13 @@ export async function createCardWithParantWishlistID(
     .insert(cards)
     .returning(CARD_COLUMNS.id);
 
-  return cards.map((card, i) => ({ ...card, id: cardIDs[i]?.id ?? "" }));
+  return cards.map((card, i) => {
+    const insertedCard = cardIDs[i];
+    if (!insertedCard) {
+      throw new InternalServerError("Failed to create card fixture");
+    }
+    return { ...card, id: insertedCard.id };
+  });
 }
 
 export async function createCards(

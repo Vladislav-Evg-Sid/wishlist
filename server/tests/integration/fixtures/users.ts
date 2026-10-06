@@ -4,15 +4,23 @@ import {
   TABLES,
   USER_COLUMNS,
 } from "../../../src/db/schema.js";
-import { UUID } from "../../../src/types/shared.js";
+import type { UUID } from "../../../src/types/shared.js";
 
-export async function createUser(): Promise<UUID> {
+export async function createUser(
+  overrides: Partial<{
+    username: string;
+    user_hash: number;
+    email: string;
+    password_hash: string;
+  }> = {},
+): Promise<UUID> {
   const userIDs = await db(TABLES.users)
     .insert({
       [USER_COLUMNS.username]: "Vlad",
       [USER_COLUMNS.user_hash]: 123,
       [USER_COLUMNS.email]: "vlad@example.com",
       [USER_COLUMNS.password_hash]: "some strong password hash",
+      ...overrides,
     })
     .returning(USER_COLUMNS.id);
   return userIDs[0][GROUPS_COLUMNS.id];

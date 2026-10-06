@@ -1,25 +1,27 @@
-import { db } from "../../../src/db/knex";
+import { db } from "../../../src/db/knex.js";
 import {
   GROUPS_COLUMNS,
   TABLES,
   WISHILST_COLUMNS,
-} from "../../../src/db/schema";
-import { NotFoundError } from "../../../src/shared/errors";
-import { UUID } from "../../../src/types/shared";
-import { createGroup } from "./groups";
+} from "../../../src/db/schema.js";
+import { NotFoundError } from "../../../src/shared/errors.js";
+import type { UUID } from "../../../src/types/shared.js";
+import { createGroup } from "./groups.js";
 
 export async function createWishlistWithParantGroupID(
   parantGroupID: UUID,
   creatorID?: UUID,
 ): Promise<UUID> {
   if (!creatorID) {
-    let creatorID = db(TABLES.groups)
+    const group = await db(TABLES.groups)
       .select(GROUPS_COLUMNS.creator_id)
-      .where(GROUPS_COLUMNS.id, parantGroupID);
+      .where(GROUPS_COLUMNS.id, parantGroupID)
+      .first();
 
-    if (!creatorID) {
+    if (!group) {
       throw new NotFoundError("This group not exist");
     }
+    creatorID = group[GROUPS_COLUMNS.creator_id];
   }
 
   const wishlistIDs = await db(TABLES.wishlist)
