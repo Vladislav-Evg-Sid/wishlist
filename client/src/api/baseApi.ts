@@ -1,4 +1,5 @@
 import { SERVER_HOST, SERVER_PORT } from "../env";
+import { ApiError } from "../types/errors";
 
 let getAccessToken: () => string | null = () => null;
 let setAccessToken: (accessToken: string | null) => void = () => {};
@@ -57,13 +58,23 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
     "/auth/logout/all-sessions",
   ].includes(pathname);
 
-  if (response.status !== 401 || isSessionEndpoint) return response;
+  if (!response.ok) {
+    if (response.status === 401 && !isSessionEndpoint) {
+      const currentToken = getAccessToken();
+      const token =
+        currentToken && currentToken !== accessToken
+          ? currentToken
+          : await refreshAccessToken();
 
-  const currentToken = getAccessToken();
-  const token =
-    currentToken && currentToken !== accessToken
-      ? currentToken
-      : await refreshAccessToken();
+      return token ? request(token) : response;
+    }
 
-  return token ? request(token) : response;
+    const errorDetails = await response.json();
+    throw new ApiError(
+      errorDetails.message,
+      response.status,
+      errorDetails.code,
+    );
+  }
+  return response;
 }
