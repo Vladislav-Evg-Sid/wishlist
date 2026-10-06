@@ -1,23 +1,28 @@
+import { logger } from "../../config/logger.js";
+import { UnauthorizedError } from "../../shared/errors.js";
 import type {
   CreateWishlistRequestDTO,
   CreateWishlistResponseDTO,
   GetGroupWishlistRequestDTO,
   GetGroupWishlistResponseDTO,
-} from "./wishlists.dto.js";
+} from "./wishlists.http.dto.js";
 import { addWishlist, getGroupWishlists } from "./wishlists.service.js";
 
 export async function getGroupWishlistRequest(
   req: GetGroupWishlistRequestDTO,
   res: GetGroupWishlistResponseDTO,
 ): Promise<void> {
+  console.log("************** init");
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
-  const groupID = req.params.groupID;
+  logger.debug("user");
+  const groupParams = res.locals.validateParams;
+  logger.debug("params");
 
-  const wishlists = await getGroupWishlists(userID, groupID);
+  const wishlists = await getGroupWishlists(userID, groupParams.groupID);
+  logger.debug("done");
 
   res.status(200).json(wishlists);
 }
@@ -28,15 +33,14 @@ export async function addWishlistRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
-  const wishlistDataRaw = req.body;
+  const wishlistData = res.locals.validateBody;
 
   await addWishlist({
     creatorID: userID,
-    groupID: wishlistDataRaw.group_id,
-    name: wishlistDataRaw.title,
+    groupID: wishlistData.groupID,
+    name: wishlistData.title,
   });
   res.status(201).send();
 }
