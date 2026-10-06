@@ -12,13 +12,14 @@ import type { CardDataInsert } from "./orders.types.js";
 import type { UUID } from "../../types/shared.js";
 
 // Мокаем функции
-const createCardMock = jest.fn<(card: CardDataInsert) => Promise<number>>();
+type Repository = typeof import("./orders.repository.js");
+type CheckUserGroup = typeof import("./../../shared/checkUserGroup.js");
+const createCardMock = jest.fn<Repository["createCard"]>();
 const findGroupIDByWishlistIDMock =
-  jest.fn<(wishlistID: UUID) => Promise<string | null>>();
-const findWishlistCardsMock =
-  jest.fn<(wishlistID: UUID) => Promise<CardDataRaw[]>>();
+  jest.fn<Repository["findGroupIDByWishlistID"]>();
+const findWishlistCardsMock = jest.fn<Repository["findWishlistCards"]>();
 const checkGroupUserAccessMock =
-  jest.fn<(userID: UUID, groupID: UUID) => Promise<boolean>>();
+  jest.fn<CheckUserGroup["checkGroupUserAccess"]>();
 
 // Мокаем импорты этих функций
 jest.unstable_mockModule("./orders.repository.js", () => ({
