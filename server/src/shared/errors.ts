@@ -11,13 +11,13 @@ export class AppError extends Error {
 
 export class NotFoundError extends AppError {
   constructor(message: string) {
-    super(message, 403, "FORBIDEN");
+    super(message, 404, "NOT_FOUND");
   }
 }
 
 export class ForbidenError extends AppError {
   constructor(message: string) {
-    super(message, 404, "NOT_FOUND");
+    super(message, 403, "FORBIDEN");
   }
 }
 
