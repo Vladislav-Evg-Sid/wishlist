@@ -4,9 +4,11 @@
   "main": "server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "dev:nest": "tsx watch src/main.ts",
     "db:migrate": "knex migrate:latest --env development",
     "db:seed": "knex seed:run --env development",
     "dev:docker": "npm run db:migrate && npm run db:seed && npm run dev",
+    "dev:docker:nest": "npm run db:migrate && npm run db:seed && npm run dev:nest",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "start": "node dist/server.js",
@@ -19,6 +21,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nestjs/core": "^12.1.2",
+    "@nestjs/platform-express": "^12.1.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
