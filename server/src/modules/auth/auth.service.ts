@@ -22,7 +22,11 @@ import {
   revokeAllUserRefreshTokens,
   revokeRefreshToken,
 } from "./jwt.repository.js";
-import type { UserData } from "./auth.types.js";
+import type {
+  UserData,
+  UserLoginData,
+  UserRegisterData,
+} from "./auth.types.js";
 import type { UUID } from "../../types/shared.js";
 import {
   DataConflictError,
@@ -78,9 +82,7 @@ async function getCurrentUserHash(username: string): Promise<number> {
 }
 
 export async function registerUser(
-  email: string,
-  name: string,
-  password: string,
+  { email, username, password }: UserRegisterData,
   userAgent?: string,
 ) {
   const existingUser = await findUserByEmail(email);
@@ -89,8 +91,8 @@ export async function registerUser(
   }
 
   const passwordHash = await bcrypt.hash(password, config.auth.bcryptRounds);
-  const userHash = await getCurrentUserHash(name);
-  const user = await createUser(name, email, passwordHash, userHash);
+  const userHash = await getCurrentUserHash(username);
+  const user = await createUser(username, email, passwordHash, userHash);
 
   if (!user) {
     throw new InternalServerError("Can't create user");
@@ -99,8 +101,7 @@ export async function registerUser(
 }
 
 export async function loginUser(
-  email: string,
-  password: string,
+  { email, password }: UserLoginData,
   userAgent?: string,
 ) {
   const user = await findUserByEmail(email);

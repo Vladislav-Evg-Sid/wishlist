@@ -7,7 +7,7 @@ import type {
   GetUserDataResponseDTO,
   LoginUserRequestDTO,
   LoginUserResponseDTO,
-} from "./auth.dto.js";
+} from "./auth.http.dto.js";
 import {
   getUserData,
   loginUser,
@@ -17,15 +17,16 @@ import {
   revokeAllUserRefresh,
 } from "./auth.service.js";
 import { config } from "../../config/env.js";
+import { UnauthorizedError } from "../../shared/errors.js";
 
 export async function registerUserRequest(
   req: CreateUserRequestDTO,
   res: CreateUserResponseDTO,
 ): Promise<void> {
+  const userData = res.locals.validateBody;
+
   const { accessToken, refreshToken } = await registerUser(
-    req.body.email,
-    req.body.username,
-    req.body.password,
+    userData,
     req.get("user-agent"),
   );
 
@@ -42,9 +43,10 @@ export async function loginUserRequest(
   req: LoginUserRequestDTO,
   res: LoginUserResponseDTO,
 ): Promise<void> {
+  const userData = res.locals.validateBody;
+
   const { accessToken, refreshToken } = await loginUser(
-    req.body.email,
-    req.body.password,
+    userData,
     req.get("user-agent"),
   );
 
@@ -123,8 +125,7 @@ export async function getUserDataRequest(
   const userID = req.userId;
 
   if (!userID) {
-    res.status(401).send("Access token not found");
-    return;
+    throw new UnauthorizedError("Access token not found");
   }
 
   const user = await getUserData(userID);

@@ -2,7 +2,7 @@ import { db } from "../../db/knex.js";
 import { TABLES, REFRESH_TOKENS_COLUMNS } from "../../db/schema.js";
 import { InternalServerError } from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
-import type { RefreshTokenRaw } from "./auth.dto.js";
+import type { RefreshTokenRaw } from "./auth.repository.dto.js";
 
 type CreateRefreshTokenData = {
   userId: UUID;

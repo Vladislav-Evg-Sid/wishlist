@@ -1,8 +1,8 @@
 import { db } from "../../db/knex.js";
 import { TABLES, USER_COLUMNS } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
-import type { UserRaw } from "./auth.dto.js";
-import type { User, UserData } from "./auth.types.js";
+import type { UserRaw } from "./auth.repository.dto.js";
+import type { User } from "./auth.types.js";
 
 export async function findUserByEmail(
   email: string,
