@@ -1,3 +1,4 @@
+import { UnauthorizedError } from "../../shared/errors.js";
 import type {
   CreateGroupRequestDTO,
   CreateGroupResponseDTO,
@@ -7,7 +8,7 @@ import type {
   getGroupUsersResponseDTO,
   GetUserGroupsRequestDTO,
   GetUserGroupsResponseDTO,
-} from "./groups.dto.js";
+} from "./groups.http.dto.js";
 import {
   getGroupsByUserId,
   addGroup,
@@ -21,8 +22,7 @@ export async function getUserGroupsRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
   const groups = await getGroupsByUserId(userID);
   res.status(200).json(groups);
@@ -34,12 +34,11 @@ export async function addGroupRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
-  const groupData = req.body;
+  const groupData = res.locals.validateBody;
 
-  await addGroup(userID, { groupName: groupData.group_name });
+  await addGroup(userID, groupData);
   res.status(201).send("Successfully created");
 }
 
@@ -49,12 +48,11 @@ export async function getGroupInfoRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
-  const groupID = req.params.groupID;
+  const groupParams = res.locals.validateParams;
 
-  const { title, isCreator } = await getGroupInfo(userID, groupID);
+  const { title, isCreator } = await getGroupInfo(userID, groupParams.groupID);
 
   res.status(200).json({ title, is_creator: isCreator });
 }
@@ -65,12 +63,11 @@ export async function getGroupUsersRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
-  const groupID = req.params.groupID;
+  const groupParams = res.locals.validateParams;
 
-  const users = await getGroupUsers(userID, groupID);
+  const users = await getGroupUsers(userID, groupParams.groupID);
 
   res.status(200).json(users);
 }

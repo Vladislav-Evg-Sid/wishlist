@@ -7,7 +7,7 @@ import {
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UUID } from "../../types/shared.js";
-import type { GroupInfoRaw } from "./groups.dto.js";
+import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import type { GroupData, GroupUser } from "./groups.types.js";
 
 export async function findGroupsByUserId(userID: UUID): Promise<GroupData[]> {
