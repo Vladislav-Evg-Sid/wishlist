@@ -1,4 +1,8 @@
-import { ForbidenError, NotFoundError } from "../../shared/errors.js";
+import {
+  ForbidenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../../shared/errors.js";
 import type {
   AddCardRequestDTO,
   AddCardResponseDTO,
@@ -13,8 +17,7 @@ export async function getWishlistCardsRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
   const { wishlistID } = res.locals.validateParams;
 
@@ -28,8 +31,7 @@ export async function addCardRequest(
 ): Promise<void> {
   const userID = req.userId;
   if (!userID) {
-    res.status(401).send();
-    return;
+    throw new UnauthorizedError("");
   }
 
   const cardData = res.locals.validateBody;

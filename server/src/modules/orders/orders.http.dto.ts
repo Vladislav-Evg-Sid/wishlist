@@ -8,17 +8,16 @@ import {
   addCardBodySchema,
 } from "./orders.schemas.js";
 
-type GetWishlistCardsRes = CardData[] | string;
 interface GetWishlistCardsLocals {
   validateParams: z.output<typeof getWishlistCardsParamsSchema>;
 }
 
 export type GetWishlistCardsRequestDTO = Request<
   z.input<typeof getWishlistCardsParamsSchema>,
-  GetWishlistCardsRes
+  CardData[]
 >;
 export type GetWishlistCardsResponseDTO = Response<
-  GetWishlistCardsRes,
+  CardData[],
   GetWishlistCardsLocals
 >;
 
@@ -28,7 +27,7 @@ interface AddCardLocals {
 
 export type AddCardRequestDTO = Request<
   NoParams,
-  string,
+  NoParams,
   z.input<typeof addCardBodySchema>
 >;
-export type AddCardResponseDTO = Response<string, AddCardLocals>;
+export type AddCardResponseDTO = Response<NoParams, AddCardLocals>;
