@@ -7,7 +7,7 @@ import {
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UUID } from "../../types/shared.js";
-import type { CardDataRaw } from "./orders.dto.js";
+import type { CardDataRaw } from "./orders.repository.dto.js";
 import type { CardDataInsert } from "./orders.types.js";
 
 export async function findGroupIDByWishlistID(

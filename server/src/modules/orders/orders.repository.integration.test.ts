@@ -9,7 +9,7 @@ import { createWishlist } from "../../../tests/integration/fixtures/wishlists.js
 import { db } from "../../db/knex.js";
 import { CARD_COLUMNS, TABLES, USER_COLUMNS } from "../../db/schema.js";
 import { createCards } from "../../../tests/integration/fixtures/card.js";
-import { UUID } from "../../types/shared.js";
+import type { UUID } from "../../types/shared.js";
 
 describe("orders repository", () => {
   describe("findGroupIDByWishlistID", () => {
