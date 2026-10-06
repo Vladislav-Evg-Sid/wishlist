@@ -12,7 +12,6 @@ export async function getGroupWishlistRequest(
   req: GetGroupWishlistRequestDTO,
   res: GetGroupWishlistResponseDTO,
 ): Promise<void> {
-  console.log("************** init");
   const userID = req.userId;
   if (!userID) {
     throw new UnauthorizedError("");
