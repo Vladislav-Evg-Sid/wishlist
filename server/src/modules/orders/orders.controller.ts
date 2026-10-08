@@ -2,9 +2,13 @@ import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
 import type z from "zod";
 
 import { UnauthorizedError } from "../../shared/errors.js";
-import type { addCardBodySchema } from "./orders.schemas.js";
-import type { UUID } from "../../types/shared.js";
+import {
+  getWishlistCardsParamsSchema,
+  addCardBodySchema,
+} from "./orders.schemas.js";
 import { ORDERS_SERVICE, type OrdersServiceInterface } from "./orders.di.js";
+import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
+import type { UUID } from "../../types/shared.js";
 
 @Controller("orders")
 export class OrderController {
@@ -12,25 +16,24 @@ export class OrderController {
     @Inject(ORDERS_SERVICE)
     private readonly ordersService: OrdersServiceInterface,
   ) {}
-  // validateParams(getWishlistCardsParamsSchema),
-  @Get(":wishlist_id")
-  async getWishlistCards(@Param("wishlist_id") wishlistID: UUID) {
-    const userID = req.userId;
-    if (!userID) {
-      throw new UnauthorizedError("");
-    }
 
-    return await this.ordersService.getWishlistCards(userID, wishlistID);
+  @Get(":wishlist_id")
+  async getWishlistCards(
+    @Param({ schema: getWishlistCardsParamsSchema })
+    params: z.output<typeof getWishlistCardsParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.ordersService.getWishlistCards(userID, params.wishlistID);
   }
 
-  //validateBody(addCardBodySchema)
   @Post()
-  async addCardRequest(@Body() cardData: z.output<typeof addCardBodySchema>) {
-    const userID = req.userId;
-    if (!userID) {
-      throw new UnauthorizedError("");
-    }
-
+  async addCardRequest(
+    @Body({ schema: addCardBodySchema })
+    cardData: z.output<typeof addCardBodySchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
     await this.ordersService.addCard({
       ...cardData,
       creatorID: userID,
