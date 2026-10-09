@@ -36,6 +36,10 @@ export interface JwtServiceInterface {
   verifyRefreshToken(token: string): RefreshTokenPayload;
 }
 
+export interface JwtServiceForVerifAccess {
+  verifyAccessToken(token: string): AccessTokenPayload;
+}
+
 export const AUTH_REPOSITORY = Symbol("AUTH_REPOSITORY");
 
 export interface AuthRepositoryInterface {

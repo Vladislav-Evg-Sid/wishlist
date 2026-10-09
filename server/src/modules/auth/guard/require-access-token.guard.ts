@@ -1,17 +1,22 @@
-import { type Reflector } from "@nestjs/core";
+import { Reflector } from "@nestjs/core";
 import {
   type CanActivate,
   type ExecutionContext,
+  Inject,
   Injectable,
 } from "@nestjs/common";
 
-import { verifyAccessToken } from "../modules/auth/jwt.service.js";
-import { UnauthorizedError } from "../shared/errors.js";
-import { IS_PUBLIC_KEY } from "../modules/auth/decorator/publicEndpoint.decorator.js";
+import { UnauthorizedError } from "../../../shared/errors.js";
+import { IS_PUBLIC_KEY } from "../decorator/publicEndpoint.decorator.js";
+import { JWT_SERVICE, type JwtServiceForVerifAccess } from "../auth.di.js";
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    @Inject(JWT_SERVICE)
+    private readonly jwtService: JwtServiceForVerifAccess,
+    private readonly reflector: Reflector,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -33,7 +38,7 @@ export class AccessTokenGuard implements CanActivate {
       throw new UnauthorizedError("Invalid authorization header");
     }
 
-    const payload = verifyAccessToken(token);
+    const payload = this.jwtService.verifyAccessToken(token);
     request.userId = payload.sub;
     return true;
   }

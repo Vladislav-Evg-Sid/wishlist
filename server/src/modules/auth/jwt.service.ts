@@ -7,9 +7,15 @@ import type { AccessTokenPayload, RefreshTokenPayload } from "./auth.types.js";
 import type { UUID } from "../../types/shared.js";
 import { UnauthorizedError } from "../../shared/errors.js";
 import type { TokenData } from "./jwt.types.js";
+import type {
+  JwtServiceForVerifAccess,
+  JwtServiceInterface,
+} from "./auth.di.js";
 
 @Injectable()
-export class JwtService implements JwtService {
+export class JwtService
+  implements JwtServiceInterface, JwtServiceForVerifAccess
+{
   createAccessToken(userID: UUID): string {
     return jwt.sign(
       {

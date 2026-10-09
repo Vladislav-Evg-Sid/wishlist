@@ -19,7 +19,7 @@ import { createUserBodySchema } from "./auth.schemas.js";
 import { CurrentUserID } from "./decorator/currentUserID.decorator.js";
 import type { UUID } from "../../types/shared.js";
 
-@Controller()
+@Controller("auth")
 export class AuthController {
   constructor(
     @Inject(AUTH_SERVICE)
@@ -60,6 +60,7 @@ export class AuthController {
     @Res({ passthrough: true })
     res: Response,
   ) {
+    console.log("******************************************");
     const { accessToken, refreshToken } = await this.authService.loginUser(
       userData,
       userAgent,
