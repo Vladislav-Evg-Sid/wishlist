@@ -4,9 +4,12 @@ import { StandardSchemaValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module.js";
 import { config } from "./config/env.js";
 import { ValidationError } from "./shared/errors.js";
+import { httpLogger } from "./middleware/logger.middleware.js";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(httpLogger);
 
   app.useGlobalPipes(
     new StandardSchemaValidationPipe({
