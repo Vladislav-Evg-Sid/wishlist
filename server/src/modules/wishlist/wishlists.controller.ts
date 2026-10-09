@@ -1,45 +1,45 @@
-import { logger } from "../../config/logger.js";
-import { UnauthorizedError } from "../../shared/errors.js";
-import type {
-  CreateWishlistRequestDTO,
-  CreateWishlistResponseDTO,
-  GetGroupWishlistRequestDTO,
-  GetGroupWishlistResponseDTO,
-} from "./wishlists.http.dto.js";
-import { addWishlist, getGroupWishlists } from "./wishlists.service.js";
+import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
+import type z from "zod";
 
-export async function getGroupWishlistRequest(
-  req: GetGroupWishlistRequestDTO,
-  res: GetGroupWishlistResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+import {
+  WISHLIST_SERVICE,
+  type WishlistsServiceInterface,
+} from "./wishlists.di.js";
+import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
+import type { UUID } from "../../types/shared.js";
+import {
+  createWishlistBodySchema,
+  getGroupWishlistsParamsSchema,
+} from "./wishlists.schemas.js";
+
+@Controller("wishlists")
+export class WishlistsController {
+  constructor(
+    @Inject(WISHLIST_SERVICE)
+    private readonly wishlistService: WishlistsServiceInterface,
+  ) {}
+
+  @Get(":group_id")
+  async getGroupWishlistRequest(
+    @Param({ schema: getGroupWishlistsParamsSchema })
+    params: z.output<typeof getGroupWishlistsParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.wishlistService.getGroupWishlists(userID, params.groupID);
   }
-  logger.debug("user");
-  const groupParams = res.locals.validateParams;
-  logger.debug("params");
 
-  const wishlists = await getGroupWishlists(userID, groupParams.groupID);
-  logger.debug("done");
-
-  res.status(200).json(wishlists);
-}
-
-export async function addWishlistRequest(
-  req: CreateWishlistRequestDTO,
-  res: CreateWishlistResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+  @Post()
+  async addWishlistRequest(
+    @Body({ schema: createWishlistBodySchema })
+    wishlistData: z.output<typeof createWishlistBodySchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.wishlistService.addWishlist({
+      creatorID: userID,
+      groupID: wishlistData.groupID,
+      name: wishlistData.title,
+    });
   }
-  const wishlistData = res.locals.validateBody;
-
-  await addWishlist({
-    creatorID: userID,
-    groupID: wishlistData.groupID,
-    name: wishlistData.title,
-  });
-  res.status(201).send();
 }

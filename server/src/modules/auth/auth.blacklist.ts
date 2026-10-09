@@ -1,26 +1,29 @@
+import { Injectable } from "@nestjs/common";
+
 import { redis } from "../../redis/redis.js";
+import type { AuthBlacklistServiceInterface } from "./auth.di.js";
 
-function getRefreshBlacklistKey(jti: string): string {
-  return `reft:bl:${jti}`;
-}
-
-export async function isRefreshBlacklisted(jti: string): Promise<boolean> {
-  const result = await redis.exists(getRefreshBlacklistKey(jti));
-  return result === 1;
-}
-
-export async function blacklistRefreshToken(
-  jti: string,
-  expiresAt: number,
-): Promise<void> {
-  const now = Math.floor(Date.now() / 1000);
-  const ttl = expiresAt - now;
-
-  if (ttl <= 0) {
-    return;
+@Injectable()
+export class AuthBlacklistService implements AuthBlacklistServiceInterface {
+  private getRefreshBlacklistKey(jti: string): string {
+    return `reft:bl:${jti}`;
   }
 
-  await redis.set(getRefreshBlacklistKey(jti), "1", {
-    EX: ttl,
-  });
+  async isRefreshBlacklisted(jti: string): Promise<boolean> {
+    const result = await redis.exists(this.getRefreshBlacklistKey(jti));
+    return result === 1;
+  }
+
+  async blacklistRefreshToken(jti: string, expiresAt: number): Promise<void> {
+    const now = Math.floor(Date.now() / 1000);
+    const ttl = expiresAt - now;
+
+    if (ttl <= 0) {
+      return;
+    }
+
+    await redis.set(this.getRefreshBlacklistKey(jti), "1", {
+      EX: ttl,
+    });
+  }
 }

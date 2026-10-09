@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
 import type z from "zod";
 
-import { UnauthorizedError } from "../../shared/errors.js";
 import {
   getWishlistCardsParamsSchema,
   addCardBodySchema,

@@ -1,3 +1,6 @@
+import { Body, Controller, Get, Inject, Param } from "@nestjs/common";
+import type z from "zod";
+
 import { UnauthorizedError } from "../../shared/errors.js";
 import type {
   CreateGroupRequestDTO,
@@ -9,65 +12,61 @@ import type {
   GetUserGroupsRequestDTO,
   GetUserGroupsResponseDTO,
 } from "./groups.http.dto.js";
+import { GROUPS_SERVICE, type GroupsServiceInterface } from "./groups.di.js";
+import type { UUID } from "../../types/shared.js";
+import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
-  getGroupsByUserId,
-  addGroup,
-  getGroupInfo,
-  getGroupUsers,
-} from "./groups.service.js";
+  createGroupBodySchema,
+  getGroupInfoParamsSchema,
+} from "./groups.schemas.js";
 
-export async function getUserGroupsRequest(
-  req: GetUserGroupsRequestDTO,
-  res: GetUserGroupsResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+@Controller("groups")
+export class GroupsController {
+  constructor(
+    @Inject(GROUPS_SERVICE)
+    private readonly groupsServece: GroupsServiceInterface,
+  ) {}
+
+  @Get()
+  async getUserGroupsRequest(
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.groupsServece.getGroupsByUserId(userID);
   }
-  const groups = await getGroupsByUserId(userID);
-  res.status(200).json(groups);
-}
 
-export async function addGroupRequest(
-  req: CreateGroupRequestDTO,
-  res: CreateGroupResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+  async addGroupRequest(
+    @Body({ schema: createGroupBodySchema })
+    groupData: z.output<typeof createGroupBodySchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsServece.addGroup(userID, groupData);
+    return "Successfully created";
   }
-  const groupData = res.locals.validateBody;
 
-  await addGroup(userID, groupData);
-  res.status(201).send("Successfully created");
-}
+  @Get(":group_id")
+  async getGroupInfoRequest(
+    @Param({ schema: getGroupInfoParamsSchema })
+    params: z.output<typeof getGroupInfoParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    const { title, isCreator } = await this.groupsServece.getGroupInfo(
+      userID,
+      params.groupID,
+    );
 
-export async function getGroupInfoRequest(
-  req: GetGroupInfoRequestDTO,
-  res: GetGroupInfoResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+    return { title, is_creator: isCreator };
   }
-  const groupParams = res.locals.validateParams;
 
-  const { title, isCreator } = await getGroupInfo(userID, groupParams.groupID);
-
-  res.status(200).json({ title, is_creator: isCreator });
-}
-
-export async function getGroupUsersRequest(
-  req: GetGroupUsersRequestDTO,
-  res: getGroupUsersResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+  @Get(":group_id/users")
+  async getGroupUsersRequest(
+    @Param({ schema: getGroupInfoParamsSchema })
+    params: z.output<typeof getGroupInfoParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.groupsServece.getGroupUsers(userID, params.groupID);
   }
-  const groupParams = res.locals.validateParams;
-
-  const users = await getGroupUsers(userID, groupParams.groupID);
-
-  res.status(200).json(users);
 }
