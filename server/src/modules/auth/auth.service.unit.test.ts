@@ -8,83 +8,136 @@ import {
 } from "@jest/globals";
 
 import type { UUID } from "../../types/shared.js";
-
-type Users = typeof import("./auth.repository.js");
-
-type Sessions = typeof import("./jwt.repository.js");
-
-type Tokens = typeof import("./jwt.service.js");
-
-type Blacklist = typeof import("./auth.blacklist.js");
+import type {
+  AuthBlacklistServiceInterface,
+  AuthRepositoryInterface,
+  JwtRepositoryInterface,
+  JwtServiceInterface,
+} from "./auth.di.js";
+import type {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  User,
+} from "./auth.types.js";
+import type { RefreshTokenRaw, UserRaw } from "./auth.repository.dto.js";
+import {
+  CreateRefreshTokenData,
+  RevokeRefreshTokenData,
+  TokenData,
+} from "./jwt.types.js";
 
 // Мокаем функции
-const createUserMock = jest.fn<Users["createUser"]>();
-const findMaxUserHashMock = jest.fn<Users["findMaxUserHash"]>();
-const findUserByEmailMock = jest.fn<Users["findUserByEmail"]>();
-const findUserByIDMock = jest.fn<Users["findUserByID"]>();
+const findUserByEmailMock =
+  jest.fn<(email: string) => Promise<User | undefined>>();
+const findUserByIDMock = jest.fn<(id: UUID) => Promise<User>>();
+const createUserMock =
+  jest.fn<
+    (
+      username: string,
+      email: string,
+      passwordHash: string,
+      user_hash: number,
+    ) => Promise<UserRaw | undefined>
+  >();
+const findMaxUserHashMock = jest.fn<(username: string) => Promise<number>>();
+class AuthRepository implements AuthRepositoryInterface {
+  constructor(
+    public readonly findUserByEmail: any,
+    public readonly findUserByID: any,
+    public readonly createUser: any,
+    public readonly findMaxUserHash: any,
+  ) {}
+}
+const authRepository = new AuthRepository(
+  findUserByEmailMock,
+  findUserByIDMock,
+  createUserMock,
+  findMaxUserHashMock,
+);
+
 const createRefreshTokenRecordMock =
-  jest.fn<Sessions["createRefreshTokenRecord"]>();
-const findRefreshTokenByJtiMock = jest.fn<Sessions["findRefreshTokenByJti"]>();
+  jest.fn<(data: CreateRefreshTokenData) => Promise<RefreshTokenRaw>>();
+const findRefreshTokenByJtiMock =
+  jest.fn<(jti: string) => Promise<RefreshTokenRaw | undefined>>();
+const revokeRefreshTokenMock = jest.fn<(jti: string) => Promise<void>>();
 const revokeAllUserRefreshTokensMock =
-  jest.fn<Sessions["revokeAllUserRefreshTokens"]>();
-const revokeRefreshTokenMock = jest.fn<Sessions["revokeRefreshToken"]>();
-const verifyRefreshTokenMock = jest.fn<Tokens["verifyRefreshToken"]>();
-const createAccessTokenMock = jest.fn<Tokens["createAccessToken"]>();
-const createRefreshTokenMock = jest.fn<Tokens["createRefreshToken"]>();
-const isRefreshBlacklistedMock = jest.fn<Blacklist["isRefreshBlacklisted"]>();
-const blacklistRefreshTokenMock = jest.fn<Blacklist["blacklistRefreshToken"]>();
+  jest.fn<(userId: UUID) => Promise<RevokeRefreshTokenData[]>>();
+const deleteExpiredRefreshTokensMock = jest.fn<() => Promise<number>>();
+class JwtRepository implements JwtRepositoryInterface {
+  constructor(
+    public readonly createRefreshTokenRecord: any,
+    public readonly findRefreshTokenByJti: any,
+    public readonly revokeRefreshToken: any,
+    public readonly revokeAllUserRefreshTokens: any,
+    public readonly deleteExpiredRefreshTokens: any,
+  ) {}
+}
+const jwtRepository = new JwtRepository(
+  createRefreshTokenRecordMock,
+  findRefreshTokenByJtiMock,
+  revokeRefreshTokenMock,
+  revokeAllUserRefreshTokensMock,
+  deleteExpiredRefreshTokensMock,
+);
+
+const createAccessTokenMock = jest.fn<(userID: UUID) => string>();
+const createRefreshTokenMock = jest.fn<(userID: UUID) => TokenData>();
+const verifyAccessToken = jest.fn<(token: string) => AccessTokenPayload>();
+const verifyRefreshTokenMock =
+  jest.fn<(token: string) => RefreshTokenPayload>();
+class JwtService implements JwtServiceInterface {
+  constructor(
+    public readonly createAccessToken: any,
+    public readonly createRefreshToken: any,
+    public readonly verifyAccessToken: any,
+    public readonly verifyRefreshToken: any,
+  ) {}
+}
+const jwtService = new JwtService(
+  createAccessTokenMock,
+  createRefreshTokenMock,
+  verifyAccessToken,
+  verifyRefreshTokenMock,
+);
+
+const isRefreshBlacklistedMock = jest.fn<(jti: string) => Promise<boolean>>();
+const blacklistRefreshTokenMock =
+  jest.fn<(jti: string, expiresAt: number) => Promise<void>>();
+class AuthBlacklistService implements AuthBlacklistServiceInterface {
+  constructor(
+    public readonly isRefreshBlacklisted: any,
+    public readonly blacklistRefreshToken: any,
+  ) {}
+}
+const authBlacklistService = new AuthBlacklistService(
+  isRefreshBlacklistedMock,
+  blacklistRefreshTokenMock,
+);
+
 const hashMock =
   jest.fn<(password: string, rounds: number) => Promise<string>>();
 const compareMock =
   jest.fn<(password: string, hashed: string) => Promise<boolean>>();
 
 // Мокаем импорты этих функций
-jest.unstable_mockModule("bcrypt", () => ({ default: { hash: hashMock, compare: compareMock } }));
-jest.unstable_mockModule("./auth.repository.js", () => ({
-  createUser: createUserMock,
-  findMaxUserHash: findMaxUserHashMock,
-  findUserByEmail: findUserByEmailMock,
-  findUserByID: findUserByIDMock,
+jest.unstable_mockModule("bcrypt", () => ({
+  default: { hash: hashMock, compare: compareMock },
 }));
-jest.unstable_mockModule("./jwt.repository.js", () => ({
-  createRefreshTokenRecord: createRefreshTokenRecordMock,
-  findRefreshTokenByJti: findRefreshTokenByJtiMock,
-  revokeAllUserRefreshTokens: revokeAllUserRefreshTokensMock,
-  revokeRefreshToken: revokeRefreshTokenMock,
+jest.unstable_mockModule("../../config/env.js", () => ({
+  config: { auth: { bcryptRounds: 12 } },
 }));
-jest.unstable_mockModule("./jwt.service.js", () => ({
-  verifyRefreshToken: verifyRefreshTokenMock,
-  createAccessToken: createAccessTokenMock,
-  createRefreshToken: createRefreshTokenMock,
-}));
-jest.unstable_mockModule("./auth.blacklist.js", () => ({
-  isRefreshBlacklisted: isRefreshBlacklistedMock,
-  blacklistRefreshToken: blacklistRefreshTokenMock,
-}));
-jest.unstable_mockModule("../../config/env.js", () => ({ config: { auth: { bcryptRounds: 12 } } }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-type AuthService = typeof import("./auth.service.js");
-
-let registerUser: AuthService["registerUser"];
-let loginUser: AuthService["loginUser"];
-let refreshTokens: AuthService["refreshTokens"];
-let logoutUser: AuthService["logoutUser"];
-let revokeAllUserRefresh: AuthService["revokeAllUserRefresh"];
-let getUserData: AuthService["getUserData"];
+let authService: any;
 beforeAll(async () => {
   const service = await import("./auth.service.js");
-
-  registerUser = service.registerUser;
-  loginUser = service.loginUser;
-  refreshTokens = service.refreshTokens;
-  logoutUser = service.logoutUser;
-  revokeAllUserRefresh = service.revokeAllUserRefresh;
-  getUserData = service.getUserData;
+  authService = new service.AuthService(
+    authRepository,
+    jwtService,
+    jwtRepository,
+    authBlacklistService,
+  );
 });
-
-
-
 
 describe("auth service", () => {
   const userID = "00000000-0000-0000-0000-000000000001" as UUID;
@@ -115,11 +168,17 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
@@ -139,15 +198,23 @@ describe("auth service", () => {
     test("registers with hashed password and next username hash", async () => {
       hashMock.mockResolvedValue("hashed");
       findMaxUserHashMock.mockResolvedValue(2);
-      createUserMock.mockResolvedValue({ id: userID } as Awaited<ReturnType<Users["createUser"]>>);
+      createUserMock.mockResolvedValue({ id: userID } as Awaited<
+        ReturnType<Users["createUser"]>
+      >);
 
-      await expect(registerUser(registration, "Browser")).resolves.toEqual(
-        { accessToken: "access", refreshToken: "refresh" },
-      );
+      await expect(registerUser(registration, "Browser")).resolves.toEqual({
+        accessToken: "access",
+        refreshToken: "refresh",
+      });
 
       expect(hashMock).toHaveBeenCalledWith("password", 12);
       expect(findMaxUserHashMock).toHaveBeenCalledWith("Vlad");
-      expect(createUserMock).toHaveBeenCalledWith("Vlad", user.email, "hashed", 3);
+      expect(createUserMock).toHaveBeenCalledWith(
+        "Vlad",
+        user.email,
+        "hashed",
+        3,
+      );
       expect(createAccessTokenMock).toHaveBeenCalledWith(userID);
       expect(createRefreshTokenMock).toHaveBeenCalledWith(userID);
       expect(createRefreshTokenRecordMock).toHaveBeenCalledWith({
@@ -161,7 +228,9 @@ describe("auth service", () => {
     test("rejects failed user creation without issuing tokens", async () => {
       findMaxUserHashMock.mockResolvedValue(0);
 
-      await expect(registerUser(registration)).rejects.toThrow("Can't create user");
+      await expect(registerUser(registration)).rejects.toThrow(
+        "Can't create user",
+      );
 
       expect(createAccessTokenMock).not.toHaveBeenCalled();
     });
@@ -171,11 +240,17 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
@@ -202,9 +277,10 @@ describe("auth service", () => {
       findUserByEmailMock.mockResolvedValue(user);
       compareMock.mockResolvedValue(true);
 
-      await expect(loginUser(registration)).resolves.toEqual(
-        { accessToken: "access", refreshToken: "refresh" },
-      );
+      await expect(loginUser(registration)).resolves.toEqual({
+        accessToken: "access",
+        refreshToken: "refresh",
+      });
 
       expect(createAccessTokenMock).toHaveBeenCalledWith(userID);
       expect(createRefreshTokenMock).toHaveBeenCalledWith(userID);
@@ -221,11 +297,17 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
@@ -233,14 +315,18 @@ describe("auth service", () => {
     test("rejects blacklisted refresh before reading session", async () => {
       isRefreshBlacklistedMock.mockResolvedValue(true);
 
-      await expect(refreshTokens("old")).rejects.toThrow("Refresh token revoked");
+      await expect(refreshTokens("old")).rejects.toThrow(
+        "Refresh token revoked",
+      );
 
       expect(isRefreshBlacklistedMock).toHaveBeenCalledWith("old-jti");
       expect(findRefreshTokenByJtiMock).not.toHaveBeenCalled();
     });
 
     test("refreshTokens rejects missing session", async () => {
-      await expect(refreshTokens("old")).rejects.toThrow("Refresh token session not found");
+      await expect(refreshTokens("old")).rejects.toThrow(
+        "Refresh token session not found",
+      );
 
       expect(findRefreshTokenByJtiMock).toHaveBeenCalledWith("old-jti");
       expect(revokeRefreshTokenMock).not.toHaveBeenCalled();
@@ -249,20 +335,29 @@ describe("auth service", () => {
     });
 
     test("rejects revoked refresh", async () => {
-      findRefreshTokenByJtiMock.mockResolvedValue({ ...session, revoked_at: new Date() });
+      findRefreshTokenByJtiMock.mockResolvedValue({
+        ...session,
+        revoked_at: new Date(),
+      });
 
-      await expect(refreshTokens("old")).rejects.toThrow("Refresh token revoked");
+      await expect(refreshTokens("old")).rejects.toThrow(
+        "Refresh token revoked",
+      );
 
       expect(createRefreshTokenRecordMock).not.toHaveBeenCalled();
       expect(blacklistRefreshTokenMock).not.toHaveBeenCalled();
     });
 
     test("rotates refresh and preserves user agent Browser", async () => {
-      findRefreshTokenByJtiMock.mockResolvedValue({ ...session, user_agent: "Browser" });
+      findRefreshTokenByJtiMock.mockResolvedValue({
+        ...session,
+        user_agent: "Browser",
+      });
 
-      await expect(refreshTokens("old")).resolves.toEqual(
-        { accessToken: "access", refreshToken: "refresh" },
-      );
+      await expect(refreshTokens("old")).resolves.toEqual({
+        accessToken: "access",
+        refreshToken: "refresh",
+      });
 
       expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
         "old-jti",
@@ -280,11 +375,15 @@ describe("auth service", () => {
     });
 
     test("rotates refresh and preserves user agent null", async () => {
-      findRefreshTokenByJtiMock.mockResolvedValue({ ...session, user_agent: null });
+      findRefreshTokenByJtiMock.mockResolvedValue({
+        ...session,
+        user_agent: null,
+      });
 
-      await expect(refreshTokens("old")).resolves.toEqual(
-        { accessToken: "access", refreshToken: "refresh" },
-      );
+      await expect(refreshTokens("old")).resolves.toEqual({
+        accessToken: "access",
+        refreshToken: "refresh",
+      });
 
       expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
         "old-jti",
@@ -315,17 +414,25 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
 
     test("logoutUser rejects missing session", async () => {
-      await expect(logoutUser("old")).rejects.toThrow("Refresh token session not found");
+      await expect(logoutUser("old")).rejects.toThrow(
+        "Refresh token session not found",
+      );
 
       expect(findRefreshTokenByJtiMock).toHaveBeenCalledWith("old-jti");
       expect(revokeRefreshTokenMock).not.toHaveBeenCalled();
@@ -346,7 +453,10 @@ describe("auth service", () => {
     });
 
     test("logout is idempotent for revoked session", async () => {
-      findRefreshTokenByJtiMock.mockResolvedValue({ ...session, revoked_at: new Date() });
+      findRefreshTokenByJtiMock.mockResolvedValue({
+        ...session,
+        revoked_at: new Date(),
+      });
 
       await logoutUser("old");
 
@@ -368,11 +478,17 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
@@ -390,21 +506,32 @@ describe("auth service", () => {
 
     test("revokes all sessions of the session owner", async () => {
       findRefreshTokenByJtiMock.mockResolvedValue(session);
-      revokeAllUserRefreshTokensMock.mockResolvedValue([{ jti: "first", expires_at: 1900000000 }, { jti: "second", expires_at: 1900000100 }]);
+      revokeAllUserRefreshTokensMock.mockResolvedValue([
+        { jti: "first", expires_at: 1900000000 },
+        { jti: "second", expires_at: 1900000100 },
+      ]);
 
       await revokeAllUserRefresh("old");
 
       expect(revokeAllUserRefreshTokensMock).toHaveBeenCalledWith(userID);
       expect(blacklistRefreshTokenMock).toHaveBeenCalledTimes(2);
-      expect(blacklistRefreshTokenMock).toHaveBeenCalledWith("first", 1900000000);
-      expect(blacklistRefreshTokenMock).toHaveBeenCalledWith("second", 1900000100);
+      expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
+        "first",
+        1900000000,
+      );
+      expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
+        "second",
+        1900000100,
+      );
     });
 
     test("revokeAllUserRefresh propagates invalid token before repository calls", async () => {
       verifyRefreshTokenMock.mockImplementation(() => {
         throw new Error("Invalid token");
       });
-      await expect(revokeAllUserRefresh("invalid")).rejects.toThrow("Invalid token");
+      await expect(revokeAllUserRefresh("invalid")).rejects.toThrow(
+        "Invalid token",
+      );
 
       expect(findRefreshTokenByJtiMock).not.toHaveBeenCalled();
     });
@@ -414,11 +541,17 @@ describe("auth service", () => {
     beforeEach(() => {
       jest.resetAllMocks();
       createAccessTokenMock.mockReturnValue("access");
-      createRefreshTokenMock.mockReturnValue({ token: "refresh", jti: "00000000-0000-0000-0000-000000000003" });
-      verifyRefreshTokenMock.mockImplementation(token => ({
+      createRefreshTokenMock.mockReturnValue({
+        token: "refresh",
+        jti: "00000000-0000-0000-0000-000000000003",
+      });
+      verifyRefreshTokenMock.mockImplementation((token) => ({
         type: "refresh",
         sub: userID,
-        jti: token === "refresh" ? "00000000-0000-0000-0000-000000000003" : "old-jti",
+        jti:
+          token === "refresh"
+            ? "00000000-0000-0000-0000-000000000003"
+            : "old-jti",
         exp: expiresAt.getTime() / 1000,
       }));
     });
@@ -432,7 +565,9 @@ describe("auth service", () => {
     });
 
     test("rejects missing current user", async () => {
-      await expect(getUserData(userID)).rejects.toThrow("Refresh token session not found");
+      await expect(getUserData(userID)).rejects.toThrow(
+        "Refresh token session not found",
+      );
     });
   });
 });

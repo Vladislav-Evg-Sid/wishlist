@@ -8,36 +8,39 @@ import {
 } from "@jest/globals";
 
 import type { UUID } from "../../types/shared.js";
-
-type Repository = typeof import("./wishlists.repository.js");
+import type { WishlistsRepositoryInterface } from "./wishlists.di.js";
+import type { CreateWishlistData, WishlistData } from "./wishlists.types.js";
 
 // Мокаем функции
-const createWishlistMock = jest.fn<Repository["createWishlist"]>();
-const findGroupWishlistsMock = jest.fn<Repository["findGroupWishlists"]>();
 type CheckUserGroup = typeof import("../../shared/checkUserGroup.js");
-
 const checkGroupUserAccessMock =
   jest.fn<CheckUserGroup["checkGroupUserAccess"]>();
 
+const createWishlistMock =
+  jest.fn<(wishlist: CreateWishlistData) => Promise<string>>();
+const findGroupWishlistsMock =
+  jest.fn<(groupID: UUID) => Promise<WishlistData[]>>();
+class WishlistsRepository implements WishlistsRepositoryInterface {
+  constructor(
+    public readonly createWishlist: any,
+    public readonly findGroupWishlists: any,
+  ) {}
+}
+const wishlistsRepository = new WishlistsRepository(
+  createWishlistMock,
+  findGroupWishlistsMock,
+);
+
 // Мокаем импорты этих функций
-jest.unstable_mockModule("./wishlists.repository.js", () => ({
-  createWishlist: createWishlistMock,
-  findGroupWishlists: findGroupWishlistsMock,
-}));
 jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
   checkGroupUserAccess: checkGroupUserAccessMock,
 }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-type WishlistsService = typeof import("./wishlists.service.js");
-
-let getGroupWishlists: WishlistsService["getGroupWishlists"];
-let addWishlist: WishlistsService["addWishlist"];
+let wishlistsService: any;
 beforeAll(async () => {
   const service = await import("./wishlists.service.js");
-
-  getGroupWishlists = service.getGroupWishlists;
-  addWishlist = service.addWishlist;
+  wishlistsService = new service.WishlistsService(wishlistsRepository);
 });
 
 describe("wishlists service", () => {
@@ -53,9 +56,9 @@ describe("wishlists service", () => {
     test("denies reading wishlists without group access", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(getGroupWishlists(creatorID, groupID)).rejects.toThrow(
-        "User not a member or creator",
-      );
+      await expect(
+        wishlistsService.getGroupWishlists(creatorID, groupID),
+      ).rejects.toThrow("User not a member or creator");
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(findGroupWishlistsMock).not.toHaveBeenCalled();
@@ -65,7 +68,9 @@ describe("wishlists service", () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
       findGroupWishlistsMock.mockResolvedValue([]);
 
-      await expect(getGroupWishlists(creatorID, groupID)).resolves.toEqual([]);
+      await expect(
+        wishlistsService.getGroupWishlists(creatorID, groupID),
+      ).resolves.toEqual([]);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(findGroupWishlistsMock).toHaveBeenCalledWith(groupID);
@@ -73,11 +78,13 @@ describe("wishlists service", () => {
 
     test("returns group wishlists", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
-      findGroupWishlistsMock.mockResolvedValue([{ id: groupID, title: "Birthday" }]);
+      findGroupWishlistsMock.mockResolvedValue([
+        { id: groupID, title: "Birthday" },
+      ]);
 
-      await expect(getGroupWishlists(creatorID, groupID)).resolves.toEqual(
-        [{ id: groupID, title: "Birthday" }],
-      );
+      await expect(
+        wishlistsService.getGroupWishlists(creatorID, groupID),
+      ).resolves.toEqual([{ id: groupID, title: "Birthday" }]);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(findGroupWishlistsMock).toHaveBeenCalledWith(groupID);
@@ -92,7 +99,9 @@ describe("wishlists service", () => {
     test("denies creating a wishlist without group access", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(addWishlist(wishlist)).rejects.toThrow("User not a member or creator");
+      await expect(wishlistsService.addWishlist(wishlist)).rejects.toThrow(
+        "User not a member or creator",
+      );
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(createWishlistMock).not.toHaveBeenCalled();
@@ -101,11 +110,13 @@ describe("wishlists service", () => {
     test("creates a wishlist with group access", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
 
-      await expect(addWishlist(wishlist)).resolves.toBeUndefined();
+      await expect(
+        wishlistsService.addWishlist(wishlist),
+      ).resolves.toBeUndefined();
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
-      expect(createWishlistMock).toHaveBeenCalledWith(wishlist);
       expect(createWishlistMock).toHaveBeenCalledTimes(1);
+      expect(createWishlistMock).toHaveBeenCalledWith(wishlist);
     });
   });
 });
