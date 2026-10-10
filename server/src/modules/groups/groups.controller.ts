@@ -1,17 +1,6 @@
-import { Body, Controller, Get, Inject, Param } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
 import type z from "zod";
 
-import { UnauthorizedError } from "../../shared/errors.js";
-import type {
-  CreateGroupRequestDTO,
-  CreateGroupResponseDTO,
-  GetGroupInfoRequestDTO,
-  GetGroupInfoResponseDTO,
-  GetGroupUsersRequestDTO,
-  getGroupUsersResponseDTO,
-  GetUserGroupsRequestDTO,
-  GetUserGroupsResponseDTO,
-} from "./groups.http.dto.js";
 import { GROUPS_SERVICE, type GroupsServiceInterface } from "./groups.di.js";
 import type { UUID } from "../../types/shared.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
@@ -35,6 +24,7 @@ export class GroupsController {
     return await this.groupsServece.getGroupsByUserId(userID);
   }
 
+  @Post()
   async addGroupRequest(
     @Body({ schema: createGroupBodySchema })
     groupData: z.output<typeof createGroupBodySchema>,

@@ -15,7 +15,7 @@ import { config } from "../../config/env.js";
 import { UnauthorizedError } from "../../shared/errors.js";
 import { AUTH_SERVICE, type AuthServiceInterface } from "./auth.di.js";
 import { Public } from "./decorator/publicEndpoint.decorator.js";
-import { createUserBodySchema } from "./auth.schemas.js";
+import { createUserBodySchema, loginUserBodySchema } from "./auth.schemas.js";
 import { CurrentUserID } from "./decorator/currentUserID.decorator.js";
 import type { UUID } from "../../types/shared.js";
 
@@ -53,14 +53,13 @@ export class AuthController {
   @Public()
   @Post("login")
   async loginUserRequest(
-    @Body({ schema: createUserBodySchema })
-    userData: z.output<typeof createUserBodySchema>,
+    @Body({ schema: loginUserBodySchema })
+    userData: z.output<typeof loginUserBodySchema>,
     @Headers("user-agent")
     userAgent: string | undefined,
     @Res({ passthrough: true })
     res: Response,
   ) {
-    console.log("******************************************");
     const { accessToken, refreshToken } = await this.authService.loginUser(
       userData,
       userAgent,

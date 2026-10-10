@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "dev:nest": "tsx watch src/main.ts",
+    "dev:nest": "nest start --watch --builder tsc --entryFile main.js",
     "db:migrate": "knex migrate:latest --env development",
     "db:seed": "knex seed:run --env development",
     "dev:docker": "npm run db:migrate && npm run db:seed && npm run dev",
@@ -39,6 +39,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@nestjs/cli": "^12.0.8",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
