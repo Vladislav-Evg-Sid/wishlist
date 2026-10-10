@@ -3,6 +3,7 @@ import {
   type ArgumentsHost,
   type ExceptionFilter,
   Catch,
+  HttpException,
 } from "@nestjs/common";
 
 import { AppError } from "../errors.js";
@@ -33,6 +34,28 @@ export class AppErrorFilter implements ExceptionFilter {
         },
         error.statusCode,
       );
+      return;
+    }
+
+    if (error instanceof HttpException) {
+      const statusCode = error.getStatus();
+
+      request.log.warn(
+        {
+          statusCode,
+        },
+        error.message,
+      );
+
+      httpAdapter.reply(
+        response,
+        {
+          code: statusCode === 404 ? "NOT_FOUND" : "HTTP_ERROR",
+          message: error.message,
+        },
+        statusCode,
+      );
+
       return;
     }
 
