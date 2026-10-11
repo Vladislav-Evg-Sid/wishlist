@@ -4,16 +4,17 @@ include .env
 help:
 	@echo Команды для запуска:
 	@echo = Разработка:
-	@echo -- run-dev:       запуск в режиме разработки
-	@echo -- stop-dev:      остановка контейнеров в режиме разработки
+	@echo -- run-dev:          запуск в режиме разработки
+	@echo -- stop-dev:         остановка контейнеров в режиме разработки
 	@echo = Тестрование:
-	@echo -- test-unit:     запуск unit-тестов
-	@echo -- run-dev-test:  запуск БД с миграциями для интеграционных тестов
-	@echo -- stop-dev-test: остановка контейнеров для интеграционных тестов
+	@echo -- test-unit:        запуск unit-тестов
+	@echo -- test-integration: запуск интеграционных тестов
+	@echo -- run-dev-test:     запуск БД с миграциями для интеграционных тестов
+	@echo -- stop-dev-test:    остановка контейнеров для интеграционных тестов
 	@echo = Подключения:
-	@echo -- connect-db:    подключение к БД
-	@echo -- connect-db-test: подключение к тестовой БД
-	@echo -- connect-redis: подключение к Redis
+	@echo -- connect-db:       подключение к БД
+	@echo -- connect-db-test:  подключение к тестовой БД
+	@echo -- connect-redis:    подключение к Redis
 
 .PHONY: run-dev stop-dev
 run-dev:
@@ -22,9 +23,19 @@ run-dev:
 stop-dev:
 	docker compose -f ./docker-compose-develop.yml stop
 
-.PHONY: run-dev-test stop-dev-test test-unit
+.PHONY: run-dev-test stop-dev-test test-unit test-integration test-all
 test-unit:
 	cd ./server && npm run test:unit
+
+test-integration:
+	make run-dev-test
+	cd ./server && npm run test:integration
+	make stop-dev-test
+
+test-all:
+	make run-dev-test
+	cd ./server && npm run test
+	make stop-dev-test
 
 run-dev-test:
 	docker compose --env-file ./server/.env.test -f ./docker-compose-testing.yml up -d db-test
