@@ -11,10 +11,10 @@ help:
 	@echo -- connect-redis: подключение к Redis
 
 run-dev:
-	docker compose -f .\docker-compose-develop.yml up --build --watch
+	docker compose -f ./docker-compose-develop.yml up --build --watch
 
 run-dev-test:
-	docker compose --env-file .\server\.env.test -f .\docker-compose-testing.yml up -d --build
+	docker compose --env-file ./server/.env.test -f ./docker-compose-testing.yml up -d --build
 
 connect-db:
 	docker exec -it wishlist-db psql -U postgres -d wishlist
