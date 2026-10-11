@@ -20,7 +20,7 @@ import type {
   User,
 } from "./auth.types.js";
 import type { RefreshTokenRaw, UserRaw } from "./auth.repository.dto.js";
-import {
+import type {
   CreateRefreshTokenData,
   RevokeRefreshTokenData,
   TokenData,
@@ -186,7 +186,7 @@ describe("auth service", () => {
     test("rejects duplicate email before hashing", async () => {
       findUserByEmailMock.mockResolvedValue(user);
 
-      await expect(registerUser(registration)).rejects.toThrow(
+      await expect(authService.registerUser(registration)).rejects.toThrow(
         "User with this email already exists",
       );
 
@@ -198,11 +198,19 @@ describe("auth service", () => {
     test("registers with hashed password and next username hash", async () => {
       hashMock.mockResolvedValue("hashed");
       findMaxUserHashMock.mockResolvedValue(2);
-      createUserMock.mockResolvedValue({ id: userID } as Awaited<
-        ReturnType<Users["createUser"]>
-      >);
+      createUserMock.mockResolvedValue({
+        id: userID,
+        username: "",
+        user_hash: 1,
+        email: "1@mail.ru",
+        password_hash: "",
+        created_at: new Date(),
+        updated_at: null,
+      });
 
-      await expect(registerUser(registration, "Browser")).resolves.toEqual({
+      await expect(
+        authService.registerUser(registration, "Browser"),
+      ).resolves.toEqual({
         accessToken: "access",
         refreshToken: "refresh",
       });
@@ -228,7 +236,7 @@ describe("auth service", () => {
     test("rejects failed user creation without issuing tokens", async () => {
       findMaxUserHashMock.mockResolvedValue(0);
 
-      await expect(registerUser(registration)).rejects.toThrow(
+      await expect(authService.registerUser(registration)).rejects.toThrow(
         "Can't create user",
       );
 
@@ -256,7 +264,9 @@ describe("auth service", () => {
     });
 
     test("rejects unknown login email", async () => {
-      await expect(loginUser(registration)).rejects.toThrow("Invalid email");
+      await expect(authService.loginUser(registration)).rejects.toThrow(
+        "Invalid email",
+      );
 
       expect(compareMock).not.toHaveBeenCalled();
     });
@@ -265,7 +275,7 @@ describe("auth service", () => {
       findUserByEmailMock.mockResolvedValue(user);
       compareMock.mockResolvedValue(false);
 
-      await expect(loginUser(registration)).rejects.toThrow(
+      await expect(authService.loginUser(registration)).rejects.toThrow(
         "Invalid password for this email",
       );
 
@@ -277,7 +287,7 @@ describe("auth service", () => {
       findUserByEmailMock.mockResolvedValue(user);
       compareMock.mockResolvedValue(true);
 
-      await expect(loginUser(registration)).resolves.toEqual({
+      await expect(authService.loginUser(registration)).resolves.toEqual({
         accessToken: "access",
         refreshToken: "refresh",
       });
@@ -315,7 +325,7 @@ describe("auth service", () => {
     test("rejects blacklisted refresh before reading session", async () => {
       isRefreshBlacklistedMock.mockResolvedValue(true);
 
-      await expect(refreshTokens("old")).rejects.toThrow(
+      await expect(authService.refreshTokens("old")).rejects.toThrow(
         "Refresh token revoked",
       );
 
@@ -324,7 +334,7 @@ describe("auth service", () => {
     });
 
     test("refreshTokens rejects missing session", async () => {
-      await expect(refreshTokens("old")).rejects.toThrow(
+      await expect(authService.refreshTokens("old")).rejects.toThrow(
         "Refresh token session not found",
       );
 
@@ -340,7 +350,7 @@ describe("auth service", () => {
         revoked_at: new Date(),
       });
 
-      await expect(refreshTokens("old")).rejects.toThrow(
+      await expect(authService.refreshTokens("old")).rejects.toThrow(
         "Refresh token revoked",
       );
 
@@ -354,7 +364,7 @@ describe("auth service", () => {
         user_agent: "Browser",
       });
 
-      await expect(refreshTokens("old")).resolves.toEqual({
+      await expect(authService.refreshTokens("old")).resolves.toEqual({
         accessToken: "access",
         refreshToken: "refresh",
       });
@@ -380,7 +390,7 @@ describe("auth service", () => {
         user_agent: null,
       });
 
-      await expect(refreshTokens("old")).resolves.toEqual({
+      await expect(authService.refreshTokens("old")).resolves.toEqual({
         accessToken: "access",
         refreshToken: "refresh",
       });
@@ -404,7 +414,9 @@ describe("auth service", () => {
       verifyRefreshTokenMock.mockImplementation(() => {
         throw new Error("Invalid token");
       });
-      await expect(refreshTokens("invalid")).rejects.toThrow("Invalid token");
+      await expect(authService.refreshTokens("invalid")).rejects.toThrow(
+        "Invalid token",
+      );
 
       expect(findRefreshTokenByJtiMock).not.toHaveBeenCalled();
     });
@@ -430,7 +442,7 @@ describe("auth service", () => {
     });
 
     test("logoutUser rejects missing session", async () => {
-      await expect(logoutUser("old")).rejects.toThrow(
+      await expect(authService.logoutUser("old")).rejects.toThrow(
         "Refresh token session not found",
       );
 
@@ -443,7 +455,7 @@ describe("auth service", () => {
     test("logout revokes and blacklists refresh", async () => {
       findRefreshTokenByJtiMock.mockResolvedValue(session);
 
-      await logoutUser("old");
+      await authService.logoutUser("old");
 
       expect(revokeRefreshTokenMock).toHaveBeenCalledWith("old-jti");
       expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
@@ -458,7 +470,7 @@ describe("auth service", () => {
         revoked_at: new Date(),
       });
 
-      await logoutUser("old");
+      await authService.logoutUser("old");
 
       expect(revokeRefreshTokenMock).not.toHaveBeenCalled();
       expect(blacklistRefreshTokenMock).not.toHaveBeenCalled();
@@ -468,7 +480,9 @@ describe("auth service", () => {
       verifyRefreshTokenMock.mockImplementation(() => {
         throw new Error("Invalid token");
       });
-      await expect(logoutUser("invalid")).rejects.toThrow("Invalid token");
+      await expect(authService.logoutUser("invalid")).rejects.toThrow(
+        "Invalid token",
+      );
 
       expect(findRefreshTokenByJtiMock).not.toHaveBeenCalled();
     });
@@ -494,7 +508,7 @@ describe("auth service", () => {
     });
 
     test("revokeAllUserRefresh rejects missing session", async () => {
-      await expect(revokeAllUserRefresh("old")).rejects.toThrow(
+      await expect(authService.revokeAllUserRefresh("old")).rejects.toThrow(
         "Refresh token session not found",
       );
 
@@ -507,20 +521,20 @@ describe("auth service", () => {
     test("revokes all sessions of the session owner", async () => {
       findRefreshTokenByJtiMock.mockResolvedValue(session);
       revokeAllUserRefreshTokensMock.mockResolvedValue([
-        { jti: "first", expires_at: 1900000000 },
-        { jti: "second", expires_at: 1900000100 },
+        { jti: "first-0-0-0-0", expires_at: 1900000000 },
+        { jti: "second-0-0-0-0", expires_at: 1900000100 },
       ]);
 
-      await revokeAllUserRefresh("old");
+      await authService.revokeAllUserRefresh("old");
 
       expect(revokeAllUserRefreshTokensMock).toHaveBeenCalledWith(userID);
       expect(blacklistRefreshTokenMock).toHaveBeenCalledTimes(2);
       expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
-        "first",
+        "first-0-0-0-0",
         1900000000,
       );
       expect(blacklistRefreshTokenMock).toHaveBeenCalledWith(
-        "second",
+        "second-0-0-0-0",
         1900000100,
       );
     });
@@ -529,7 +543,7 @@ describe("auth service", () => {
       verifyRefreshTokenMock.mockImplementation(() => {
         throw new Error("Invalid token");
       });
-      await expect(revokeAllUserRefresh("invalid")).rejects.toThrow(
+      await expect(authService.revokeAllUserRefresh("invalid")).rejects.toThrow(
         "Invalid token",
       );
 
@@ -559,13 +573,13 @@ describe("auth service", () => {
     test("returns current user", async () => {
       findUserByIDMock.mockResolvedValue(user);
 
-      await expect(getUserData(userID)).resolves.toEqual(user);
+      await expect(authService.getUserData(userID)).resolves.toEqual(user);
 
       expect(findUserByIDMock).toHaveBeenCalledWith(userID);
     });
 
     test("rejects missing current user", async () => {
-      await expect(getUserData(userID)).rejects.toThrow(
+      await expect(authService.getUserData(userID)).rejects.toThrow(
         "Refresh token session not found",
       );
     });
