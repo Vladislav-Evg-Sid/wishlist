@@ -15,10 +15,27 @@ services:
     networks:
       - wishlist-server-testing-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
-      interval: 10s
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "postgres"]
+      interval: 2s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  db-migrate:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    environment:
+      DB_HOST: db-test
+      DB_PORT: ${DB_CONTAINER_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    command: npm run db:prepare
+    depends_on:
+      db-test:
+        condition: service_healthy
+    networks:
+      - wishlist-server-testing-network
 
 networks:
   wishlist-server-testing-network:

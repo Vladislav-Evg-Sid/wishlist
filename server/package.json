@@ -6,6 +6,7 @@
     "dev": "tsx watch src/server.ts",
     "dev:nest": "nest start --watch --builder tsc --entryFile main.js",
     "db:migrate": "knex migrate:latest --env development",
+    "db:prepare": "tsx src/db/prepare.ts",
     "db:seed": "knex seed:run --env development",
     "dev:docker": "npm run db:migrate && npm run db:seed && npm run dev",
     "dev:docker:nest": "npm run db:migrate && npm run db:seed && npm run dev:nest",
