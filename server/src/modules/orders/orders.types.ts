@@ -29,3 +29,11 @@ export interface CardDataInsert {
   href: string;
   creatorID: UUID;
 }
+
+export interface CardDataUpdate {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  href: string;
+}

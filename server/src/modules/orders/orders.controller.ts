@@ -1,9 +1,19 @@
-import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+} from "@nestjs/common";
 import type z from "zod";
 
 import {
   getWishlistCardsParamsSchema,
   addCardBodySchema,
+  updateCardBopySchema,
+  updateCardParamsSchema,
 } from "./orders.schemas.js";
 import { ORDERS_SERVICE, type OrdersServiceInterface } from "./orders.di.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
@@ -36,6 +46,22 @@ export class OrderController {
     await this.ordersService.addCard({
       ...cardData,
       creatorID: userID,
+    });
+    return;
+  }
+
+  @Put(":order_id")
+  async updateCardRequest(
+    @Body({ schema: updateCardBopySchema })
+    cardData: z.output<typeof updateCardBopySchema>,
+    @Param({ schema: updateCardParamsSchema })
+    params: z.output<typeof updateCardParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.updateCard(userID, {
+      ...cardData,
+      id: params.orderID,
     });
     return;
   }

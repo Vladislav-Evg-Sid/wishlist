@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { number, z } from "zod";
 
 import { UUIDSchema } from "../../shared/zodUUID.js";
 
@@ -25,3 +25,16 @@ export const addCardBodySchema = z
     icon: data.icon,
     href: data.href,
   }));
+
+export const updateCardBopySchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  icon: z.string(),
+  href: z.string(),
+});
+
+export const updateCardParamsSchema = z
+  .object({
+    order_id: z.string(),
+  })
+  .transform(({ order_id }) => ({ orderID: +order_id }));

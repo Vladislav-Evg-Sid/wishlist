@@ -3,7 +3,11 @@ import { Inject, Injectable } from "@nestjs/common";
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
 import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
-import type { CardData, CardDataInsert } from "./orders.types.js";
+import type {
+  CardData,
+  CardDataInsert,
+  CardDataUpdate,
+} from "./orders.types.js";
 import {
   ORDERS_REPOSITORY,
   type OrdersRepositoryInterface,
@@ -14,12 +18,12 @@ import {
 export class OrdersService implements OrdersServiceInterface {
   constructor(
     @Inject(ORDERS_REPOSITORY)
-    private readonly serviceRepository: OrdersRepositoryInterface,
+    private readonly ordersRepository: OrdersRepositoryInterface,
   ) {}
 
   async getWishlistCards(userID: UUID, wishlistID: UUID): Promise<CardData[]> {
     const groupID =
-      await this.serviceRepository.findGroupIDByWishlistID(wishlistID);
+      await this.ordersRepository.findGroupIDByWishlistID(wishlistID);
     if (!groupID) {
       throw new NotFoundError("Not found wishlist's group");
     }
@@ -29,7 +33,7 @@ export class OrdersService implements OrdersServiceInterface {
       throw new ForbidenError("User not a member or creator");
     }
 
-    const cardsRaw = await this.serviceRepository.findWishlistCards(wishlistID);
+    const cardsRaw = await this.ordersRepository.findWishlistCards(wishlistID);
 
     return cardsRaw.map(
       (card): CardData => ({
@@ -52,7 +56,7 @@ export class OrdersService implements OrdersServiceInterface {
   }
 
   async addCard(card: CardDataInsert): Promise<void> {
-    const groupID = await this.serviceRepository.findGroupIDByWishlistID(
+    const groupID = await this.ordersRepository.findGroupIDByWishlistID(
       card.wishlistID,
     );
     if (!groupID) {
@@ -64,6 +68,29 @@ export class OrdersService implements OrdersServiceInterface {
       throw new ForbidenError("User not a member or creator");
     }
 
-    await this.serviceRepository.createCard(card);
+    await this.ordersRepository.createCard(card);
+  }
+
+  async updateCard(userID: UUID, card: CardDataUpdate): Promise<void> {
+    const groupID = await this.ordersRepository.findGroupIDByOrderID(card.id);
+    if (!groupID) {
+      throw new NotFoundError("Not found wishlist's group");
+    }
+
+    const userAccess = await checkGroupUserAccess(userID, groupID);
+    if (!userAccess) {
+      throw new ForbidenError("User not a member or creator");
+    }
+
+    const cardData = await this.ordersRepository.findCardByID(card.id);
+    if (!cardData) {
+      throw new NotFoundError("card not found");
+    }
+
+    if (userID !== cardData.author_id) {
+      throw new ForbidenError("user is not a creator");
+    }
+
+    await this.ordersRepository.updateCard(card);
   }
 }

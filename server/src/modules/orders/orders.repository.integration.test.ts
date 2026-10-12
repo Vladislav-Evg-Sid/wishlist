@@ -4,7 +4,10 @@ import { OrdersRepository } from "./orders.repository.js";
 import { createWishlist } from "../../../tests/integration/fixtures/wishlists.js";
 import { db } from "../../db/knex.js";
 import { CARD_COLUMNS, TABLES, USER_COLUMNS } from "../../db/schema.js";
-import { createCards } from "../../../tests/integration/fixtures/card.js";
+import {
+  createCards,
+  createCardWithParantWishlistID,
+} from "../../../tests/integration/fixtures/card.js";
 import type { UUID } from "../../types/shared.js";
 
 const ordersRepository = new OrdersRepository();
@@ -27,6 +30,98 @@ describe("orders repository", () => {
         await ordersRepository.findGroupIDByWishlistID(wishlistID);
 
       expect(findedGroupID).toBe(groupID);
+    });
+  });
+
+  describe("findGroupIDByOrderID", () => {
+    test("returns null when order does not exist", async () => {
+      await createCards(1);
+      const orderID = 0;
+
+      const groupID = await ordersRepository.findGroupIDByOrderID(orderID);
+
+      expect(groupID).toBeNull();
+    });
+
+    test("returns group ID when order exists", async () => {
+      const { creatorID, groupID, wishlistID } = await createWishlist();
+      const cards = await createCardWithParantWishlistID(
+        wishlistID,
+        creatorID,
+        3,
+      );
+      const orderID = cards[1].id;
+
+      const findedGroupID =
+        await ordersRepository.findGroupIDByOrderID(orderID);
+
+      expect(findedGroupID).toBe(groupID);
+    });
+  });
+
+  describe("findCardByID", () => {
+    test("returns null when card does not exist", async () => {
+      await createCards(1);
+      const cardID = 0;
+
+      const card = await ordersRepository.findCardByID(cardID);
+
+      expect(card).toBeNull();
+    });
+
+    test("returns mapped card when card exists", async () => {
+      const { cards, creatorID } = await createCards(3);
+      const card = cards[1];
+      const createdCard = await db(TABLES.card)
+        .where(CARD_COLUMNS.id, card.id)
+        .first();
+      const user = await db(TABLES.users)
+        .select({
+          id: USER_COLUMNS.id,
+          name: USER_COLUMNS.username,
+          email: USER_COLUMNS.email,
+          hash: USER_COLUMNS.user_hash,
+        })
+        .where(USER_COLUMNS.id, creatorID)
+        .first();
+
+      const findedCard = await ordersRepository.findCardByID(card.id);
+
+      expect(findedCard).toStrictEqual({
+        id: card.id,
+        title: card.title,
+        icon: card.icon,
+        description: card.description,
+        created_at: createdCard.created_at,
+        status: "Свободно",
+        author_id: user.id,
+        author_name: user.name,
+        author_email: user.email,
+        author_hash: user.hash,
+        reserved_by: null,
+        href: card.href,
+      });
+    });
+
+    test("returns reserved card with null href", async () => {
+      const { cards, creatorID } = await createCards(1);
+      const cardID = cards[0].id;
+      await db(TABLES.card)
+        .where(CARD_COLUMNS.id, cardID)
+        .update({
+          [CARD_COLUMNS.status]: "Забронировано",
+          [CARD_COLUMNS.reserved_by]: creatorID,
+          [CARD_COLUMNS.href]: null,
+        });
+
+      const card = await ordersRepository.findCardByID(cardID);
+
+      expect(card).toMatchObject({
+        id: cardID,
+        status: "Забронировано",
+        reserved_by: creatorID,
+        href: null,
+      });
     });
   });
 
@@ -133,6 +228,38 @@ describe("orders repository", () => {
         href: card.href,
       }));
       expect(findedCards).toStrictEqual(compairCards);
+    });
+  });
+
+  describe("updateCard", () => {
+    const updatedCardData = {
+      title: "Обновлённое название",
+      description: "Новое описание",
+      icon: "Другая иконка",
+      href: "https://example.com/some-shop/some-order",
+    };
+
+    test("correct update card", async () => {
+      const { cards, wishlistID, creatorID } = await createCards(1);
+      const cardID = cards[0].id;
+
+      await ordersRepository.updateCard({
+        id: cardID,
+        ...updatedCardData,
+      });
+
+      const createdCard = await db(TABLES.card)
+        .where(CARD_COLUMNS.id, cardID)
+        .first();
+      expect(createdCard).toBeDefined();
+      expect(createdCard).toMatchObject({
+        [CARD_COLUMNS.title]: updatedCardData.title,
+        [CARD_COLUMNS.description]: updatedCardData.description,
+        [CARD_COLUMNS.icon]: updatedCardData.icon,
+        [CARD_COLUMNS.href]: updatedCardData.href,
+        [CARD_COLUMNS.wishlist_id]: wishlistID,
+        [CARD_COLUMNS.creator_id]: creatorID,
+      });
     });
   });
 });

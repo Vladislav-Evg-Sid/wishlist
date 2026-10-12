@@ -10,7 +10,7 @@ import {
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UUID } from "../../types/shared.js";
 import type { CardDataRaw } from "./orders.repository.dto.js";
-import type { CardDataInsert } from "./orders.types.js";
+import type { CardDataInsert, CardDataUpdate } from "./orders.types.js";
 import type { OrdersRepositoryInterface } from "./orders.di.js";
 
 @Injectable()
@@ -19,6 +19,19 @@ export class OrdersRepository implements OrdersRepositoryInterface {
     const groupID = await db(TABLES.wishlist)
       .select(WISHILST_COLUMNS.group_id)
       .where(WISHILST_COLUMNS.id, wishlistID)
+      .first();
+    return groupID?.group_id ?? null;
+  }
+
+  async findGroupIDByOrderID(orderID: number): Promise<UUID | null> {
+    const groupID = await db(TABLES.wishlist)
+      .join(
+        TABLES.card,
+        concatTableAndColumn(TABLES.wishlist, WISHILST_COLUMNS.id),
+        concatTableAndColumn(TABLES.card, CARD_COLUMNS.wishlist_id),
+      )
+      .select(WISHILST_COLUMNS.group_id)
+      .where(concatTableAndColumn(TABLES.card, CARD_COLUMNS.id), orderID)
       .first();
     return groupID?.group_id ?? null;
   }
@@ -47,6 +60,32 @@ export class OrdersRepository implements OrdersRepositoryInterface {
       .where(CARD_COLUMNS.wishlist_id, wishlistID);
   }
 
+  async findCardByID(orderID: number): Promise<CardDataRaw | null> {
+    const cardData = await db(TABLES.card)
+      .join(
+        TABLES.users,
+        concatTableAndColumn(TABLES.card, CARD_COLUMNS.creator_id),
+        concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
+      )
+      .select({
+        id: concatTableAndColumn(TABLES.card, CARD_COLUMNS.id),
+        title: CARD_COLUMNS.title,
+        icon: CARD_COLUMNS.icon,
+        description: CARD_COLUMNS.description,
+        created_at: concatTableAndColumn(TABLES.card, CARD_COLUMNS.created_at),
+        status: CARD_COLUMNS.status,
+        author_id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
+        author_name: USER_COLUMNS.username,
+        author_email: USER_COLUMNS.email,
+        author_hash: USER_COLUMNS.user_hash,
+        reserved_by: CARD_COLUMNS.reserved_by,
+        href: CARD_COLUMNS.href,
+      })
+      .where(concatTableAndColumn(TABLES.card, CARD_COLUMNS.id), orderID)
+      .first();
+    return cardData ?? null;
+  }
+
   async createCard(card: CardDataInsert): Promise<number> {
     const cardIDs = await db(TABLES.card)
       .insert({
@@ -59,5 +98,16 @@ export class OrdersRepository implements OrdersRepositoryInterface {
       })
       .returning(CARD_COLUMNS.id);
     return cardIDs[0][CARD_COLUMNS.id];
+  }
+
+  async updateCard(card: CardDataUpdate): Promise<void> {
+    await db(TABLES.card)
+      .update({
+        [CARD_COLUMNS.title]: card.title,
+        [CARD_COLUMNS.description]: card.description,
+        [CARD_COLUMNS.icon]: card.icon,
+        [CARD_COLUMNS.href]: card.href,
+      })
+      .where(CARD_COLUMNS.id, card.id);
   }
 }
