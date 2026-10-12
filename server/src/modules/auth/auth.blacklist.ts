@@ -1,16 +1,20 @@
 import { Injectable } from "@nestjs/common";
 
-import { redis } from "../../redis/redis.js";
 import type { AuthBlacklistServiceInterface } from "./auth.di.js";
+import { RedisService } from "../../infrastructure/redis/redis.service.js";
 
 @Injectable()
 export class AuthBlacklistService implements AuthBlacklistServiceInterface {
+  constructor(private readonly redisService: RedisService) {}
+
   private getRefreshBlacklistKey(jti: string): string {
     return `reft:bl:${jti}`;
   }
 
   async isRefreshBlacklisted(jti: string): Promise<boolean> {
-    const result = await redis.exists(this.getRefreshBlacklistKey(jti));
+    const result = await this.redisService.client.exists(
+      this.getRefreshBlacklistKey(jti),
+    );
     return result === 1;
   }
 
@@ -22,7 +26,7 @@ export class AuthBlacklistService implements AuthBlacklistServiceInterface {
       return;
     }
 
-    await redis.set(this.getRefreshBlacklistKey(jti), "1", {
+    await this.redisService.client.set(this.getRefreshBlacklistKey(jti), "1", {
       EX: ttl,
     });
   }

@@ -5,12 +5,13 @@ import crypto from "node:crypto";
 import { config } from "../../config/env.js";
 import type { AccessTokenPayload, RefreshTokenPayload } from "./auth.types.js";
 import type { UUID } from "../../types/shared.js";
-import { UnauthorizedError } from "../../shared/errors.js";
+import { InternalServerError, UnauthorizedError } from "../../shared/errors.js";
 import type { TokenData } from "./jwt.types.js";
 import type {
   JwtServiceForVerifAccess,
   JwtServiceInterface,
 } from "./auth.di.js";
+import { logger } from "../../config/logger.js";
 
 @Injectable()
 export class JwtService
@@ -48,7 +49,15 @@ export class JwtService
   }
 
   verifyAccessToken(token: string): AccessTokenPayload {
-    const payload = jwt.verify(token, config.jwt.accessSecret);
+    let payload: string | jwt.JwtPayload;
+    try {
+      payload = jwt.verify(token, config.jwt.accessSecret);
+    } catch (error) {
+      if (error instanceof Error && error.message === "jwt expired") {
+        throw new UnauthorizedError(error.message);
+      }
+      throw new InternalServerError("unknown error with access tocken");
+    }
 
     if (typeof payload === "string") {
       throw new UnauthorizedError("Invalid access token payload");
@@ -62,7 +71,15 @@ export class JwtService
   }
 
   verifyRefreshToken(token: string): RefreshTokenPayload {
-    const payload = jwt.verify(token, config.jwt.refreshSecret);
+    let payload: string | jwt.JwtPayload;
+    try {
+      payload = jwt.verify(token, config.jwt.refreshSecret);
+    } catch (error) {
+      if (error instanceof Error && error.message === "jwt expired") {
+        throw new UnauthorizedError(error.message);
+      }
+      throw new InternalServerError("unknown error with access tocken");
+    }
 
     if (typeof payload === "string") {
       throw new UnauthorizedError("Invalid refresh token payload");

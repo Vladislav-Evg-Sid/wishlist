@@ -63,13 +63,14 @@ export class AppErrorFilter implements ExceptionFilter {
       request.log.error(
         {
           message: error.message,
+          type: "error",
         },
         error.message,
       );
       httpAdapter.reply(
         response,
         {
-          code: "UNKNIWN_INTERNAL_SERVER_ERROR",
+          code: "UNKNOWN_INTERNAL_SERVER_ERROR",
           message: "unknown internal server error",
         },
         500,
@@ -80,6 +81,7 @@ export class AppErrorFilter implements ExceptionFilter {
     request.log.error(
       {
         message: error,
+        type: typeof error,
       },
       error,
     );

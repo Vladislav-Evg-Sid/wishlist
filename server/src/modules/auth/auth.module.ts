@@ -15,6 +15,7 @@ import { AuthRepository } from "./auth.repository.js";
 import { JwtService } from "./jwt.service.js";
 import { JwtRepository } from "./jwt.repository.js";
 import { AccessTokenGuard } from "./guard/require-access-token.guard.js";
+import { RedisModule } from "../../infrastructure/redis/redis.module.js";
 
 @Module({
   controllers: [AuthController],
@@ -26,5 +27,6 @@ import { AccessTokenGuard } from "./guard/require-access-token.guard.js";
     { provide: JWT_REPOSITORY, useClass: JwtRepository },
     { provide: APP_GUARD, useClass: AccessTokenGuard },
   ],
+  imports: [RedisModule],
 })
 export class AuthModule {}
