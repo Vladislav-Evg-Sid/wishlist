@@ -9,6 +9,7 @@ import {
 
 import jwt from "jsonwebtoken";
 import type { UUID } from "../../types/shared.js";
+import { InternalServerError, UnauthorizedError } from "../../shared/errors.js";
 
 const config = {
   jwt: {
@@ -21,9 +22,12 @@ const config = {
 
 // Мокаем импорты этих функций
 jest.unstable_mockModule("../../config/env.js", () => ({ config }));
+jest.unstable_mockModule("../../config/logger.js", () => ({
+  logger: { error: jest.fn() },
+}));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-let jwtService: any;
+let jwtService: import("./jwt.service.js").JwtService;
 beforeAll(async () => {
   const service = await import("./jwt.service.js");
   jwtService = new service.JwtService();
@@ -75,7 +79,9 @@ describe("jwt service", () => {
     });
 
     test("rejects malformed, incorrectly signed and expired access tokens", () => {
-      expect(() => jwtService.verifyAccessToken("invalid")).toThrow();
+      expect(() => jwtService.verifyAccessToken("invalid")).toThrow(
+        InternalServerError,
+      );
       expect(() =>
         jwtService.verifyAccessToken(
           jwt.sign({ type: "access" }, "wrong-secret", {
@@ -83,11 +89,11 @@ describe("jwt service", () => {
             expiresIn: "1h",
           }),
         ),
-      ).toThrow();
+      ).toThrow(InternalServerError);
       jest.useFakeTimers();
       const token = jwtService.createAccessToken(userID);
       jest.setSystemTime(Date.now() + 8 * 86400 * 1000);
-      expect(() => jwtService.verifyAccessToken(token)).toThrow("jwt expired");
+      expect(() => jwtService.verifyAccessToken(token)).toThrow(UnauthorizedError);
     });
 
     test("rejects string access payload", () => {
@@ -120,7 +126,9 @@ describe("jwt service", () => {
     });
 
     test("rejects malformed, incorrectly signed and expired refresh tokens", () => {
-      expect(() => jwtService.verifyRefreshToken("invalid")).toThrow();
+      expect(() => jwtService.verifyRefreshToken("invalid")).toThrow(
+        InternalServerError,
+      );
       expect(() =>
         jwtService.verifyRefreshToken(
           jwt.sign({ type: "refresh" }, "wrong-secret", {
@@ -128,11 +136,11 @@ describe("jwt service", () => {
             expiresIn: "1h",
           }),
         ),
-      ).toThrow();
+      ).toThrow(InternalServerError);
       jest.useFakeTimers();
       const token = jwtService.createRefreshToken(userID).token;
       jest.setSystemTime(Date.now() + 8 * 86400 * 1000);
-      expect(() => jwtService.verifyRefreshToken(token)).toThrow("jwt expired");
+      expect(() => jwtService.verifyRefreshToken(token)).toThrow(UnauthorizedError);
     });
 
     test("rejects string refresh payload", () => {

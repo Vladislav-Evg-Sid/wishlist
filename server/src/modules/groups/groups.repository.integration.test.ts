@@ -7,6 +7,7 @@ import {
   addGroupMember,
 } from "../../../tests/integration/fixtures/groups.js";
 import { createUser } from "../../../tests/integration/fixtures/users.js";
+import { createWishlistWithParantGroupID } from "../../../tests/integration/fixtures/wishlists.js";
 import { db } from "../../db/knex.js";
 import { TABLES, GROUPS_COLUMNS } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
@@ -15,6 +16,105 @@ const groupsRepository = new GroupsRepository();
 
 describe("groups repository", () => {
   const missingID = "00000000-0000-0000-0000-000000000000" as UUID;
+
+  describe("updateGroupName", () => {
+    test("updates only requested group's name", async () => {
+      const { creatorID, groupID } = await createGroupFixture();
+      const otherGroupID = await createGroupWithCreatorID(creatorID);
+      const groupBeforeUpdate = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+      const otherGroupBeforeUpdate = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, otherGroupID)
+        .first();
+      const newName = "Новое название группы";
+
+      await groupsRepository.updateGroupName(groupID, newName);
+
+      const updatedGroup = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+      const otherGroup = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, otherGroupID)
+        .first();
+      expect(updatedGroup).toStrictEqual({
+        ...groupBeforeUpdate,
+        [GROUPS_COLUMNS.title]: newName,
+      });
+      expect(otherGroup).toStrictEqual(otherGroupBeforeUpdate);
+    });
+
+    test("does not change groups when group does not exist", async () => {
+      await createGroupFixture();
+      const groupsBeforeUpdate = await db(TABLES.groups).select("*");
+
+      await groupsRepository.updateGroupName(missingID, "New name");
+
+      const groups = await db(TABLES.groups).select("*");
+      expect(groups).toStrictEqual(groupsBeforeUpdate);
+    });
+  });
+
+  describe("deleteGroup", () => {
+    test("deletes only requested group and preserves creator", async () => {
+      const { creatorID, groupID } = await createGroupFixture();
+      const otherGroupID = await createGroupWithCreatorID(creatorID);
+      const otherGroupBeforeDelete = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, otherGroupID)
+        .first();
+
+      await groupsRepository.deleteGroup(groupID);
+
+      const deletedGroup = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+      const groups = await db(TABLES.groups).select("*");
+      const creator = await db(TABLES.users).where("id", creatorID).first();
+      expect(deletedGroup).toBeUndefined();
+      expect(groups).toStrictEqual([otherGroupBeforeDelete]);
+      expect(creator).toBeDefined();
+    });
+
+    test("does not delete groups when group does not exist", async () => {
+      await createGroupFixture();
+      const groupsBeforeDelete = await db(TABLES.groups).select("*");
+
+      await groupsRepository.deleteGroup(missingID);
+
+      const groups = await db(TABLES.groups).select("*");
+      expect(groups).toStrictEqual(groupsBeforeDelete);
+    });
+
+    test("throw when group has members", async () => {
+      const { creatorID, groupID } = await createGroupFixture();
+      await addGroupMember(groupID, creatorID);
+
+      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject({
+        code: "23503",
+        constraint: "group_member_group_id_foreign",
+      });
+
+      const group = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+      expect(group).toBeDefined();
+    });
+
+    test("throw when group has wishlists", async () => {
+      const { creatorID, groupID } = await createGroupFixture();
+      await createWishlistWithParantGroupID(groupID, creatorID);
+
+      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject({
+        code: "23503",
+        constraint: "wishlist_group_id_foreign",
+      });
+
+      const group = await db(TABLES.groups)
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+      expect(group).toBeDefined();
+    });
+  });
 
   describe("createGroup", () => {
     test("success create group", async () => {

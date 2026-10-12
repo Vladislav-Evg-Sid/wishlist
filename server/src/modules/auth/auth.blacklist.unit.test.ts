@@ -8,6 +8,8 @@ import {
   test,
 } from "@jest/globals";
 
+import type { RedisService } from "../../infrastructure/redis/redis.service.js";
+
 // Мокаем функции
 const existsMock = jest.fn<(key: string) => Promise<number>>();
 const setMock = jest.fn<
@@ -21,15 +23,19 @@ const setMock = jest.fn<
 >();
 
 // Мокаем импорты этих функций
-jest.unstable_mockModule("../../redis/redis.js", () => ({
-  redis: { exists: existsMock, set: setMock },
+jest.unstable_mockModule("../../infrastructure/redis/redis.service.js", () => ({
+  RedisService: jest.fn(),
 }));
 
+const redisService = {
+  client: { exists: existsMock, set: setMock },
+} as unknown as RedisService;
+
 // Импорт тестируемых модулей после подмены импортов на моки
-let blacklistService: any;
+let blacklistService: import("./auth.blacklist.js").AuthBlacklistService;
 beforeAll(async () => {
   const service = await import("./auth.blacklist.js");
-  blacklistService = new service.AuthBlacklistService();
+  blacklistService = new service.AuthBlacklistService(redisService);
 });
 
 describe("auth blacklist", () => {
@@ -60,6 +66,17 @@ describe("auth blacklist", () => {
       await expect(blacklistService.isRefreshBlacklisted("jti")).resolves.toBe(
         true,
       );
+
+      expect(existsMock).toHaveBeenCalledWith("reft:bl:jti");
+    });
+
+    test("propagates Redis lookup errors", async () => {
+      const error = new Error("Redis unavailable");
+      existsMock.mockRejectedValue(error);
+
+      await expect(
+        blacklistService.isRefreshBlacklisted("jti"),
+      ).rejects.toBe(error);
 
       expect(existsMock).toHaveBeenCalledWith("reft:bl:jti");
     });

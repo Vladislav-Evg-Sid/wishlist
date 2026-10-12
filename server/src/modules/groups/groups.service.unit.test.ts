@@ -26,6 +26,9 @@ const findGroupInfoMock = jest.fn<(groupID: UUID) => Promise<GroupInfoRaw>>();
 const findGroupCreatorMock =
   jest.fn<(groupID: UUID) => Promise<GroupUser | undefined>>();
 const findGroupMembersMock = jest.fn<(groupID: UUID) => Promise<GroupUser[]>>();
+const updateGroupNameMock =
+  jest.fn<GroupsRepositoryInterface["updateGroupName"]>();
+const deleteGroupMock = jest.fn<GroupsRepositoryInterface["deleteGroup"]>();
 class GroupsRepository implements GroupsRepositoryInterface {
   constructor(
     public readonly findGroupsByUserId: any,
@@ -33,6 +36,8 @@ class GroupsRepository implements GroupsRepositoryInterface {
     public readonly findGroupInfo: any,
     public readonly findGroupCreator: any,
     public readonly findGroupMembers: any,
+    public readonly updateGroupName: GroupsRepositoryInterface["updateGroupName"],
+    public readonly deleteGroup: GroupsRepositoryInterface["deleteGroup"],
   ) {}
 }
 const groupsRepository = new GroupsRepository(
@@ -41,6 +46,8 @@ const groupsRepository = new GroupsRepository(
   findGroupInfoMock,
   findGroupCreatorMock,
   findGroupMembersMock,
+  updateGroupNameMock,
+  deleteGroupMock,
 );
 
 // Мокаем импорты этих функций
@@ -50,6 +57,8 @@ jest.unstable_mockModule("./groups.repository.js", () => ({
   findGroupInfo: findGroupInfoMock,
   findGroupCreator: findGroupCreatorMock,
   findGroupMembers: findGroupMembersMock,
+  updateGroupName: updateGroupNameMock,
+  deleteGroup: deleteGroupMock,
 }));
 jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
   checkGroupUserAccess: checkGroupUserAccessMock,
@@ -65,6 +74,108 @@ beforeAll(async () => {
 describe("groups service", () => {
   const userID = "00000000-0000-0000-0000-000000000001" as UUID;
   const groupID = "00000000-0000-0000-0000-000000000002" as UUID;
+
+  describe("updateGroupName", () => {
+    const newName = "Новое название группы";
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    test("updates group name when user is creator", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+
+      await groupsService.updateGroupName(userID, groupID, newName);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(updateGroupNameMock).toHaveBeenCalledWith(groupID, newName);
+      expect(updateGroupNameMock).toHaveBeenCalledTimes(1);
+    });
+
+    test("throw when user is not creator", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: groupID });
+
+      await expect(
+        groupsService.updateGroupName(userID, groupID, newName),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(updateGroupNameMock).not.toHaveBeenCalled();
+    });
+
+    test("propagates group lookup error without updating group", async () => {
+      const error = new Error("Database unavailable");
+      findGroupInfoMock.mockRejectedValue(error);
+
+      await expect(
+        groupsService.updateGroupName(userID, groupID, newName),
+      ).rejects.toBe(error);
+
+      expect(updateGroupNameMock).not.toHaveBeenCalled();
+    });
+
+    test("propagates group update error", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      const error = new Error("Failed to update group");
+      updateGroupNameMock.mockRejectedValue(error);
+
+      await expect(
+        groupsService.updateGroupName(userID, groupID, newName),
+      ).rejects.toBe(error);
+
+      expect(updateGroupNameMock).toHaveBeenCalledWith(groupID, newName);
+    });
+  });
+
+  describe("deleteGroup", () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    test("deletes group when user is creator", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+
+      await groupsService.deleteGroup(userID, groupID);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(deleteGroupMock).toHaveBeenCalledWith(groupID);
+      expect(deleteGroupMock).toHaveBeenCalledTimes(1);
+    });
+
+    test("throw when user is not creator", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: groupID });
+
+      await expect(
+        groupsService.deleteGroup(userID, groupID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(deleteGroupMock).not.toHaveBeenCalled();
+    });
+
+    test("propagates group lookup error without deleting group", async () => {
+      const error = new Error("Database unavailable");
+      findGroupInfoMock.mockRejectedValue(error);
+
+      await expect(
+        groupsService.deleteGroup(userID, groupID),
+      ).rejects.toBe(error);
+
+      expect(deleteGroupMock).not.toHaveBeenCalled();
+    });
+
+    test("propagates group delete error", async () => {
+      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      const error = new Error("Failed to delete group");
+      deleteGroupMock.mockRejectedValue(error);
+
+      await expect(
+        groupsService.deleteGroup(userID, groupID),
+      ).rejects.toBe(error);
+
+      expect(deleteGroupMock).toHaveBeenCalledWith(groupID);
+    });
+  });
 
   describe("getGroupsByUserId", () => {
     beforeEach(() => {
