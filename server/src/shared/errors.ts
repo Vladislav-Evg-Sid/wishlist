@@ -9,9 +9,20 @@ export class AppError extends Error {
   }
 }
 
-export class NotFoundError extends AppError {
+export interface ValidationIssue {
+  message: string;
+  path?: string;
+}
+
+export class ValidationError extends AppError {
+  constructor(public readonly errors: ValidationIssue[]) {
+    super("Invalid request data", 400, "VALIDATION_ERROR");
+  }
+}
+
+export class UnauthorizedError extends AppError {
   constructor(message: string) {
-    super(message, 404, "NOT_FOUND");
+    super(message, 401, "UNAUTHORIZED");
   }
 }
 
@@ -21,9 +32,9 @@ export class ForbidenError extends AppError {
   }
 }
 
-export class UnauthorizedError extends AppError {
+export class NotFoundError extends AppError {
   constructor(message: string) {
-    super(message, 401, "UNAUTHORIZED");
+    super(message, 404, "NOT_FOUND");
   }
 }
 

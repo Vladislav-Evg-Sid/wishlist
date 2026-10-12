@@ -1,11 +1,15 @@
 import { describe, expect, test } from "@jest/globals";
 
-import { createWishlist, findGroupWishlists } from "./wishlists.repository.js";
-import { createGroup, createGroupWithCreatorID } from "../../../tests/integration/fixtures/groups.js";
+import { WishlistsRepository } from "./wishlists.repository.js";
+import {
+  createGroup,
+  createGroupWithCreatorID,
+} from "../../../tests/integration/fixtures/groups.js";
 import { db } from "../../db/knex.js";
 import { TABLES } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
 
+const wishlistsRepository = new WishlistsRepository();
 
 describe("wishlists repository", () => {
   const missingID = "00000000-0000-0000-0000-000000000000" as UUID;
@@ -13,7 +17,11 @@ describe("wishlists repository", () => {
   describe("createWishlist", () => {
     test("persists wishlist fields and defaults", async () => {
       const { creatorID, groupID } = await createGroup();
-      await createWishlist({ creatorID, groupID, name: "Birthday" });
+      await wishlistsRepository.createWishlist({
+        creatorID,
+        groupID,
+        name: "Birthday",
+      });
       const rows = await db(TABLES.wishlist).select("*");
 
       expect(rows).toHaveLength(1);
@@ -30,7 +38,11 @@ describe("wishlists repository", () => {
     test("rejects missing creator", async () => {
       const { creatorID, groupID } = await createGroup();
       await expect(
-        createWishlist({ creatorID: missingID, groupID: groupID, name: "Birthday" }),
+        wishlistsRepository.createWishlist({
+          creatorID: missingID,
+          groupID: groupID,
+          name: "Birthday",
+        }),
       ).rejects.toMatchObject({
         code: "23503",
         constraint: "wishlist_creator_id_foreign",
@@ -39,11 +51,13 @@ describe("wishlists repository", () => {
 
     test("rejects missing group", async () => {
       const { creatorID, groupID } = await createGroup();
-      await expect(createWishlist({
-        creatorID: creatorID,
-        groupID: missingID,
-        name: "Birthday",
-      })).rejects.toMatchObject({
+      await expect(
+        wishlistsRepository.createWishlist({
+          creatorID: creatorID,
+          groupID: missingID,
+          name: "Birthday",
+        }),
+      ).rejects.toMatchObject({
         code: "23503",
         constraint: "wishlist_group_id_foreign",
       });
@@ -53,22 +67,40 @@ describe("wishlists repository", () => {
   describe("findGroupWishlists", () => {
     test("returns no wishlists for missing or empty group", async () => {
       const { groupID } = await createGroup();
-      await expect(findGroupWishlists(missingID)).resolves.toEqual([]);
-      await expect(findGroupWishlists(groupID)).resolves.toEqual([]);
+      await expect(
+        wishlistsRepository.findGroupWishlists(missingID),
+      ).resolves.toEqual([]);
+      await expect(
+        wishlistsRepository.findGroupWishlists(groupID),
+      ).resolves.toEqual([]);
     });
 
     test("returns only wishlists from requested group", async () => {
       const { creatorID, groupID } = await createGroup();
       const otherGroupID = await createGroupWithCreatorID(creatorID);
-      await createWishlist({ creatorID, groupID, name: "Birthday" });
-      await createWishlist({ creatorID, groupID, name: "Holiday" });
-      await createWishlist({ creatorID, groupID: otherGroupID, name: "Other" });
+      await wishlistsRepository.createWishlist({
+        creatorID,
+        groupID,
+        name: "Birthday",
+      });
+      await wishlistsRepository.createWishlist({
+        creatorID,
+        groupID,
+        name: "Holiday",
+      });
+      await wishlistsRepository.createWishlist({
+        creatorID,
+        groupID: otherGroupID,
+        name: "Other",
+      });
       const rows = await db(TABLES.wishlist).where({ group_id: groupID });
-      const lists = await findGroupWishlists(groupID);
+      const lists = await wishlistsRepository.findGroupWishlists(groupID);
 
       expect(lists).toHaveLength(2);
       expect(lists).toEqual(
-        expect.arrayContaining(rows.map(row => ({ id: row.id, title: row.title }))),
+        expect.arrayContaining(
+          rows.map((row) => ({ id: row.id, title: row.title })),
+        ),
       );
     });
   });

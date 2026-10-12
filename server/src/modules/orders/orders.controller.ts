@@ -1,44 +1,42 @@
+import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
+import type z from "zod";
+
 import {
-  ForbidenError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../../shared/errors.js";
-import type {
-  AddCardRequestDTO,
-  AddCardResponseDTO,
-  GetWishlistCardsRequestDTO,
-  GetWishlistCardsResponseDTO,
-} from "./orders.http.dto.js";
-import { addCard, getWishlistCards } from "./orders.service.js";
+  getWishlistCardsParamsSchema,
+  addCardBodySchema,
+} from "./orders.schemas.js";
+import { ORDERS_SERVICE, type OrdersServiceInterface } from "./orders.di.js";
+import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
+import type { UUID } from "../../types/shared.js";
 
-export async function getWishlistCardsRequest(
-  req: GetWishlistCardsRequestDTO,
-  res: GetWishlistCardsResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
-  }
-  const { wishlistID } = res.locals.validateParams;
+@Controller("orders")
+export class OrderController {
+  constructor(
+    @Inject(ORDERS_SERVICE)
+    private readonly ordersService: OrdersServiceInterface,
+  ) {}
 
-  const cards = await getWishlistCards(userID, wishlistID);
-  res.status(200).json(cards);
-}
-
-export async function addCardRequest(
-  req: AddCardRequestDTO,
-  res: AddCardResponseDTO,
-): Promise<void> {
-  const userID = req.userId;
-  if (!userID) {
-    throw new UnauthorizedError("");
+  @Get(":wishlist_id")
+  async getWishlistCards(
+    @Param({ schema: getWishlistCardsParamsSchema })
+    params: z.output<typeof getWishlistCardsParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return await this.ordersService.getWishlistCards(userID, params.wishlistID);
   }
 
-  const cardData = res.locals.validateBody;
-  await addCard({
-    ...cardData,
-    creatorID: userID,
-  });
-
-  res.status(201).send();
+  @Post()
+  async addCardRequest(
+    @Body({ schema: addCardBodySchema })
+    cardData: z.output<typeof addCardBodySchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.addCard({
+      ...cardData,
+      creatorID: userID,
+    });
+    return;
+  }
 }

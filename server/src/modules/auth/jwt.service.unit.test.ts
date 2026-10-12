@@ -23,19 +23,10 @@ const config = {
 jest.unstable_mockModule("../../config/env.js", () => ({ config }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-type JwtService = typeof import("./jwt.service.js");
-
-let createAccessToken: JwtService["createAccessToken"];
-let createRefreshToken: JwtService["createRefreshToken"];
-let verifyAccessToken: JwtService["verifyAccessToken"];
-let verifyRefreshToken: JwtService["verifyRefreshToken"];
+let jwtService: any;
 beforeAll(async () => {
   const service = await import("./jwt.service.js");
-
-  createAccessToken = service.createAccessToken;
-  createRefreshToken = service.createRefreshToken;
-  verifyAccessToken = service.verifyAccessToken;
-  verifyRefreshToken = service.verifyRefreshToken;
+  jwtService = new service.JwtService();
 });
 
 describe("jwt service", () => {
@@ -47,8 +38,8 @@ describe("jwt service", () => {
     });
 
     test("creates and verifies access token with configured TTL", () => {
-      const token = createAccessToken(userID);
-      const payload = verifyAccessToken(token);
+      const token = jwtService.createAccessToken(userID);
+      const payload = jwtService.verifyAccessToken(token);
       expect(payload).toMatchObject({
         sub: userID,
         type: "access",
@@ -65,11 +56,15 @@ describe("jwt service", () => {
     });
 
     test("creates refresh tokens with unique jti and configured TTL", () => {
-      const first = createRefreshToken(userID);
-      const second = createRefreshToken(userID);
+      const first = jwtService.createRefreshToken(userID);
+      const second = jwtService.createRefreshToken(userID);
       expect(first.jti).not.toBe(second.jti);
-      const payload = verifyRefreshToken(first.token);
-      expect(payload).toMatchObject({ sub: userID, type: "refresh", jti: first.jti });
+      const payload = jwtService.verifyRefreshToken(first.token);
+      expect(payload).toMatchObject({
+        sub: userID,
+        type: "refresh",
+        jti: first.jti,
+      });
       expect(payload.exp - payload.iat!).toBe(7 * 86400);
     });
   });
@@ -80,45 +75,42 @@ describe("jwt service", () => {
     });
 
     test("rejects malformed, incorrectly signed and expired access tokens", () => {
-      expect(() => verifyAccessToken("invalid")).toThrow();
-      expect(
-        () => verifyAccessToken(
-          jwt.sign(
-            { type: "access" },
-            "wrong-secret",
-            { subject: userID, expiresIn: "1h" },
-          ),
+      expect(() => jwtService.verifyAccessToken("invalid")).toThrow();
+      expect(() =>
+        jwtService.verifyAccessToken(
+          jwt.sign({ type: "access" }, "wrong-secret", {
+            subject: userID,
+            expiresIn: "1h",
+          }),
         ),
       ).toThrow();
       jest.useFakeTimers();
-      const token = createAccessToken(userID);
+      const token = jwtService.createAccessToken(userID);
       jest.setSystemTime(Date.now() + 8 * 86400 * 1000);
-      expect(() => verifyAccessToken(token)).toThrow("jwt expired");
+      expect(() => jwtService.verifyAccessToken(token)).toThrow("jwt expired");
     });
 
     test("rejects string access payload", () => {
       const secret = config.jwt.accessSecret;
-      expect(() => verifyAccessToken(jwt.sign("string payload", secret))).toThrow(
-        "Invalid access token payload",
-      );
+      expect(() =>
+        jwtService.verifyAccessToken(jwt.sign("string payload", secret)),
+      ).toThrow("Invalid access token payload");
     });
 
     test("throw when access token has refresh type", () => {
-      expect(
-        () => verifyAccessToken(
+      expect(() =>
+        jwtService.verifyAccessToken(
           jwt.sign({ type: "refresh", sub: userID }, config.jwt.accessSecret),
         ),
-      ).toThrow(
-        "Invalid access token",
-      );
+      ).toThrow("Invalid access token");
     });
 
     test("throw when access token has no subject", () => {
-      expect(
-        () => verifyAccessToken(jwt.sign({ type: "access" }, config.jwt.accessSecret)),
-      ).toThrow(
-        "Invalid access token",
-      );
+      expect(() =>
+        jwtService.verifyAccessToken(
+          jwt.sign({ type: "access" }, config.jwt.accessSecret),
+        ),
+      ).toThrow("Invalid access token");
     });
   });
 
@@ -128,76 +120,70 @@ describe("jwt service", () => {
     });
 
     test("rejects malformed, incorrectly signed and expired refresh tokens", () => {
-      expect(() => verifyRefreshToken("invalid")).toThrow();
-      expect(
-        () => verifyRefreshToken(
-          jwt.sign(
-            { type: "refresh" },
-            "wrong-secret",
-            { subject: userID, expiresIn: "1h" },
-          ),
+      expect(() => jwtService.verifyRefreshToken("invalid")).toThrow();
+      expect(() =>
+        jwtService.verifyRefreshToken(
+          jwt.sign({ type: "refresh" }, "wrong-secret", {
+            subject: userID,
+            expiresIn: "1h",
+          }),
         ),
       ).toThrow();
       jest.useFakeTimers();
-      const token = createRefreshToken(userID).token;
+      const token = jwtService.createRefreshToken(userID).token;
       jest.setSystemTime(Date.now() + 8 * 86400 * 1000);
-      expect(() => verifyRefreshToken(token)).toThrow("jwt expired");
+      expect(() => jwtService.verifyRefreshToken(token)).toThrow("jwt expired");
     });
 
     test("rejects string refresh payload", () => {
       const secret = config.jwt.refreshSecret;
-      expect(() => verifyRefreshToken(jwt.sign("string payload", secret))).toThrow(
-        "Invalid refresh token payload",
-      );
+      expect(() =>
+        jwtService.verifyRefreshToken(jwt.sign("string payload", secret)),
+      ).toThrow("Invalid refresh token payload");
     });
 
     test("throw when refresh token has access type", () => {
-      expect(
-        () => verifyRefreshToken(
+      expect(() =>
+        jwtService.verifyRefreshToken(
           jwt.sign(
             { type: "access", sub: userID, jti: "jti", exp: 2000000000 },
             config.jwt.refreshSecret,
           ),
         ),
-      ).toThrow(
-        "Invalid refresh token",
-      );
+      ).toThrow("Invalid refresh token");
     });
 
     test("throw when refresh token has no subject", () => {
-      expect(
-        () => verifyRefreshToken(
+      expect(() =>
+        jwtService.verifyRefreshToken(
           jwt.sign(
             { type: "refresh", jti: "jti", exp: 2000000000 },
             config.jwt.refreshSecret,
           ),
         ),
-      ).toThrow(
-        "Invalid refresh token",
-      );
+      ).toThrow("Invalid refresh token");
     });
 
     test("throw when refresh token has no jti", () => {
-      expect(
-        () => verifyRefreshToken(
+      expect(() =>
+        jwtService.verifyRefreshToken(
           jwt.sign(
             { type: "refresh", sub: userID, exp: 2000000000 },
             config.jwt.refreshSecret,
           ),
         ),
-      ).toThrow(
-        "Invalid refresh token",
-      );
+      ).toThrow("Invalid refresh token");
     });
 
     test("throw when refresh token has no expiration", () => {
-      expect(
-        () => verifyRefreshToken(
-          jwt.sign({ type: "refresh", sub: userID, jti: "jti" }, config.jwt.refreshSecret),
+      expect(() =>
+        jwtService.verifyRefreshToken(
+          jwt.sign(
+            { type: "refresh", sub: userID, jti: "jti" },
+            config.jwt.refreshSecret,
+          ),
         ),
-      ).toThrow(
-        "Invalid refresh token",
-      );
+      ).toThrow("Invalid refresh token");
     });
   });
 });

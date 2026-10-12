@@ -1,22 +1,21 @@
 import { describe, expect, test } from "@jest/globals";
 
-import {
-  createCard,
-  findGroupIDByWishlistID,
-  findWishlistCards,
-} from "./orders.repository.js";
+import { OrdersRepository } from "./orders.repository.js";
 import { createWishlist } from "../../../tests/integration/fixtures/wishlists.js";
 import { db } from "../../db/knex.js";
 import { CARD_COLUMNS, TABLES, USER_COLUMNS } from "../../db/schema.js";
 import { createCards } from "../../../tests/integration/fixtures/card.js";
 import type { UUID } from "../../types/shared.js";
 
+const ordersRepository = new OrdersRepository();
+
 describe("orders repository", () => {
   describe("findGroupIDByWishlistID", () => {
     test("returns null when wishlist does not exist", async () => {
       const wishlistID = "00000000-0000-0000-0000-000000000000" as UUID;
 
-      const groupID = await findGroupIDByWishlistID(wishlistID);
+      const groupID =
+        await ordersRepository.findGroupIDByWishlistID(wishlistID);
 
       expect(groupID).toBeNull();
     });
@@ -24,7 +23,8 @@ describe("orders repository", () => {
     test("returns group ID when wishlist exist", async () => {
       const { groupID, wishlistID } = await createWishlist();
 
-      const findedGroupID = await findGroupIDByWishlistID(wishlistID);
+      const findedGroupID =
+        await ordersRepository.findGroupIDByWishlistID(wishlistID);
 
       expect(findedGroupID).toBe(groupID);
     });
@@ -46,7 +46,7 @@ describe("orders repository", () => {
         wishlistID,
       };
 
-      const cardID = await createCard(card);
+      const cardID = await ordersRepository.createCard(card);
 
       expect(cardID).toBeDefined();
       expect(cardID).toBe(1);
@@ -73,7 +73,7 @@ describe("orders repository", () => {
         wishlistID,
       };
 
-      await expect(createCard(card)).rejects.toMatchObject({
+      await expect(ordersRepository.createCard(card)).rejects.toMatchObject({
         code: "23503",
         constraint: "card_creator_id_foreign",
       });
@@ -88,7 +88,7 @@ describe("orders repository", () => {
         wishlistID,
       };
 
-      await expect(createCard(card)).rejects.toMatchObject({
+      await expect(ordersRepository.createCard(card)).rejects.toMatchObject({
         code: "23503",
         constraint: "card_wishlist_id_foreign",
       });
@@ -99,7 +99,7 @@ describe("orders repository", () => {
     test("founding unknown wishlist's card", async () => {
       const wishlistID = "00000000-0000-0000-0000-000000000000" as UUID;
 
-      const cards = await findWishlistCards(wishlistID);
+      const cards = await ordersRepository.findWishlistCards(wishlistID);
 
       expect(cards.length).toBe(0);
     });
@@ -107,7 +107,7 @@ describe("orders repository", () => {
     test("find exists cards", async () => {
       const { cards, wishlistID, creatorID } = await createCards(3);
 
-      const findedCards = await findWishlistCards(wishlistID);
+      const findedCards = await ordersRepository.findWishlistCards(wishlistID);
 
       const user = await db(TABLES.users)
         .select({

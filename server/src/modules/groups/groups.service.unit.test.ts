@@ -8,19 +8,39 @@ import {
 } from "@jest/globals";
 
 import type { UUID } from "../../types/shared.js";
-
-type Repository = typeof import("./groups.repository.js");
+import type { GroupsRepositoryInterface } from "./groups.di.js";
+import type { GroupData, GroupUser } from "./groups.types.js";
+import type { GroupInfoRaw } from "./groups.repository.dto.js";
 
 // Мокаем функции
-const findGroupsByUserIdMock = jest.fn<Repository["findGroupsByUserId"]>();
-const createGroupMock = jest.fn<Repository["createGroup"]>();
-const findGroupInfoMock = jest.fn<Repository["findGroupInfo"]>();
-const findGroupCreatorMock = jest.fn<Repository["findGroupCreator"]>();
-const findGroupMembersMock = jest.fn<Repository["findGroupMembers"]>();
 type CheckUserGroup = typeof import("../../shared/checkUserGroup.js");
-
 const checkGroupUserAccessMock =
   jest.fn<CheckUserGroup["checkGroupUserAccess"]>();
+
+const findGroupsByUserIdMock =
+  jest.fn<(userID: UUID) => Promise<GroupData[]>>();
+const createGroupMock =
+  jest.fn<(userID: UUID, groupName: string) => Promise<string>>();
+const findGroupInfoMock = jest.fn<(groupID: UUID) => Promise<GroupInfoRaw>>();
+const findGroupCreatorMock =
+  jest.fn<(groupID: UUID) => Promise<GroupUser | undefined>>();
+const findGroupMembersMock = jest.fn<(groupID: UUID) => Promise<GroupUser[]>>();
+class GroupsRepository implements GroupsRepositoryInterface {
+  constructor(
+    public readonly findGroupsByUserId: any,
+    public readonly createGroup: any,
+    public readonly findGroupInfo: any,
+    public readonly findGroupCreator: any,
+    public readonly findGroupMembers: any,
+  ) {}
+}
+const groupsRepository = new GroupsRepository(
+  findGroupsByUserIdMock,
+  createGroupMock,
+  findGroupInfoMock,
+  findGroupCreatorMock,
+  findGroupMembersMock,
+);
 
 // Мокаем импорты этих функций
 jest.unstable_mockModule("./groups.repository.js", () => ({
@@ -30,24 +50,16 @@ jest.unstable_mockModule("./groups.repository.js", () => ({
   findGroupCreator: findGroupCreatorMock,
   findGroupMembers: findGroupMembersMock,
 }));
-jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({ checkGroupUserAccess: checkGroupUserAccessMock }));
+jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
+  checkGroupUserAccess: checkGroupUserAccessMock,
+}));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-type GroupsService = typeof import("./groups.service.js");
-
-let getGroupsByUserId: GroupsService["getGroupsByUserId"];
-let addGroup: GroupsService["addGroup"];
-let getGroupInfo: GroupsService["getGroupInfo"];
-let getGroupUsers: GroupsService["getGroupUsers"];
+let groupsService: any;
 beforeAll(async () => {
   const service = await import("./groups.service.js");
-
-  getGroupsByUserId = service.getGroupsByUserId;
-  addGroup = service.addGroup;
-  getGroupInfo = service.getGroupInfo;
-  getGroupUsers = service.getGroupUsers;
+  groupsService = new service.GroupsService(groupsRepository);
 });
-
 
 describe("groups service", () => {
   const userID = "00000000-0000-0000-0000-000000000001" as UUID;
@@ -62,7 +74,9 @@ describe("groups service", () => {
       const groups = [{ id: groupID, name: "Family" }];
       findGroupsByUserIdMock.mockResolvedValue(groups);
 
-      await expect(getGroupsByUserId(userID)).resolves.toEqual(groups);
+      await expect(groupsService.getGroupsByUserId(userID)).resolves.toEqual(
+        groups,
+      );
 
       expect(findGroupsByUserIdMock).toHaveBeenCalledWith(userID);
     });
@@ -74,7 +88,9 @@ describe("groups service", () => {
     });
 
     test("creates a group for the user", async () => {
-      await expect(addGroup(userID, { groupName: "Family" })).resolves.toBeUndefined();
+      await expect(
+        groupsService.addGroup(userID, { groupName: "Family" }),
+      ).resolves.toBeUndefined();
 
       expect(createGroupMock).toHaveBeenCalledWith(userID, "Family");
       expect(createGroupMock).toHaveBeenCalledTimes(1);
@@ -89,7 +105,7 @@ describe("groups service", () => {
     test("getGroupInfo denies access before reading group data", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(getGroupInfo(userID, groupID)).rejects.toThrow(
+      await expect(groupsService.getGroupInfo(userID, groupID)).rejects.toThrow(
         "User not a member or creator",
       );
 
@@ -101,22 +117,34 @@ describe("groups service", () => {
 
     test("reports creator status: true", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: userID,
+      });
 
-      await expect(getGroupInfo(userID, groupID)).resolves.toEqual(
-        { title: "Family", isCreator: true },
-      );
+      await expect(
+        groupsService.getGroupInfo(userID, groupID),
+      ).resolves.toEqual({
+        title: "Family",
+        isCreator: true,
+      });
 
       expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
     });
 
     test("reports creator status: false", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: groupID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: groupID,
+      });
 
-      await expect(getGroupInfo(userID, groupID)).resolves.toEqual(
-        { title: "Family", isCreator: false },
-      );
+      await expect(
+        groupsService.getGroupInfo(userID, groupID),
+      ).resolves.toEqual({
+        title: "Family",
+        isCreator: false,
+      });
 
       expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
     });
@@ -130,9 +158,9 @@ describe("groups service", () => {
     test("getGroupUsers denies access before reading group data", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(getGroupUsers(userID, groupID)).rejects.toThrow(
-        "User not a member or creator",
-      );
+      await expect(
+        groupsService.getGroupUsers(userID, groupID),
+      ).rejects.toThrow("User not a member or creator");
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findGroupInfoMock).not.toHaveBeenCalled();
@@ -144,9 +172,9 @@ describe("groups service", () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
       findGroupCreatorMock.mockResolvedValue(undefined);
 
-      await expect(getGroupUsers(userID, groupID)).rejects.toThrow(
-        "Group's creator not found",
-      );
+      await expect(
+        groupsService.getGroupUsers(userID, groupID),
+      ).rejects.toThrow("Group's creator not found");
 
       expect(findGroupMembersMock).not.toHaveBeenCalled();
     });
@@ -170,9 +198,12 @@ describe("groups service", () => {
           hash: number;
         },
       ]);
-      await expect(getGroupUsers(userID, groupID)).resolves.toEqual(
-        { creator, members: [{ name: "Member", hash: 0 }] },
-      );
+      await expect(
+        groupsService.getGroupUsers(userID, groupID),
+      ).resolves.toEqual({
+        creator,
+        members: [{ name: "Member", hash: 0 }],
+      });
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);

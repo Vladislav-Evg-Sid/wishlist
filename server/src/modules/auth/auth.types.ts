@@ -39,3 +39,8 @@ export interface UserLoginData {
   email: string;
   password: string;
 }
+
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}

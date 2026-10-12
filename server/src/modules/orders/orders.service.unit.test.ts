@@ -10,36 +10,40 @@ import {
 import type { CardDataRaw } from "./orders.repository.dto.js";
 import type { CardDataInsert } from "./orders.types.js";
 import type { UUID } from "../../types/shared.js";
+import type { OrdersRepositoryInterface } from "./orders.di.js";
 
 // Мокаем функции
-type Repository = typeof import("./orders.repository.js");
 type CheckUserGroup = typeof import("./../../shared/checkUserGroup.js");
-const createCardMock = jest.fn<Repository["createCard"]>();
-const findGroupIDByWishlistIDMock =
-  jest.fn<Repository["findGroupIDByWishlistID"]>();
-const findWishlistCardsMock = jest.fn<Repository["findWishlistCards"]>();
 const checkGroupUserAccessMock =
   jest.fn<CheckUserGroup["checkGroupUserAccess"]>();
+const findGroupIDByWishlistIDMock =
+  jest.fn<(wishlistID: UUID) => Promise<UUID | null>>();
+const findWishlistCardsMock =
+  jest.fn<(wishlistID: UUID) => Promise<CardDataRaw[]>>();
+const createCardMock = jest.fn<(card: CardDataInsert) => Promise<number>>();
+class OrderRepository implements OrdersRepositoryInterface {
+  constructor(
+    public readonly findGroupIDByWishlistID: any,
+    public readonly findWishlistCards: any,
+    public readonly createCard: any,
+  ) {}
+}
+const orderRepository = new OrderRepository(
+  findGroupIDByWishlistIDMock,
+  findWishlistCardsMock,
+  createCardMock,
+);
 
 // Мокаем импорты этих функций
-jest.unstable_mockModule("./orders.repository.js", () => ({
-  findGroupIDByWishlistID: findGroupIDByWishlistIDMock,
-  findWishlistCards: findWishlistCardsMock,
-  createCard: createCardMock,
-}));
-
 jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
   checkGroupUserAccess: checkGroupUserAccessMock,
 }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-type OrdersService = typeof import("./orders.service.js");
-let getWishlistCards: OrdersService["getWishlistCards"];
-let addCard: OrdersService["addCard"];
+let orderService: any;
 beforeAll(async () => {
   const service = await import("./orders.service.js");
-  getWishlistCards = service.getWishlistCards;
-  addCard = service.addCard;
+  orderService = new service.OrdersService(orderRepository);
 });
 
 describe("orders service", () => {
@@ -55,9 +59,9 @@ describe("orders service", () => {
     test("throw when wishlist's group does not exist", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(null);
 
-      await expect(getWishlistCards(userID, wishlistID)).rejects.toThrow(
-        "Not found wishlist's group",
-      );
+      await expect(
+        orderService.getWishlistCards(userID, wishlistID),
+      ).rejects.toThrow("Not found wishlist's group");
 
       expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith(wishlistID);
       expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
@@ -68,9 +72,9 @@ describe("orders service", () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(getWishlistCards(userID, wishlistID)).rejects.toThrow(
-        "User not a member or creator",
-      );
+      await expect(
+        orderService.getWishlistCards(userID, wishlistID),
+      ).rejects.toThrow("User not a member or creator");
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findWishlistCardsMock).not.toHaveBeenCalled();
@@ -96,7 +100,7 @@ describe("orders service", () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
       findWishlistCardsMock.mockResolvedValue([rawCard]);
 
-      const result = await getWishlistCards(userID, wishlistID);
+      const result = await orderService.getWishlistCards(userID, wishlistID);
 
       expect(result).toEqual([
         {
@@ -138,7 +142,7 @@ describe("orders service", () => {
     test("throw when wishlist's group does not exist", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(null);
 
-      await expect(addCard(newCard)).rejects.toThrow(
+      await expect(orderService.addCard(newCard)).rejects.toThrow(
         "Not found wishlist's group",
       );
 
@@ -151,7 +155,7 @@ describe("orders service", () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(addCard(newCard)).rejects.toThrow(
+      await expect(orderService.addCard(newCard)).rejects.toThrow(
         "User not a member or creator",
       );
 
@@ -164,7 +168,7 @@ describe("orders service", () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
       createCardMock.mockResolvedValue(cardID);
 
-      await addCard(newCard);
+      await orderService.addCard(newCard);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(createCardMock).toHaveBeenCalledWith(newCard);
