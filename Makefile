@@ -2,6 +2,9 @@ include .env
 
 .PHONY: help
 help:
+ifeq ($(OS),Windows_NT)
+	@chcp 65001 > nul
+endif
 	@echo Команды для запуска:
 	@echo = Разработка:
 	@echo -- run-dev:          запуск в режиме разработки
