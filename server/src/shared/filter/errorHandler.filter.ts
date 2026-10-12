@@ -50,7 +50,12 @@ export class AppErrorFilter implements ExceptionFilter {
       httpAdapter.reply(
         response,
         {
-          code: statusCode === 404 ? "NOT_FOUND" : "HTTP_ERROR",
+          code:
+            statusCode === 404
+              ? "NOT_FOUND"
+              : statusCode === 405
+                ? "METHOD_NOT_ALLOWED"
+                : "HTTP_ERROR",
           message: error.message,
         },
         statusCode,
