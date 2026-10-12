@@ -66,13 +66,13 @@ export class OrderController {
     });
   }
 
-  // @Delete(":order_id")
-  // async deleteCardRequest(
-  //   @Param({ schema: updateCardParamsSchema })
-  //   params: z.output<typeof updateCardParamsSchema>,
-  //   @CurrentUserID()
-  //   userID: UUID,
-  // ) {
-  //   await this.ordersService.deleteCard(userID, params.orderID);
-  // }
+  @Delete(":order_id")
+  async deleteCardRequest(
+    @Param({ schema: updateCardParamsSchema })
+    params: z.output<typeof updateCardParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.deleteCard(userID, params.orderID);
+  }
 }
