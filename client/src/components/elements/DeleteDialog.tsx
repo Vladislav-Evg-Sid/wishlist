@@ -7,19 +7,21 @@ import {
   Typography,
 } from "@mui/material";
 
-interface DeleteOrderDialogProps {
+interface DeleteDialogProps {
   open: boolean;
-  orderTitle: string;
+  elementTitle: string;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
 }
 
 export default function DeleteOrderDialog({
   open,
-  orderTitle,
+  elementTitle,
   onClose,
   onConfirm,
-}: DeleteOrderDialogProps) {
+  title = "Удалить запись?",
+}: DeleteDialogProps) {
   return (
     <Dialog
       open={open}
@@ -53,14 +55,14 @@ export default function DeleteOrderDialog({
           letterSpacing: "-0.035em",
         }}
       >
-        Удалить запись?
+        {title}
       </DialogTitle>
       <DialogContent sx={{ px: { xs: 2.5, sm: 3.5 }, pb: 1 }}>
         <Typography
           id="delete-order-description"
           sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.7 }}
         >
-          Вы уверены, что хотите удалить {orderTitle}?
+          Вы уверены, что хотите удалить {elementTitle}?
         </Typography>
       </DialogContent>
       <DialogActions
@@ -78,7 +80,11 @@ export default function DeleteOrderDialog({
           },
         }}
       >
-        <Button type="button" onClick={onClose} sx={{ color: "text.secondary" }}>
+        <Button
+          type="button"
+          onClick={onClose}
+          sx={{ color: "text.secondary" }}
+        >
           Отмена
         </Button>
         <Button

@@ -12,3 +12,7 @@ export const getGroupInfoParamsSchema = z
     group_id: UUIDSchema,
   })
   .transform((data) => ({ groupID: data.group_id }));
+
+export const updateGroupNameBodySchema = z.object({
+  title: z.string(),
+});

@@ -23,7 +23,7 @@ import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutl
 import { getWishIcon } from "../../../constants/wishIcons";
 import { useStore, useStoreOrders } from "../../../hooks/useStore";
 import type { OrderData, OrderDataChange } from "../../../types/orders";
-import DeleteOrderDialog from "../../elements/DeleteOrderDialog";
+import DeleteOrderDialog from "../../elements/DeleteDialog";
 
 const statusStyles = {
   Свободно: { bgcolor: "#E8F7EF", color: "#177447" },
@@ -225,7 +225,7 @@ function OrderActions({
         </Box>
         <DeleteOrderDialog
           open={isDeleteDialogOpen}
-          orderTitle={order.title}
+          elementTitle={order.title}
           onClose={() => setIsDeleteDialogOpen(false)}
           onConfirm={() => {
             orderStore.deleteOrder(order.id);

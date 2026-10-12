@@ -1,26 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 
 import CreateWishlistDialog from "../../elements/CreateWishlistDialog";
 import GroupMembersDialog from "../../elements/GroupMembersDialog";
 import { useStoreWishlists } from "../../../hooks/useStore";
+import DeleteOrderDialog from "../../elements/DeleteDialog";
 
 const WishlistHeader = observer(() => {
   const wishlistStore = useStoreWishlists();
+  const [paranrGroupName, setParantGroupName] = useState<string>(
+    wishlistStore.parantGroupTitle,
+  );
   const [isCreateWishlistOpen, setIsCreateWishlistOpen] =
     useState<boolean>(false);
   const [isMembersOpen, setIsMembersOpen] = useState<boolean>(false);
+  const [isEditingName, setIsEditingName] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  useEffect(
+    () => setParantGroupName(wishlistStore.parantGroupTitle),
+    [wishlistStore.parantGroupTitle],
+  );
 
   return (
     <Box component="header" sx={{ mb: { xs: 4, md: 5 } }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: { xs: 2.5, md: 3 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: { xs: 2.5, md: 3 },
+        }}
+      >
         <Tooltip title="Вернуться назад">
           <IconButton
             type="button"
@@ -40,7 +68,9 @@ const WishlistHeader = observer(() => {
             <ArrowBackRoundedIcon />
           </IconButton>
         </Tooltip>
-        <Typography sx={{ color: "text.secondary", fontSize: 14, fontWeight: 600 }}>
+        <Typography
+          sx={{ color: "text.secondary", fontSize: 14, fontWeight: 600 }}
+        >
           Мои группы
         </Typography>
       </Box>
@@ -53,32 +83,70 @@ const WishlistHeader = observer(() => {
           gap: 3,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
-          <Typography
-            component="h1"
-            sx={{
-              color: "text.primary",
-              fontSize: { xs: 30, md: 40 },
-              fontWeight: 700,
-              letterSpacing: "-0.045em",
-              lineHeight: 1.2,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {wishlistStore.parantGroupTitle ||
-              "Не удалось загрузить название группы"}
-          </Typography>
-          {wishlistStore.isParantGroupCreator && (
-            <Tooltip title="Изменить название группы">
+        <Box
+          sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}
+        >
+          {isEditingName ? (
+            <>
+              <TextField
+                autoFocus
+                fullWidth
+                required
+                id="create-wishlist-name"
+                name="groupName"
+                value={paranrGroupName}
+                onChange={(event) => setParantGroupName(event.target.value)}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "#FBFCFE",
+                    "& .MuiOutlinedInput-input": {
+                      fontSize: "20px",
+                      padding: "16.5px 14px",
+                    },
+                  },
+                }}
+              />
               <IconButton
                 type="button"
-                aria-label="Изменить название группы"
-                onClick={() => alert("Функция изменения названия группы пока не доступна")}
+                aria-label="Сохранить название группы"
+                onClick={() => {
+                  setIsEditingName(false);
+                  wishlistStore.updateParantGroupName(paranrGroupName);
+                }}
                 sx={{ flexShrink: 0, color: "text.secondary" }}
               >
-                <EditRoundedIcon />
+                <CheckRoundedIcon />
               </IconButton>
-            </Tooltip>
+            </>
+          ) : (
+            <>
+              <Typography
+                component="h1"
+                sx={{
+                  color: "text.primary",
+                  fontSize: { xs: 30, md: 40 },
+                  fontWeight: 700,
+                  letterSpacing: "-0.045em",
+                  lineHeight: 1.2,
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {wishlistStore.parantGroupTitle ||
+                  "Не удалось загрузить название группы"}
+              </Typography>
+              {wishlistStore.isParantGroupCreator && (
+                <Tooltip title="Изменить название группы">
+                  <IconButton
+                    type="button"
+                    aria-label="Изменить название группы"
+                    onClick={() => setIsEditingName(true)}
+                    sx={{ flexShrink: 0, color: "text.secondary" }}
+                  >
+                    <EditRoundedIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </>
           )}
         </Box>
         <Stack
@@ -86,6 +154,40 @@ const WishlistHeader = observer(() => {
           spacing={1.25}
           sx={{ width: { xs: "100%", md: "auto" }, flexShrink: 0 }}
         >
+          {wishlistStore.isParantGroupCreator && (
+            <>
+              <Button
+                type="button"
+                variant="outlined"
+                color="error"
+                onClick={() => setIsDeleteDialogOpen(true)}
+                startIcon={<DeleteForeverRoundedIcon />}
+                sx={{
+                  borderRadius: "12px",
+                  px: 2.25,
+                  py: 1.35,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Удалить группу
+              </Button>
+
+              <DeleteOrderDialog
+                open={isDeleteDialogOpen}
+                elementTitle={paranrGroupName}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirm={async () => {
+                  await wishlistStore.deleteParantGroupName();
+                  setIsDeleteDialogOpen(false);
+                  navigate(-1);
+                }}
+                title="Удалить группу?"
+              />
+            </>
+          )}
           <Button
             type="button"
             variant="outlined"

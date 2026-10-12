@@ -89,4 +89,16 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       })
       .where(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id), groupID);
   }
+
+  async updateGroupName(groupID: UUID, newName: string): Promise<void> {
+    await db(TABLES.groups)
+      .update({
+        [GROUPS_COLUMNS.title]: newName,
+      })
+      .where(GROUPS_COLUMNS.id, groupID);
+  }
+
+  async deleteGroup(groupID: UUID): Promise<void> {
+    await db(TABLES.groups).delete().where(GROUPS_COLUMNS.id, groupID);
+  }
 }

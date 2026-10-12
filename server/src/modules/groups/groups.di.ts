@@ -16,6 +16,8 @@ export interface GroupsRepositoryInterface {
   findGroupInfo(groupID: UUID): Promise<GroupInfoRaw>;
   findGroupCreator(groupID: UUID): Promise<GroupUser | undefined>;
   findGroupMembers(groupID: UUID): Promise<GroupUser[]>;
+  updateGroupName(groupID: UUID, newName: string): Promise<void>;
+  deleteGroup(groupID: UUID): Promise<void>;
 }
 
 export const GROUPS_SERVICE = Symbol("GROUPS_SERVICE");
@@ -25,4 +27,6 @@ export interface GroupsServiceInterface {
   addGroup(userID: UUID, groupData: CreateGroup): Promise<void>;
   getGroupInfo(userID: UUID, groupID: UUID): Promise<GroupInfo>;
   getGroupUsers(userID: UUID, groupID: UUID): Promise<GroupUsersList>;
+  updateGroupName(userID: UUID, groupID: UUID, newName: string): Promise<void>;
+  deleteGroup(userID: UUID, groupID: UUID): Promise<void>;
 }

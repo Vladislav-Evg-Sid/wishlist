@@ -60,18 +60,6 @@ const OrdersHeader = observer(() => {
       >
         <Box sx={{ minWidth: 0 }}>
           <Typography
-            sx={{
-              mb: 0.75,
-              color: "text.secondary",
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-            }}
-          >
-            Вишлист
-          </Typography>
-          <Typography
             component="h1"
             sx={{
               color: "text.primary",

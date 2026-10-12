@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Put,
+} from "@nestjs/common";
 import type z from "zod";
 
 import { GROUPS_SERVICE, type GroupsServiceInterface } from "./groups.di.js";
@@ -7,6 +16,7 @@ import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
   createGroupBodySchema,
   getGroupInfoParamsSchema,
+  updateGroupNameBodySchema,
 } from "./groups.schemas.js";
 
 @Controller("groups")
@@ -58,5 +68,31 @@ export class GroupsController {
     userID: UUID,
   ) {
     return await this.groupsServece.getGroupUsers(userID, params.groupID);
+  }
+
+  @Put(":group_id")
+  async updateGroupNameRequest(
+    @Param({ schema: getGroupInfoParamsSchema })
+    params: z.output<typeof getGroupInfoParamsSchema>,
+    @Body({ schema: updateGroupNameBodySchema })
+    groupName: z.output<typeof updateGroupNameBodySchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsServece.updateGroupName(
+      userID,
+      params.groupID,
+      groupName.title,
+    );
+  }
+
+  @Delete(":group_id")
+  async deleteGroupRequest(
+    @Param({ schema: getGroupInfoParamsSchema })
+    params: z.output<typeof getGroupInfoParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsServece.deleteGroup(userID, params.groupID);
   }
 }

@@ -59,3 +59,38 @@ export async function getGroupUsers(groupID: string): Promise<GroupUsersList> {
 
   return await response.json();
 }
+
+export async function deleteGroup(groupID: string): Promise<void> {
+  const response = await apiFetch(`/groups/${groupID}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("User not creator");
+    }
+    throw new Error(`${response.status}`);
+  }
+}
+
+export async function updateGroupName(
+  groupID: string,
+  groupName: string,
+): Promise<void> {
+  const response = await apiFetch(`/groups/${groupID}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: groupName,
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("User not a creator");
+    }
+    throw new Error(`${response.status}`);
+  }
+}

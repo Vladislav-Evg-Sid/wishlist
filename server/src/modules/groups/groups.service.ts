@@ -64,4 +64,29 @@ export class GroupsService implements GroupsServiceInterface {
       members: filteredMembers,
     };
   }
+
+  async updateGroupName(
+    userID: UUID,
+    groupID: UUID,
+    newName: string,
+  ): Promise<void> {
+    const { creatorID } = await this.groupsRepository.findGroupInfo(groupID);
+    if (creatorID !== userID) {
+      throw new ForbidenError("user not a creator");
+    }
+
+    await this.groupsRepository.updateGroupName(groupID, newName);
+  }
+
+  async deleteGroup(userID: UUID, groupID: UUID): Promise<void> {
+    const { creatorID } = await this.groupsRepository.findGroupInfo(groupID);
+    if (!creatorID) {
+      throw new NotFoundError("group not found");
+    }
+    if (creatorID !== userID) {
+      throw new ForbidenError("user not a creator");
+    }
+
+    await this.groupsRepository.deleteGroup(groupID);
+  }
 }

@@ -3,7 +3,12 @@ import { toast } from "react-toastify";
 
 import type { GroupUsersList, WishlistData } from "../types/wishlists";
 import { createWishlist, getGroupWishlists } from "../api/wishlists";
-import { getGroupInfo, getGroupUsers } from "../api/groups";
+import {
+  deleteGroup,
+  getGroupInfo,
+  getGroupUsers,
+  updateGroupName,
+} from "../api/groups";
 
 export class WishlistStore {
   wishlists: WishlistData[] = [];
@@ -120,14 +125,75 @@ export class WishlistStore {
   async createWishlist(wishlistName: string) {
     try {
       await createWishlist(this.parantGroupID, wishlistName);
-      toast.success("Вишлист создан");
-      this.loadGroupWishlists();
+
+      runInAction(async () => {
+        toast.success("Вишлист создан");
+        await this.loadGroupWishlists();
+      });
     } catch (error) {
       if (error instanceof Error) {
         switch (error.message) {
           case "User not a member or creator":
             toast.error(
               "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
+  }
+
+  async updateParantGroupName(groupName: string) {
+    if (groupName === "") {
+      toast.info("Название группы не может быть пустым");
+      return;
+    }
+    try {
+      await updateGroupName(this.parantGroupID, groupName);
+
+      runInAction(() => {
+        this.parantGroupTitle = groupName;
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
+  }
+
+  async deleteParantGroupName() {
+    try {
+      await deleteGroup(this.parantGroupID);
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем группы",
             );
             break;
           case "Failed to fetch":
