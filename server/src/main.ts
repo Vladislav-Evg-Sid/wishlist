@@ -5,6 +5,7 @@ import { AppModule } from "./app.module.js";
 import { config } from "./config/env.js";
 import { ValidationError } from "./shared/errors.js";
 import { httpLogger } from "./middleware/logger.middleware.js";
+import cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,8 @@ async function bootstrap() {
     origin: "http://localhost:5173",
     credentials: true,
   });
+
+  app.use(cookieParser());
 
   app.use(httpLogger);
 
