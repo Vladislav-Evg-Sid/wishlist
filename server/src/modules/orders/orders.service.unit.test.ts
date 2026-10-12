@@ -81,7 +81,7 @@ describe("orders service", () => {
 
       await expect(
         orderService.getWishlistCards(userID, wishlistID),
-      ).rejects.toThrow("Not found wishlist's group");
+      ).rejects.toBeInstanceOf(NotFoundError);
 
       expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith(wishlistID);
       expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
@@ -94,7 +94,7 @@ describe("orders service", () => {
 
       await expect(
         orderService.getWishlistCards(userID, wishlistID),
-      ).rejects.toThrow("User not a member or creator");
+      ).rejects.toBeInstanceOf(ForbidenError);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findWishlistCardsMock).not.toHaveBeenCalled();
@@ -158,8 +158,8 @@ describe("orders service", () => {
     test("throw when wishlist's group does not exist", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(null);
 
-      await expect(orderService.addCard(newCard)).rejects.toThrow(
-        "Not found wishlist's group",
+      await expect(orderService.addCard(newCard)).rejects.toBeInstanceOf(
+        NotFoundError,
       );
 
       expect(findGroupIDByWishlistIDMock).toHaveBeenCalledWith(wishlistID);
@@ -171,8 +171,8 @@ describe("orders service", () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(groupID);
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(orderService.addCard(newCard)).rejects.toThrow(
-        "User not a member or creator",
+      await expect(orderService.addCard(newCard)).rejects.toBeInstanceOf(
+        ForbidenError,
       );
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);

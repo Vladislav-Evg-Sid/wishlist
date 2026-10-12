@@ -10,6 +10,7 @@ import {
 import type { UUID } from "../../types/shared.js";
 import type { WishlistsRepositoryInterface } from "./wishlists.di.js";
 import type { CreateWishlistData, WishlistData } from "./wishlists.types.js";
+import { ForbidenError } from "../../shared/errors.js";
 
 // Мокаем функции
 type CheckUserGroup = typeof import("../../shared/checkUserGroup.js");
@@ -58,7 +59,7 @@ describe("wishlists service", () => {
 
       await expect(
         wishlistsService.getGroupWishlists(creatorID, groupID),
-      ).rejects.toThrow("User not a member or creator");
+      ).rejects.toBeInstanceOf(ForbidenError);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(findGroupWishlistsMock).not.toHaveBeenCalled();
@@ -99,9 +100,9 @@ describe("wishlists service", () => {
     test("denies creating a wishlist without group access", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(wishlistsService.addWishlist(wishlist)).rejects.toThrow(
-        "User not a member or creator",
-      );
+      await expect(
+        wishlistsService.addWishlist(wishlist),
+      ).rejects.toBeInstanceOf(ForbidenError);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(creatorID, groupID);
       expect(createWishlistMock).not.toHaveBeenCalled();

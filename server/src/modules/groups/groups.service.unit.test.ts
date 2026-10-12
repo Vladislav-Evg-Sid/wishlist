@@ -11,6 +11,7 @@ import type { UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
 import type { GroupData, GroupUser } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
+import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 
 // Мокаем функции
 type CheckUserGroup = typeof import("../../shared/checkUserGroup.js");
@@ -105,9 +106,9 @@ describe("groups service", () => {
     test("getGroupInfo denies access before reading group data", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
-      await expect(groupsService.getGroupInfo(userID, groupID)).rejects.toThrow(
-        "User not a member or creator",
-      );
+      await expect(
+        groupsService.getGroupInfo(userID, groupID),
+      ).rejects.toBeInstanceOf(ForbidenError);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findGroupInfoMock).not.toHaveBeenCalled();
@@ -160,7 +161,7 @@ describe("groups service", () => {
 
       await expect(
         groupsService.getGroupUsers(userID, groupID),
-      ).rejects.toThrow("User not a member or creator");
+      ).rejects.toBeInstanceOf(ForbidenError);
 
       expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
       expect(findGroupInfoMock).not.toHaveBeenCalled();
@@ -174,7 +175,7 @@ describe("groups service", () => {
 
       await expect(
         groupsService.getGroupUsers(userID, groupID),
-      ).rejects.toThrow("Group's creator not found");
+      ).rejects.toBeInstanceOf(NotFoundError);
 
       expect(findGroupMembersMock).not.toHaveBeenCalled();
     });

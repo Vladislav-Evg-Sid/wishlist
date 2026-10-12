@@ -156,7 +156,7 @@ export class AuthService implements AuthServiceInterface {
       payload.jti,
     );
     if (!refreshTokenData) {
-      throw new NotFoundError("Refresh token session not found");
+      throw new UnauthorizedError("Refresh token session not found");
     }
 
     const allUserActiveRefresh =

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
-import { ForbidenError } from "../../shared/errors.js";
+import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
 import type {
   CreateGroup,
@@ -52,7 +52,7 @@ export class GroupsService implements GroupsServiceInterface {
     }
     const creator = await this.groupsRepository.findGroupCreator(groupID);
     if (!creator) {
-      throw new ForbidenError("Group's creator not found");
+      throw new NotFoundError("Group's creator not found");
     }
     const members = await this.groupsRepository.findGroupMembers(groupID);
     const filteredMembers = members.filter(
