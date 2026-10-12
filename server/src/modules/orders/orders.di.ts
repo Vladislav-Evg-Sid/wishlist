@@ -15,6 +15,7 @@ export interface OrdersRepositoryInterface {
   findCardByID(orderID: number): Promise<CardDataRaw | null>;
   createCard(card: CardDataInsert): Promise<number>;
   updateCard(card: CardDataUpdate): Promise<void>;
+  deleteCard(cardID: number): Promise<void>;
 }
 
 export const ORDERS_SERVICE = Symbol("ORDERS_SERVICE");
@@ -23,4 +24,5 @@ export interface OrdersServiceInterface {
   getWishlistCards(userID: UUID, wishlistID: UUID): Promise<CardData[]>;
   addCard(card: CardDataInsert): Promise<void>;
   updateCard(userID: UUID, card: CardDataUpdate): Promise<void>;
+  deleteCard(userID: UUID, cardID: number): Promise<void>;
 }

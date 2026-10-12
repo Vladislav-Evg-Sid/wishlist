@@ -10,7 +10,10 @@ import {
 import type { CardDataRaw } from "./orders.repository.dto.js";
 import type { CardDataInsert, CardDataUpdate } from "./orders.types.js";
 import type { UUID } from "../../types/shared.js";
-import type { OrdersRepositoryInterface } from "./orders.di.js";
+import type {
+  OrdersRepositoryInterface,
+  OrdersServiceInterface,
+} from "./orders.di.js";
 import { ForbidenError, NotFoundError } from "../../shared/errors.js";
 
 // Мокаем функции
@@ -27,6 +30,7 @@ const findCardByIDMock =
   jest.fn<(orderID: number) => Promise<CardDataRaw | null>>();
 const createCardMock = jest.fn<(card: CardDataInsert) => Promise<number>>();
 const updateCardMock = jest.fn<(card: CardDataUpdate) => Promise<void>>();
+const deleteCardMock = jest.fn<(cardID: number) => Promise<void>>();
 class OrderRepository implements OrdersRepositoryInterface {
   constructor(
     public readonly findGroupIDByWishlistID: (
@@ -43,6 +47,7 @@ class OrderRepository implements OrdersRepositoryInterface {
     ) => Promise<CardDataRaw | null>,
     public readonly createCard: (card: CardDataInsert) => Promise<number>,
     public readonly updateCard: (card: CardDataUpdate) => Promise<void>,
+    public readonly deleteCard: (cardID: number) => Promise<void>,
   ) {}
 }
 const orderRepository = new OrderRepository(
@@ -52,6 +57,7 @@ const orderRepository = new OrderRepository(
   findCardByIDMock,
   createCardMock,
   updateCardMock,
+  deleteCardMock,
 );
 
 // Мокаем импорты этих функций
@@ -60,7 +66,7 @@ jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
 }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
-let orderService: any;
+let orderService: OrdersServiceInterface;
 beforeAll(async () => {
   const service = await import("./orders.service.js");
   orderService = new service.OrdersService(orderRepository);
@@ -265,6 +271,74 @@ describe("orders service", () => {
       await orderService.updateCard(userID, updatedCardData);
 
       expect(updateCardMock).toHaveBeenCalledWith(updatedCardData);
+    });
+  });
+
+  describe("deleteCard", () => {
+    test("throw when order's group does not exist", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.deleteCard(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupIDByOrderIDMock).toHaveBeenCalledWith(cardID);
+      expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(deleteCardMock).not.toHaveBeenCalled();
+    });
+
+    test("throw when user not a member or creator", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(false);
+
+      await expect(
+        orderService.deleteCard(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(deleteCardMock).not.toHaveBeenCalled();
+    });
+
+    test("throw when card not exist", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.deleteCard(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findCardByIDMock).toHaveBeenCalledWith(cardID);
+      expect(deleteCardMock).not.toHaveBeenCalled();
+    });
+
+    test("throw user is not a creator of card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: wishlistID,
+      } as CardDataRaw);
+
+      await expect(
+        orderService.deleteCard(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findCardByIDMock).toHaveBeenCalledWith(cardID);
+      expect(deleteCardMock).not.toHaveBeenCalled();
+    });
+
+    test("correct delete card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: userID,
+      } as CardDataRaw);
+
+      await orderService.deleteCard(userID, cardID);
+
+      expect(deleteCardMock).toHaveBeenCalledWith(cardID);
     });
   });
 });

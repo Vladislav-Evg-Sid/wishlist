@@ -2,10 +2,9 @@ import type { WishIconValue } from "../constants/wishIcons";
 import type { User } from "./user";
 
 type Status = "Свободно" | "Забронировано" | "Подарено";
-export type OrderID = string | number;
 
 export interface OrderData {
-  id: OrderID;
+  id: number;
   title: string;
   description?: string;
   icon: WishIconValue;
@@ -25,7 +24,7 @@ export interface OrderDataInsert {
 }
 
 export interface OrderDataChange {
-  currentID: OrderID;
+  currentID: number;
   title: string;
   icon: WishIconValue;
   description: string;

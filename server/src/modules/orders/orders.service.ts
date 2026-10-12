@@ -93,4 +93,27 @@ export class OrdersService implements OrdersServiceInterface {
 
     await this.ordersRepository.updateCard(card);
   }
+
+  async deleteCard(userID: UUID, cardID: number): Promise<void> {
+    const groupID = await this.ordersRepository.findGroupIDByOrderID(cardID);
+    if (!groupID) {
+      throw new NotFoundError("Not found wishlist's group");
+    }
+
+    const userAccess = await checkGroupUserAccess(userID, groupID);
+    if (!userAccess) {
+      throw new ForbidenError("User not a member or creator");
+    }
+
+    const cardData = await this.ordersRepository.findCardByID(cardID);
+    if (!cardData) {
+      throw new NotFoundError("card not found");
+    }
+
+    if (userID !== cardData.author_id) {
+      throw new ForbidenError("user is not a creator");
+    }
+
+    this.ordersRepository.deleteCard(cardID);
+  }
 }

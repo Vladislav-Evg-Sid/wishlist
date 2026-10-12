@@ -54,3 +54,16 @@ export async function editOrder(order: OrderDataChange): Promise<void> {
     throw new Error(`${response.status}`);
   }
 }
+
+export async function deleteOrder(orderID: number): Promise<void> {
+  const response = await apiFetch(`/orders/${orderID}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("User not a member or creator");
+    }
+    throw new Error(`${response.status}`);
+  }
+}

@@ -1,8 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
-import type { OrderData, OrderID } from "../types/orders";
-import { addOrder, editOrder, getWishlistOrders } from "../api/orders";
+import type { OrderData } from "../types/orders";
+import {
+  addOrder,
+  deleteOrder,
+  editOrder,
+  getWishlistOrders,
+} from "../api/orders";
 import type { WishIconValue } from "../constants/wishIcons";
 
 export class OrderStore {
@@ -94,13 +99,35 @@ export class OrderStore {
     }
   }
 
-  deleteOrder(orderID: OrderID) {
-    void orderID;
-    toast.info("Функция удаления записи пока не доступна");
+  async deleteOrder(orderID: number) {
+    try {
+      await deleteOrder(orderID);
+      toast.success("Запись удалена");
+      this.loadWishlistOrders();
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось удалить запись");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
   async editOrder(
-    orderID: OrderID,
+    orderID: number,
     cardName: string,
     description: string,
     icon: WishIconValue,
@@ -142,17 +169,17 @@ export class OrderStore {
     }
   }
 
-  reserveOrder(orderID: OrderID) {
+  reserveOrder(orderID: number) {
     void orderID;
     toast.info("Функция бронирования записи пока не доступна");
   }
 
-  cancelOrderReservation(orderID: OrderID) {
+  cancelOrderReservation(orderID: number) {
     void orderID;
     toast.info("Функция снятия брони пока не доступна");
   }
 
-  markOrderAsGifted(orderID: OrderID) {
+  markOrderAsGifted(orderID: number) {
     void orderID;
     toast.info("Функция отметки подарка пока не доступна");
   }

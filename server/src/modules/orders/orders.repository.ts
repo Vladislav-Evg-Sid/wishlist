@@ -110,4 +110,8 @@ export class OrdersRepository implements OrdersRepositoryInterface {
       })
       .where(CARD_COLUMNS.id, card.id);
   }
+
+  async deleteCard(cardID: number): Promise<void> {
+    await db(TABLES.card).delete().where(CARD_COLUMNS.id, cardID);
+  }
 }

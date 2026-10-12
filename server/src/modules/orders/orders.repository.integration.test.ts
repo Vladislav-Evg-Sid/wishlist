@@ -9,8 +9,9 @@ import {
   createCardWithParantWishlistID,
 } from "../../../tests/integration/fixtures/card.js";
 import type { UUID } from "../../types/shared.js";
+import type { OrdersRepositoryInterface } from "./orders.di.js";
 
-const ordersRepository = new OrdersRepository();
+const ordersRepository: OrdersRepositoryInterface = new OrdersRepository();
 
 describe("orders repository", () => {
   describe("findGroupIDByWishlistID", () => {
@@ -260,6 +261,18 @@ describe("orders repository", () => {
         [CARD_COLUMNS.wishlist_id]: wishlistID,
         [CARD_COLUMNS.creator_id]: creatorID,
       });
+    });
+  });
+
+  describe("deleteCard", () => {
+    test("correct delete card", async () => {
+      const { cards } = await createCards(1);
+
+      await ordersRepository.deleteCard(cards[0].id);
+
+      const realCards = await db(TABLES.card).select("*");
+
+      expect(realCards.length).toBe(0);
     });
   });
 });

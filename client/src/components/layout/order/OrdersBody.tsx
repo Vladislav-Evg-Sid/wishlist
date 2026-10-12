@@ -14,7 +14,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import InputAdornment from "@mui/material/InputAdornment";
 
 import { useStoreOrders } from "../../../hooks/useStore";
-import type { OrderDataChange, OrderID } from "../../../types/orders";
+import type { OrderDataChange } from "../../../types/orders";
 import OrderCard from "./OrderCard";
 import CreateOrderDialog from "../../elements/CreateOrderDialog";
 
@@ -44,8 +44,8 @@ const OrdersBody = observer(() => {
   const [author, setAuthor] = useState<string>("");
   const [shop, setShop] = useState<string>("");
   const [sort, setSort] = useState<Sort>("date-desc");
-  const [expandedOrderID, setExpandedOrderID] = useState<OrderID | null>(null);
-  const [transitionOrderID, setTransitionOrderID] = useState<OrderID | null>(
+  const [expandedOrderID, setExpandedOrderID] = useState<number | null>(null);
+  const [transitionOrderID, setTransitionOrderID] = useState<number | null>(
     null,
   );
   const [isEditOrderOpen, setIsEditOrderOpen] = useState(false);
@@ -88,7 +88,7 @@ const OrdersBody = observer(() => {
       });
   }, [author, orderStore.orders, search, shop, sort, status]);
 
-  const toggleOrder = (orderID: OrderID) => {
+  const toggleOrder = (orderID: number) => {
     if (transitionOrderID !== null) return;
 
     const update = () => {

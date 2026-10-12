@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent } from "react";
+import { useState, type KeyboardEvent, type MouseEvent } from "react";
 import { observer } from "mobx-react-lite";
 import {
   Avatar,
@@ -23,6 +23,7 @@ import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutl
 import { getWishIcon } from "../../../constants/wishIcons";
 import { useStore, useStoreOrders } from "../../../hooks/useStore";
 import type { OrderData, OrderDataChange } from "../../../types/orders";
+import DeleteOrderDialog from "../../elements/DeleteOrderDialog";
 
 const statusStyles = {
   Свободно: { bgcolor: "#E8F7EF", color: "#177447" },
@@ -182,6 +183,7 @@ function OrderActions({
 }) {
   const orderStore = useStoreOrders();
   const { userStore } = useStore();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const currentUser = userStore.currentUser;
   const isAuthor = Boolean(
     currentUser && String(currentUser.id) === String(order.author.id),
@@ -199,27 +201,38 @@ function OrderActions({
 
   if (isAuthor) {
     return (
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        <Button
-          type="button"
-          variant="outlined"
-          startIcon={<EditOutlinedIcon />}
-          onClick={onInitEdit}
-          sx={buttonSx}
-        >
-          Редактировать
-        </Button>
-        <Button
-          type="button"
-          variant="outlined"
-          color="error"
-          startIcon={<DeleteOutlineRoundedIcon />}
-          onClick={() => orderStore.deleteOrder(order.id)}
-          sx={buttonSx}
-        >
-          Удалить
-        </Button>
-      </Box>
+      <>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Button
+            type="button"
+            variant="outlined"
+            startIcon={<EditOutlinedIcon />}
+            onClick={onInitEdit}
+            sx={buttonSx}
+          >
+            Редактировать
+          </Button>
+          <Button
+            type="button"
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteOutlineRoundedIcon />}
+            onClick={() => setIsDeleteDialogOpen(true)}
+            sx={buttonSx}
+          >
+            Удалить
+          </Button>
+        </Box>
+        <DeleteOrderDialog
+          open={isDeleteDialogOpen}
+          orderTitle={order.title}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={() => {
+            orderStore.deleteOrder(order.id);
+            setIsDeleteDialogOpen(false);
+          }}
+        />
+      </>
     );
   }
 
