@@ -1,6 +1,7 @@
 import { apiFetch } from "./baseApi";
-import type { GroupData, GroupInfo } from "../types/groups";
+import type { GroupData } from "../types/groups";
 import type { GroupUsersList } from "../types/wishlists";
+import type { ParantInfo } from "../types/shared";
 
 export async function getUserGroups(): Promise<GroupData[]> {
   const response = await apiFetch("/groups");
@@ -23,7 +24,7 @@ export async function createGroup(groupName: string): Promise<void> {
   }
 }
 
-export async function getGroupInfo(groupID: string): Promise<GroupInfo> {
+export async function getGroupInfo(groupID: string): Promise<ParantInfo> {
   const response = await apiFetch(`/groups/${groupID}`);
 
   if (!response.ok) {
@@ -67,7 +68,7 @@ export async function deleteGroup(groupID: string): Promise<void> {
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error("User not creator");
+      throw new Error("User not a creator");
     }
     throw new Error(`${response.status}`);
   }

@@ -9,18 +9,56 @@ import {
   getWishlistOrders,
 } from "../api/orders";
 import type { WishIconValue } from "../constants/wishIcons";
+import {
+  deleteWishlist,
+  getWishlistInfo,
+  updateWishlistName,
+} from "../api/wishlists";
 
 export class OrderStore {
   orders: OrderData[] = [];
   parantWishlistID: string;
   parantWishlistTitle: string = "";
+  isParantWishlistCreator: boolean = true;
 
-  constructor(parantWishlistID: string, parantWishlistTitle = "") {
+  constructor(parantWishlistID: string) {
     makeAutoObservable(this);
 
     this.parantWishlistID = parantWishlistID;
-    this.parantWishlistTitle = parantWishlistTitle;
+    this.loadParantWishlistInfo();
     this.loadWishlistOrders();
+  }
+
+  async loadParantWishlistInfo() {
+    try {
+      const { isCreator, title } = await getWishlistInfo(this.parantWishlistID);
+
+      runInAction(() => {
+        this.isParantWishlistCreator = isCreator;
+        this.parantWishlistTitle = title;
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error(
+              "Неизвестная ошибка.\nНе удалось получить данные о вишлисте",
+            );
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
   async loadWishlistOrders() {
@@ -48,6 +86,75 @@ export class OrderStore {
             toast.error(
               "Неизвестная ошибка.\nНе удалось получить записи вишлиста",
             );
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
+  }
+
+  async updateParantWishlistName(wishlistName: string) {
+    if (wishlistName === "") {
+      toast.info("Название вишлиста не может быть пустым");
+      return;
+    }
+    try {
+      await updateWishlistName(this.parantWishlistID, wishlistName);
+
+      runInAction(() => {
+        this.parantWishlistTitle = wishlistName;
+        toast.success("Название вишлиста обновлено");
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь участником или создателем группы",
+            );
+            break;
+          case "User not a creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем вишлиста",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
+  }
+
+  async deleteParantWishlist() {
+    try {
+      await deleteWishlist(this.parantWishlistID);
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь участником или создателем группы",
+            );
+            break;
+          case "User not a creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем вишлиста",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось удлить вишлист");
             console.error(error.message);
             break;
         }

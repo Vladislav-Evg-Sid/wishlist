@@ -47,17 +47,13 @@ export function WishlistStoreProvider({
 interface OrderStoreProviderProps {
   children: React.ReactNode;
   wishlistID: string;
-  wishlistTitle?: string;
 }
 
 export function OrderStoreProvider({
   children,
   wishlistID,
-  wishlistTitle = "",
 }: OrderStoreProviderProps) {
-  const [orderContext] = useState(
-    () => new OrderStore(wishlistID, wishlistTitle),
-  );
+  const [orderContext] = useState(() => new OrderStore(wishlistID));
 
   return <OrderStoreContext value={orderContext}>{children}</OrderStoreContext>;
 }

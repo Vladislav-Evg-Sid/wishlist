@@ -175,7 +175,9 @@ export class WishlistStore {
             toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
-            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
+            toast.error(
+              "Неизвестная ошибка.\nНе удалось обновить название группы",
+            );
             console.error(error.message);
             break;
         }
@@ -185,7 +187,7 @@ export class WishlistStore {
     }
   }
 
-  async deleteParantGroupName() {
+  async deleteParantGroup() {
     try {
       await deleteGroup(this.parantGroupID);
     } catch (error) {
@@ -200,7 +202,7 @@ export class WishlistStore {
             toast.error("Сервис недоступен.\nПопробуйте позже");
             break;
           default:
-            toast.error("Неизвестная ошибка.\nНе удалось создать вишлист");
+            toast.error("Неизвестная ошибка.\nНе удалось удлить группу");
             console.error(error.message);
             break;
         }

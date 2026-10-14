@@ -92,7 +92,7 @@ const WishlistHeader = observer(() => {
                 autoFocus
                 fullWidth
                 required
-                id="create-wishlist-name"
+                id="update-group-name"
                 name="groupName"
                 value={paranrGroupName}
                 onChange={(event) => setParantGroupName(event.target.value)}
@@ -180,7 +180,7 @@ const WishlistHeader = observer(() => {
                 elementTitle={paranrGroupName}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={async () => {
-                  await wishlistStore.deleteParantGroupName();
+                  await wishlistStore.deleteParantGroup();
                   setIsDeleteDialogOpen(false);
                   navigate(-1);
                 }}

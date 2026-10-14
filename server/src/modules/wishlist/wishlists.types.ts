@@ -10,3 +10,8 @@ export interface CreateWishlistData {
   creatorID: UUID;
   name: string;
 }
+
+export interface wishlistInfo {
+  title: string;
+  isCreator: boolean;
+}
