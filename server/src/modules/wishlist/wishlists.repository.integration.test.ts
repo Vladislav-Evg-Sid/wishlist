@@ -5,8 +5,9 @@ import {
   createGroup,
   createGroupWithCreatorID,
 } from "../../../tests/integration/fixtures/groups.js";
+import { createWishlist } from "../../../tests/integration/fixtures/wishlists.js";
 import { db } from "../../db/knex.js";
-import { TABLES } from "../../db/schema.js";
+import { TABLES, WISHILST_COLUMNS } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
 
 const wishlistsRepository = new WishlistsRepository();
@@ -102,6 +103,81 @@ describe("wishlists repository", () => {
           rows.map((row) => ({ id: row.id, title: row.title })),
         ),
       );
+    });
+  });
+
+  describe("findWishlistInfo", () => {
+    test("sucess finding wishlist info", async () => {
+      const { creatorID, wishlistID } = await createWishlist();
+      const wishlistTitle = await db(TABLES.wishlist)
+        .select({ title: WISHILST_COLUMNS.title })
+        .where(WISHILST_COLUMNS.id, wishlistID)
+        .first();
+
+      const returnedData =
+        await wishlistsRepository.findWishlistInfo(wishlistID);
+
+      expect(returnedData).toStrictEqual({
+        title: wishlistTitle.title,
+        creatorID,
+      });
+    });
+  });
+
+  describe("deleteWishlist", () => {
+    test("sucess deliting wishlist", async () => {
+      const { wishlistID } = await createWishlist();
+      const wishlistsBeforeDeliting = await db(TABLES.wishlist)
+        .select("*")
+        .where(WISHILST_COLUMNS.id, wishlistID);
+
+      await expect(
+        wishlistsRepository.deleteWishlist(wishlistID),
+      ).resolves.toBeUndefined();
+
+      const wishlistsAfterDeliting = await db(TABLES.wishlist)
+        .select("*")
+        .where(WISHILST_COLUMNS.id, wishlistID);
+
+      expect(wishlistsBeforeDeliting.length).toBe(1);
+      expect(wishlistsAfterDeliting.length).toBe(0);
+    });
+  });
+
+  describe("updateWishlistName", () => {
+    const newWishlistTitle = "some new wishlist title";
+
+    test("sucess updating wishlist name", async () => {
+      const { wishlistID } = await createWishlist();
+
+      await expect(
+        wishlistsRepository.updateWishlistName(wishlistID, newWishlistTitle),
+      ).resolves.toBeUndefined();
+
+      const realWishlistTitle = await db(TABLES.wishlist)
+        .select({ title: WISHILST_COLUMNS.title })
+        .where(WISHILST_COLUMNS.id, wishlistID)
+        .first();
+
+      expect(realWishlistTitle.title).toBe(newWishlistTitle);
+    });
+  });
+
+  describe("findGroupIDByWishlistID", () => {
+    test("sucess finding wishlist info", async () => {
+      const { groupID, wishlistID } = await createWishlist();
+
+      const returnedGroupID =
+        await wishlistsRepository.findGroupIDByWishlistID(wishlistID);
+
+      expect(returnedGroupID).toBe(groupID);
+    });
+
+    test("finding unknown group", async () => {
+      const returnedGroupID =
+        await wishlistsRepository.findGroupIDByWishlistID(missingID);
+
+      expect(returnedGroupID).toBe(null);
     });
   });
 });
