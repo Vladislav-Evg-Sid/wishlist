@@ -38,7 +38,7 @@ export class OrderController {
   }
 
   @Post()
-  async addCardRequest(
+  async addCard(
     @Body({ schema: addCardBodySchema })
     cardData: z.output<typeof addCardBodySchema>,
     @CurrentUserID()
@@ -52,7 +52,7 @@ export class OrderController {
   }
 
   @Put(":order_id")
-  async updateCardRequest(
+  async updateCard(
     @Body({ schema: updateCardBopySchema })
     cardData: z.output<typeof updateCardBopySchema>,
     @Param({ schema: updateCardParamsSchema })
@@ -67,7 +67,7 @@ export class OrderController {
   }
 
   @Delete(":order_id")
-  async deleteCardRequest(
+  async deleteCard(
     @Param({ schema: updateCardParamsSchema })
     params: z.output<typeof updateCardParamsSchema>,
     @CurrentUserID()

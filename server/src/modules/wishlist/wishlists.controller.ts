@@ -20,7 +20,7 @@ export class WishlistsController {
   ) {}
 
   @Get(":group_id")
-  async getGroupWishlistRequest(
+  async getGroupWishlist(
     @Param({ schema: getGroupWishlistsParamsSchema })
     params: z.output<typeof getGroupWishlistsParamsSchema>,
     @CurrentUserID()
@@ -30,7 +30,7 @@ export class WishlistsController {
   }
 
   @Post()
-  async addWishlistRequest(
+  async addWishlist(
     @Body({ schema: createWishlistBodySchema })
     wishlistData: z.output<typeof createWishlistBodySchema>,
     @CurrentUserID()

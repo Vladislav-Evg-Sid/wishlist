@@ -28,7 +28,7 @@ export class AuthController {
 
   @Public()
   @Post("register")
-  async registerUserRequest(
+  async registerUser(
     @Body({ schema: createUserBodySchema })
     userData: z.output<typeof createUserBodySchema>,
     @Headers("user-agent")
@@ -52,7 +52,7 @@ export class AuthController {
 
   @Public()
   @Post("login")
-  async loginUserRequest(
+  async loginUser(
     @Body({ schema: loginUserBodySchema })
     userData: z.output<typeof loginUserBodySchema>,
     @Headers("user-agent")
@@ -76,7 +76,7 @@ export class AuthController {
 
   @Public()
   @Post("refresh")
-  async refreshTokensRequest(
+  async refreshTokens(
     @Req()
     req: Request,
     @Res({ passthrough: true })
@@ -102,7 +102,7 @@ export class AuthController {
 
   @Public()
   @Post("logout")
-  async logoutUserRequest(
+  async logoutUser(
     @Req()
     req: Request,
     @Res({ passthrough: true })
@@ -124,7 +124,7 @@ export class AuthController {
 
   @Public()
   @Post("logout/all-sessions")
-  async revokeAllUserRefreshRequest(
+  async revokeAllUserRefresh(
     @Req()
     req: Request,
     @Res({ passthrough: true })
@@ -145,7 +145,7 @@ export class AuthController {
   }
 
   @Get("me")
-  async getUserDataRequest(
+  async getUserData(
     @CurrentUserID()
     userID: UUID,
   ) {

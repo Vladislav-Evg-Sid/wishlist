@@ -27,7 +27,7 @@ export class GroupsController {
   ) {}
 
   @Get()
-  async getUserGroupsRequest(
+  async getUserGroups(
     @CurrentUserID()
     userID: UUID,
   ) {
@@ -35,7 +35,7 @@ export class GroupsController {
   }
 
   @Post()
-  async addGroupRequest(
+  async addGroup(
     @Body({ schema: createGroupBodySchema })
     groupData: z.output<typeof createGroupBodySchema>,
     @CurrentUserID()
@@ -46,7 +46,7 @@ export class GroupsController {
   }
 
   @Get(":group_id")
-  async getGroupInfoRequest(
+  async getGroupInfo(
     @Param({ schema: getGroupInfoParamsSchema })
     params: z.output<typeof getGroupInfoParamsSchema>,
     @CurrentUserID()
@@ -61,7 +61,7 @@ export class GroupsController {
   }
 
   @Get(":group_id/users")
-  async getGroupUsersRequest(
+  async getGroupUsers(
     @Param({ schema: getGroupInfoParamsSchema })
     params: z.output<typeof getGroupInfoParamsSchema>,
     @CurrentUserID()
@@ -71,7 +71,7 @@ export class GroupsController {
   }
 
   @Put(":group_id")
-  async updateGroupNameRequest(
+  async updateGroupName(
     @Param({ schema: getGroupInfoParamsSchema })
     params: z.output<typeof getGroupInfoParamsSchema>,
     @Body({ schema: updateGroupNameBodySchema })
@@ -87,7 +87,7 @@ export class GroupsController {
   }
 
   @Delete(":group_id")
-  async deleteGroupRequest(
+  async deleteGroup(
     @Param({ schema: getGroupInfoParamsSchema })
     params: z.output<typeof getGroupInfoParamsSchema>,
     @CurrentUserID()
