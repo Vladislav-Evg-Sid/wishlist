@@ -67,15 +67,9 @@ export class WishlistsService implements WishlistsServiceInterface {
   }
 
   async deleteWishlist(userID: UUID, wishlistID: UUID): Promise<void> {
-    const groupID =
-      await this.wishlistRepository.findGroupIDByWishlistID(wishlistID);
-    if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
-    }
-
-    const userAccess = await checkGroupUserAccess(userID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
+    const { isCreator } = await this.getWishlistInfo(userID, wishlistID);
+    if (!isCreator) {
+      throw new ForbidenError("user not a wishlist creator");
     }
 
     await this.wishlistRepository.deleteWishlist(wishlistID);
@@ -86,15 +80,9 @@ export class WishlistsService implements WishlistsServiceInterface {
     wishlistID: UUID,
     newName: string,
   ): Promise<void> {
-    const groupID =
-      await this.wishlistRepository.findGroupIDByWishlistID(wishlistID);
-    if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
-    }
-
-    const userAccess = await checkGroupUserAccess(userID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
+    const { isCreator } = await this.getWishlistInfo(userID, wishlistID);
+    if (!isCreator) {
+      throw new ForbidenError("user not a wishlist creator");
     }
 
     this.wishlistRepository.updateWishlistName(wishlistID, newName);
