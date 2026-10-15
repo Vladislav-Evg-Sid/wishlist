@@ -14,7 +14,11 @@ import type {
   OrdersRepositoryInterface,
   OrdersServiceInterface,
 } from "./orders.di.js";
-import { ForbidenError, NotFoundError } from "../../shared/errors.js";
+import {
+  DataConflictError,
+  ForbidenError,
+  NotFoundError,
+} from "../../shared/errors.js";
 
 // Мокаем функции
 type CheckUserGroup = typeof import("./../../shared/checkUserGroup.js");
@@ -31,6 +35,10 @@ const findCardByIDMock =
 const createCardMock = jest.fn<(card: CardDataInsert) => Promise<number>>();
 const updateCardMock = jest.fn<(card: CardDataUpdate) => Promise<void>>();
 const deleteCardMock = jest.fn<(cardID: number) => Promise<void>>();
+const reserveCardMock =
+  jest.fn<(cardID: number, userID: UUID) => Promise<void>>();
+const unReserveCardMock = jest.fn<(cardID: number) => Promise<void>>();
+const giveCardMock = jest.fn<(cardID: number) => Promise<void>>();
 class OrderRepository implements OrdersRepositoryInterface {
   constructor(
     public readonly findGroupIDByWishlistID: (
@@ -48,6 +56,12 @@ class OrderRepository implements OrdersRepositoryInterface {
     public readonly createCard: (card: CardDataInsert) => Promise<number>,
     public readonly updateCard: (card: CardDataUpdate) => Promise<void>,
     public readonly deleteCard: (cardID: number) => Promise<void>,
+    public readonly reserveCard: (
+      cardID: number,
+      userID: UUID,
+    ) => Promise<void>,
+    public readonly unReserveCard: (cardID: number) => Promise<void>,
+    public readonly giveCard: (cardID: number) => Promise<void>,
   ) {}
 }
 const orderRepository = new OrderRepository(
@@ -58,6 +72,9 @@ const orderRepository = new OrderRepository(
   createCardMock,
   updateCardMock,
   deleteCardMock,
+  reserveCardMock,
+  unReserveCardMock,
+  giveCardMock,
 );
 
 // Мокаем импорты этих функций
@@ -81,6 +98,7 @@ describe("orders service", () => {
   const wishlistID: UUID = "00000000-0000-0000-0000-000000000001" as UUID;
   const cardID = 1;
   const groupID: UUID = "00000000-0000-0000-0000-000000000003" as UUID;
+  const exampleUUID: UUID = "00000000-0000-0000-0000-000000000004" as UUID;
   describe("getWishlistCards", () => {
     test("throw when wishlist's group does not exist", async () => {
       findGroupIDByWishlistIDMock.mockResolvedValue(null);
@@ -341,4 +359,319 @@ describe("orders service", () => {
       expect(deleteCardMock).toHaveBeenCalledWith(cardID);
     });
   });
+
+  describe("reserveOrder", () => {
+    test("not group found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupIDByOrderIDMock).toHaveBeenCalledWith(cardID);
+      expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(reserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a creator or member of group", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(false);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(reserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("not card found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findCardByIDMock).toHaveBeenCalledWith(cardID);
+      expect(reserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user is author of card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({ author_id: userID } as CardDataRaw);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(reserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("card alredy unreserved", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        status: "Забронировано",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(reserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("sucess reserve card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        status: "Свободно",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.reserveOrder(userID, cardID),
+      ).resolves.toBeUndefined();
+
+      expect(reserveCardMock).toHaveBeenCalledWith(cardID, userID);
+    });
+  });
+
+  describe("unResurvedOrder", () => {
+    test("not group found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupIDByOrderIDMock).toHaveBeenCalledWith(cardID);
+      expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a creator or member of group", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(false);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("not card found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findCardByIDMock).toHaveBeenCalledWith(cardID);
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user is author of card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({ author_id: userID } as CardDataRaw);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("card unreserved", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: null,
+      } as CardDataRaw);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("card gifted", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: exampleUUID,
+        status: "Подарено",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a reserver", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: exampleUUID,
+        status: "Забронировано",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(unReserveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("sucess unresurv card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: userID,
+        status: "Забронировано",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.unReserveOrder(userID, cardID),
+      ).resolves.toBeUndefined();
+
+      expect(unReserveCardMock).toHaveBeenCalledWith(cardID);
+    });
+  });
+
+  describe("markOrderAsGifted", () => {
+    test("not group found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupIDByOrderIDMock).toHaveBeenCalledWith(cardID);
+      expect(checkGroupUserAccessMock).not.toHaveBeenCalled();
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a creator or member of group", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(false);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(checkGroupUserAccessMock).toHaveBeenCalledWith(userID, groupID);
+      expect(findCardByIDMock).not.toHaveBeenCalled();
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("not card found", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue(null);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findCardByIDMock).toHaveBeenCalledWith(cardID);
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user is author of card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({ author_id: userID } as CardDataRaw);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("card unreserved", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: null,
+      } as CardDataRaw);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a reserver", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: exampleUUID,
+      } as CardDataRaw);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("card gifted", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: userID,
+        status: "Подарено",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(giveCardMock).not.toHaveBeenCalled();
+    });
+
+    test("sucess give card", async () => {
+      findGroupIDByOrderIDMock.mockResolvedValue(groupID);
+      checkGroupUserAccessMock.mockResolvedValue(true);
+      findCardByIDMock.mockResolvedValue({
+        author_id: exampleUUID,
+        reserved_by: userID,
+        status: "Забронировано",
+      } as CardDataRaw);
+
+      await expect(
+        orderService.markOrderAsGifted(userID, cardID),
+      ).resolves.toBeUndefined();
+
+      expect(giveCardMock).toHaveBeenCalledWith(cardID);
+    });
+  });
+  // markOrderAsGifted(userID: UUID, cardID: number): Promise<void>;
 });

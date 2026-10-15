@@ -10,6 +10,7 @@ import {
 } from "../../../tests/integration/fixtures/card.js";
 import type { UUID } from "../../types/shared.js";
 import type { OrdersRepositoryInterface } from "./orders.di.js";
+import { createUser } from "../../../tests/integration/fixtures/users.js";
 
 const ordersRepository: OrdersRepositoryInterface = new OrdersRepository();
 
@@ -273,6 +274,80 @@ describe("orders repository", () => {
       const realCards = await db(TABLES.card).select("*");
 
       expect(realCards.length).toBe(0);
+    });
+  });
+
+  describe("reserveCard", () => {
+    test("success resserve some card", async () => {
+      const reserverID = await createUser({
+        email: "reserver@example.com",
+        user_hash: 1,
+      });
+      const { cards } = await createCards(1);
+      const createdCardID = cards[0].id;
+
+      await ordersRepository.reserveCard(createdCardID, reserverID);
+
+      const card = await db(TABLES.card)
+        .select({
+          reserverID: CARD_COLUMNS.reserved_by,
+          status: CARD_COLUMNS.status,
+        })
+        .where(CARD_COLUMNS.id, createdCardID)
+        .first();
+
+      expect(card.status).toBe("Забронировано");
+      expect(card.reserverID).toBe(reserverID);
+    });
+  });
+
+  describe("unReserveCard", () => {
+    test("success unresserve some card", async () => {
+      const reserverID = await createUser({
+        email: "reserver@example.com",
+        user_hash: 1,
+      });
+      const { cards } = await createCards(1);
+      const createdCardID = cards[0].id;
+
+      await ordersRepository.reserveCard(createdCardID, reserverID);
+      await ordersRepository.unReserveCard(createdCardID);
+
+      const card = await db(TABLES.card)
+        .select({
+          reserverID: CARD_COLUMNS.reserved_by,
+          status: CARD_COLUMNS.status,
+        })
+        .where(CARD_COLUMNS.id, createdCardID)
+        .first();
+
+      expect(card.status).toBe("Свободно");
+      expect(card.reserverID).toBeNull();
+    });
+  });
+
+  describe("giveCard", () => {
+    test("success give some card", async () => {
+      const reserverID = await createUser({
+        email: "reserver@example.com",
+        user_hash: 1,
+      });
+      const { cards } = await createCards(1);
+      const createdCardID = cards[0].id;
+
+      await ordersRepository.reserveCard(createdCardID, reserverID);
+      await ordersRepository.giveCard(createdCardID);
+
+      const card = await db(TABLES.card)
+        .select({
+          reserverID: CARD_COLUMNS.reserved_by,
+          status: CARD_COLUMNS.status,
+        })
+        .where(CARD_COLUMNS.id, createdCardID)
+        .first();
+
+      expect(card.status).toBe("Подарено");
+      expect(card.reserverID).toBe(reserverID);
     });
   });
 });

@@ -16,6 +16,9 @@ export interface OrdersRepositoryInterface {
   createCard(card: CardDataInsert): Promise<number>;
   updateCard(card: CardDataUpdate): Promise<void>;
   deleteCard(cardID: number): Promise<void>;
+  reserveCard(cardID: number, userID: UUID): Promise<void>;
+  unReserveCard(cardID: number): Promise<void>;
+  giveCard(cardID: number): Promise<void>;
 }
 
 export const ORDERS_SERVICE = Symbol("ORDERS_SERVICE");
@@ -25,4 +28,7 @@ export interface OrdersServiceInterface {
   addCard(card: CardDataInsert): Promise<void>;
   updateCard(userID: UUID, card: CardDataUpdate): Promise<void>;
   deleteCard(userID: UUID, cardID: number): Promise<void>;
+  reserveOrder(userID: UUID, cardID: number): Promise<void>;
+  unReserveOrder(userID: UUID, cardID: number): Promise<void>;
+  markOrderAsGifted(userID: UUID, cardID: number): Promise<void>;
 }

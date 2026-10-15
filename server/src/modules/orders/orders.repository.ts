@@ -114,4 +114,30 @@ export class OrdersRepository implements OrdersRepositoryInterface {
   async deleteCard(cardID: number): Promise<void> {
     await db(TABLES.card).delete().where(CARD_COLUMNS.id, cardID);
   }
+
+  async reserveCard(cardID: number, userID: UUID): Promise<void> {
+    await db(TABLES.card)
+      .update({
+        [CARD_COLUMNS.status]: "Забронировано",
+        [CARD_COLUMNS.reserved_by]: userID,
+      })
+      .where(CARD_COLUMNS.id, cardID);
+  }
+
+  async unReserveCard(cardID: number): Promise<void> {
+    await db(TABLES.card)
+      .update({
+        [CARD_COLUMNS.status]: "Свободно",
+        [CARD_COLUMNS.reserved_by]: null,
+      })
+      .where(CARD_COLUMNS.id, cardID);
+  }
+
+  async giveCard(cardID: number): Promise<void> {
+    await db(TABLES.card)
+      .update({
+        [CARD_COLUMNS.status]: "Подарено",
+      })
+      .where(CARD_COLUMNS.id, cardID);
+  }
 }

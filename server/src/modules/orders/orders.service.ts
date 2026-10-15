@@ -1,7 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 import { checkGroupUserAccess } from "../../shared/checkUserGroup.js";
-import { ForbidenError, NotFoundError } from "../../shared/errors.js";
+import {
+  DataConflictError,
+  ForbidenError,
+  NotFoundError,
+} from "../../shared/errors.js";
 import type { UUID } from "../../types/shared.js";
 import type {
   CardData,
@@ -21,17 +25,30 @@ export class OrdersService implements OrdersServiceInterface {
     private readonly ordersRepository: OrdersRepositoryInterface,
   ) {}
 
-  async getWishlistCards(userID: UUID, wishlistID: UUID): Promise<CardData[]> {
-    const groupID =
-      await this.ordersRepository.findGroupIDByWishlistID(wishlistID);
+  private async checkUserAcess(
+    userID: UUID,
+    wishlistOrOrderID: UUID | number,
+  ): Promise<void> {
+    let groupID: UUID | null;
+    if (typeof wishlistOrOrderID === "number") {
+      groupID =
+        await this.ordersRepository.findGroupIDByOrderID(wishlistOrOrderID);
+    } else {
+      groupID =
+        await this.ordersRepository.findGroupIDByWishlistID(wishlistOrOrderID);
+    }
     if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
+      throw new NotFoundError("group not found");
     }
 
-    const userAccess = await checkGroupUserAccess(userID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
+    const userAcess = await checkGroupUserAccess(userID, groupID);
+    if (!userAcess) {
+      throw new ForbidenError("user not a creator or member of group");
     }
+  }
+
+  async getWishlistCards(userID: UUID, wishlistID: UUID): Promise<CardData[]> {
+    await this.checkUserAcess(userID, wishlistID);
 
     const cardsRaw = await this.ordersRepository.findWishlistCards(wishlistID);
 
@@ -56,31 +73,13 @@ export class OrdersService implements OrdersServiceInterface {
   }
 
   async addCard(card: CardDataInsert): Promise<void> {
-    const groupID = await this.ordersRepository.findGroupIDByWishlistID(
-      card.wishlistID,
-    );
-    if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
-    }
-
-    const userAccess = await checkGroupUserAccess(card.creatorID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
-    }
+    await this.checkUserAcess(card.creatorID, card.wishlistID);
 
     await this.ordersRepository.createCard(card);
   }
 
   async updateCard(userID: UUID, card: CardDataUpdate): Promise<void> {
-    const groupID = await this.ordersRepository.findGroupIDByOrderID(card.id);
-    if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
-    }
-
-    const userAccess = await checkGroupUserAccess(userID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
-    }
+    await this.checkUserAcess(userID, card.id);
 
     const cardData = await this.ordersRepository.findCardByID(card.id);
     if (!cardData) {
@@ -95,15 +94,7 @@ export class OrdersService implements OrdersServiceInterface {
   }
 
   async deleteCard(userID: UUID, cardID: number): Promise<void> {
-    const groupID = await this.ordersRepository.findGroupIDByOrderID(cardID);
-    if (!groupID) {
-      throw new NotFoundError("Not found wishlist's group");
-    }
-
-    const userAccess = await checkGroupUserAccess(userID, groupID);
-    if (!userAccess) {
-      throw new ForbidenError("User not a member or creator");
-    }
+    await this.checkUserAcess(userID, cardID);
 
     const cardData = await this.ordersRepository.findCardByID(cardID);
     if (!cardData) {
@@ -115,5 +106,70 @@ export class OrdersService implements OrdersServiceInterface {
     }
 
     this.ordersRepository.deleteCard(cardID);
+  }
+
+  async reserveOrder(userID: UUID, cardID: number): Promise<void> {
+    await this.checkUserAcess(userID, cardID);
+
+    const cardData = await this.ordersRepository.findCardByID(cardID);
+    if (!cardData) {
+      throw new NotFoundError("card not found");
+    }
+
+    if (cardData.author_id === userID) {
+      throw new ForbidenError("card's author can not reserve card");
+    }
+
+    if (cardData.status !== "Свободно") {
+      throw new DataConflictError("card alredy reserved or gifted");
+    }
+
+    await this.ordersRepository.reserveCard(cardID, userID);
+  }
+
+  async unReserveOrder(userID: UUID, cardID: number): Promise<void> {
+    await this.checkUserAcess(userID, cardID);
+
+    const cardData = await this.ordersRepository.findCardByID(cardID);
+    if (!cardData) {
+      throw new NotFoundError("card not found");
+    }
+    if (cardData.author_id === userID) {
+      throw new ForbidenError("card's author can not unreserve card");
+    }
+    if (!cardData.reserved_by) {
+      throw new DataConflictError("card alredy unreserved");
+    }
+    if (cardData.status === "Подарено") {
+      throw new DataConflictError("card alredy gifted");
+    }
+    if (cardData.reserved_by !== userID) {
+      throw new ForbidenError("only reserver can unreserve card");
+    }
+
+    await this.ordersRepository.unReserveCard(cardID);
+  }
+
+  async markOrderAsGifted(userID: UUID, cardID: number): Promise<void> {
+    await this.checkUserAcess(userID, cardID);
+
+    const cardData = await this.ordersRepository.findCardByID(cardID);
+    if (!cardData) {
+      throw new NotFoundError("card not found");
+    }
+    if (cardData.author_id === userID) {
+      throw new ForbidenError("card's author can not give card");
+    }
+    if (!cardData.reserved_by) {
+      throw new DataConflictError("card is unreserved");
+    }
+    if (cardData.reserved_by !== userID) {
+      throw new ForbidenError("only reserver can give card");
+    }
+    if (cardData.status === "Подарено") {
+      throw new DataConflictError("card alredy gifted");
+    }
+
+    await this.ordersRepository.giveCard(cardID);
   }
 }
