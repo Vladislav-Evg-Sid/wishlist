@@ -77,6 +77,7 @@ const OrdersHeader = observer(() => {
           alignItems: { xs: "flex-start", sm: "flex-end" },
           justifyContent: "space-between",
           flexDirection: { xs: "column", sm: "row" },
+          flexWrap: "wrap",
           gap: 2.5,
         }}
       >
