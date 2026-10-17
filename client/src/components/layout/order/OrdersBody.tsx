@@ -17,6 +17,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 
 import { useStoreOrders } from "../../../hooks/useStore";
 import type { OrderDataChange } from "../../../types/orders";
+import { getDisplayHostname } from "../../../utils/url";
 import OrderCard from "./OrderCard";
 import CreateOrderDialog from "../../elements/CreateOrderDialog";
 
@@ -24,11 +25,7 @@ type Sort = "date-desc" | "date-asc" | "title-asc" | "title-desc";
 
 function getShop(href: string) {
   if (!href) return "none";
-  try {
-    return new URL(href).hostname.replace(/^www\./, "");
-  } catch {
-    return "other";
-  }
+  return getDisplayHostname(href) || "other";
 }
 
 const controlSx = {

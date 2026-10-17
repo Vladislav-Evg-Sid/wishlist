@@ -23,6 +23,7 @@ import RemoveCircleOutlineRoundedIcon from "@mui/icons-material/RemoveCircleOutl
 import { getWishIcon } from "../../../constants/wishIcons";
 import { useStore, useStoreOrders } from "../../../hooks/useStore";
 import type { OrderData, OrderDataChange } from "../../../types/orders";
+import { getDisplayHostname, normalizeHttpUrl } from "../../../utils/url";
 import DeleteOrderDialog from "../../elements/DeleteDialog";
 
 const statusStyles = {
@@ -60,15 +61,6 @@ function getInitials(name: string) {
       .map((part) => part[0]?.toUpperCase())
       .join("") || "?"
   );
-}
-
-function getSourceName(href: string) {
-  if (!href) return "";
-  try {
-    return new URL(href).hostname.replace(/^www\./, "");
-  } catch {
-    return "Источник";
-  }
 }
 
 function stopPropagation(event: MouseEvent) {
@@ -307,7 +299,7 @@ const OrderCard = observer(function OrderCard({
   onToggle,
   onInitEdit,
 }: OrderCardProps) {
-  const sourceName = getSourceName(order.href);
+  const sourceName = getDisplayHostname(order.href) || "Источник";
   const transitionPrefix = `order-${String(order.id).replace(
     /[^a-zA-Z0-9_-]/g,
     "-",
@@ -523,7 +515,7 @@ const OrderCard = observer(function OrderCard({
                 </Typography>
                 {order.href ? (
                   <Link
-                    href={order.href}
+                    href={normalizeHttpUrl(order.href)}
                     target="_blank"
                     rel="noreferrer"
                     underline="hover"

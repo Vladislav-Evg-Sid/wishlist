@@ -25,22 +25,12 @@ import {
 } from "../../constants/wishIcons";
 import { useStoreOrders } from "../../hooks/useStore";
 import type { OrderDataChange } from "../../types/orders";
+import { isValidHttpUrl, normalizeHttpUrl } from "../../utils/url";
 
 interface CreateOrderDialogProps {
   open: boolean;
   onClose: () => void;
   changingData?: OrderDataChange;
-}
-
-function isValidHref(value: string) {
-  if (!value.trim()) return true;
-
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 const fieldSx = {
@@ -66,7 +56,7 @@ export default function CreateOrderDialog({
   );
   const [hrefTouched, setHrefTouched] = useState(false);
 
-  const hrefIsValid = isValidHref(href);
+  const hrefIsValid = isValidHttpUrl(href);
   const isCreating = !changingData;
 
   const resetFields = () => {
@@ -102,7 +92,7 @@ export default function CreateOrderDialog({
         title.trim(),
         description.trim(),
         icon.value,
-        href.trim(),
+        normalizeHttpUrl(href),
       );
     } else {
       await orderStore.editOrder(
@@ -110,7 +100,7 @@ export default function CreateOrderDialog({
         title.trim(),
         description.trim(),
         icon.value,
-        href.trim(),
+        normalizeHttpUrl(href),
       );
     }
     onClose();
@@ -252,15 +242,15 @@ export default function CreateOrderDialog({
             name="href"
             type="url"
             label="Ссылка"
-            placeholder="https://example.com/product"
+            placeholder="какой-то-сайт.рф/товар"
             value={href}
             onChange={handleHrefChange}
             onBlur={() => setHrefTouched(true)}
             error={hrefTouched && !hrefIsValid}
             helperText={
               hrefTouched && !hrefIsValid
-                ? "Введите корректную ссылку, начинающуюся с http:// или https://"
-                : "Необязательное поле"
+                ? "Введите корректную ссылку"
+                : "Можно без https://"
             }
             sx={fieldSx}
           />
