@@ -9,7 +9,9 @@ import {
   Select,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import InputAdornment from "@mui/material/InputAdornment";
 
@@ -39,6 +41,10 @@ const controlSx = {
 
 const OrdersBody = observer(() => {
   const orderStore = useStoreOrders();
+  const theme = useTheme();
+  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const isWideScreen = useMediaQuery(theme.breakpoints.up("xl"));
+  const columnCount = isWideScreen ? 3 : isMediumScreen ? 2 : 1;
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [author, setAuthor] = useState<string>("");
@@ -87,6 +93,25 @@ const OrdersBody = observer(() => {
         return sort === "date-asc" ? aTime - bTime : bTime - aTime;
       });
   }, [author, orderStore.orders, search, shop, sort, status]);
+  const displayedOrders = useMemo(() => {
+    if (expandedOrderID === null || columnCount === 1) return visibleOrders;
+
+    const expandedIndex = visibleOrders.findIndex(
+      (order) => order.id === expandedOrderID,
+    );
+    if (expandedIndex < 0) return visibleOrders;
+
+    const rowStart = Math.floor(expandedIndex / columnCount) * columnCount;
+    if (expandedIndex === rowStart) return visibleOrders;
+
+    const expandedOrder = visibleOrders[expandedIndex];
+    return [
+      ...visibleOrders.slice(0, rowStart),
+      expandedOrder,
+      ...visibleOrders.slice(rowStart, expandedIndex),
+      ...visibleOrders.slice(expandedIndex + 1),
+    ];
+  }, [columnCount, expandedOrderID, visibleOrders]);
 
   const toggleOrder = (orderID: number) => {
     if (transitionOrderID !== null) return;
@@ -238,7 +263,6 @@ const OrdersBody = observer(() => {
         <Box
           sx={{
             display: "grid",
-            gridAutoFlow: "row dense",
             gridTemplateColumns: {
               xs: "1fr",
               md: "repeat(2, minmax(0, 1fr))",
@@ -247,7 +271,7 @@ const OrdersBody = observer(() => {
             gap: 2.25,
           }}
         >
-          {visibleOrders.map((order) => (
+          {displayedOrders.map((order) => (
             <OrderCard
               key={order.id}
               order={order}
