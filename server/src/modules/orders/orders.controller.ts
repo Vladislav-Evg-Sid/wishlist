@@ -5,6 +5,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
 } from "@nestjs/common";
@@ -15,6 +16,9 @@ import {
   addCardBodySchema,
   updateCardBopySchema,
   updateCardParamsSchema,
+  reserveCardParamsSchema,
+  unreserveCardParamsSchema,
+  giveCardParamsSchema,
 } from "./orders.schemas.js";
 import { ORDERS_SERVICE, type OrdersServiceInterface } from "./orders.di.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
@@ -74,5 +78,35 @@ export class OrderController {
     userID: UUID,
   ) {
     await this.ordersService.deleteCard(userID, params.orderID);
+  }
+
+  @Patch(":order_id/reserve")
+  async reserveCard(
+    @Param({ schema: reserveCardParamsSchema })
+    params: z.output<typeof reserveCardParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.reserveOrder(userID, params.orderID);
+  }
+
+  @Patch(":order_id/unreserve")
+  async unreserveCard(
+    @Param({ schema: unreserveCardParamsSchema })
+    params: z.output<typeof unreserveCardParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.unReserveOrder(userID, params.orderID);
+  }
+
+  @Patch(":order_id/give")
+  async giveCard(
+    @Param({ schema: giveCardParamsSchema })
+    params: z.output<typeof giveCardParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.ordersService.markOrderAsGifted(userID, params.orderID);
   }
 }

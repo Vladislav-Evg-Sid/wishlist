@@ -38,3 +38,21 @@ export const updateCardParamsSchema = z
     order_id: z.string(),
   })
   .transform(({ order_id }) => ({ orderID: +order_id }));
+
+export const reserveCardParamsSchema = z
+  .object({
+    order_id: z.string(),
+  })
+  .transform(({ order_id }) => ({ orderID: +order_id }));
+
+export const unreserveCardParamsSchema = z
+  .object({
+    order_id: z.string(),
+  })
+  .transform(({ order_id }) => ({ orderID: +order_id }));
+
+export const giveCardParamsSchema = z
+  .object({
+    order_id: z.string(),
+  })
+  .transform(({ order_id }) => ({ orderID: +order_id }));

@@ -7,6 +7,9 @@ import {
   deleteOrder,
   editOrder,
   getWishlistOrders,
+  giveOrder,
+  reserveOrder,
+  unreserveOrder,
 } from "../api/orders";
 import type { WishIconValue } from "../constants/wishIcons";
 import {
@@ -276,19 +279,82 @@ export class OrderStore {
     }
   }
 
-  reserveOrder(orderID: number) {
-    void orderID;
-    toast.info("Функция бронирования записи пока не доступна");
+  async reserveOrder(orderID: number) {
+    try {
+      await reserveOrder(orderID);
+      await this.loadWishlistOrders();
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось обновить запись");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
-  cancelOrderReservation(orderID: number) {
-    void orderID;
-    toast.info("Функция снятия брони пока не доступна");
+  async cancelOrderReservation(orderID: number) {
+    try {
+      await unreserveOrder(orderID);
+      await this.loadWishlistOrders();
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось обновить запись");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
-  markOrderAsGifted(orderID: number) {
-    void orderID;
-    toast.info("Функция отметки подарка пока не доступна");
+  async markOrderAsGifted(orderID: number) {
+    try {
+      await giveOrder(orderID);
+      await this.loadWishlistOrders();
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "User not a member or creator":
+            toast.error(
+              "Отказано в доступе!\nВы не являетесь создателем или участником группы",
+            );
+            break;
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось обновить запись");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
   get countOrders(): number {

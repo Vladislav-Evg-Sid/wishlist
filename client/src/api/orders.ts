@@ -3,14 +3,15 @@ import type {
   OrderDataChange,
   OrderDataInsert,
 } from "../types/orders";
-import { apiFetch } from "./baseApi";
+import { apiErrorHandler, apiFetch } from "./baseApi";
 
 export async function getWishlistOrders(
   wishlistID: string,
 ): Promise<OrderData[]> {
   const response = await apiFetch(`/orders/${wishlistID}`);
+
   if (!response.ok) {
-    throw new Error(`${await response.text()}`);
+    await apiErrorHandler(response);
   }
 
   return response.json();
@@ -26,10 +27,7 @@ export async function addOrder(order: OrderDataInsert): Promise<void> {
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -48,10 +46,7 @@ export async function editOrder(order: OrderDataChange): Promise<void> {
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -61,9 +56,36 @@ export async function deleteOrder(orderID: number): Promise<void> {
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
+  }
+}
+
+export async function reserveOrder(orderID: number): Promise<void> {
+  const response = await apiFetch(`/orders/${orderID}/reserve`, {
+    method: "PATCH",
+  });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+}
+
+export async function unreserveOrder(orderID: number): Promise<void> {
+  const response = await apiFetch(`/orders/${orderID}/unreserve`, {
+    method: "PATCH",
+  });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+}
+
+export async function giveOrder(orderID: number): Promise<void> {
+  const response = await apiFetch(`/orders/${orderID}/give`, {
+    method: "PATCH",
+  });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
   }
 }
