@@ -161,6 +161,7 @@ const OrdersBody = observer(() => {
             labelId="orders-status-label"
             value={status}
             label="Статус"
+            MenuProps={{ disableScrollLock: true }}
             onChange={(event) => setStatus(event.target.value)}
           >
             <MenuItem value="">Все статусы</MenuItem>
@@ -175,6 +176,7 @@ const OrdersBody = observer(() => {
             labelId="orders-author-label"
             value={author}
             label="Автор"
+            MenuProps={{ disableScrollLock: true }}
             onChange={(event) => setAuthor(event.target.value)}
           >
             <MenuItem value="">Все авторы</MenuItem>
@@ -191,6 +193,7 @@ const OrdersBody = observer(() => {
             labelId="orders-shop-label"
             value={shop}
             label="Магазин"
+            MenuProps={{ disableScrollLock: true }}
             onChange={(event) => setShop(event.target.value)}
           >
             <MenuItem value="">Все магазины</MenuItem>
@@ -207,6 +210,7 @@ const OrdersBody = observer(() => {
             labelId="orders-sort-label"
             value={sort}
             label="Сортировка"
+            MenuProps={{ disableScrollLock: true }}
             onChange={(event) => setSort(event.target.value as Sort)}
           >
             <MenuItem value="date-desc">Сначала новые</MenuItem>
