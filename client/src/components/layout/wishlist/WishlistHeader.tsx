@@ -21,6 +21,7 @@ import CreateWishlistDialog from "../../elements/CreateWishlistDialog";
 import GroupMembersDialog from "../../elements/GroupMembersDialog";
 import { useStoreWishlists } from "../../../hooks/useStore";
 import DeleteOrderDialog from "../../elements/DeleteDialog";
+import { GroupStoreProvider } from "../../../providers/storeProvider";
 
 const WishlistHeader = observer(() => {
   const wishlistStore = useStoreWishlists();
@@ -80,6 +81,7 @@ const WishlistHeader = observer(() => {
           alignItems: { xs: "flex-start", md: "center" },
           justifyContent: "space-between",
           flexDirection: { xs: "column", md: "row" },
+          flexWrap: "wrap",
           gap: 3,
         }}
       >
@@ -229,10 +231,12 @@ const WishlistHeader = observer(() => {
         open={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
       />
-      <GroupMembersDialog
-        open={isMembersOpen}
-        onClose={() => setIsMembersOpen(false)}
-      />
+      <GroupStoreProvider>
+        <GroupMembersDialog
+          open={isMembersOpen}
+          onClose={() => setIsMembersOpen(false)}
+        />
+      </GroupStoreProvider>
     </Box>
   );
 });

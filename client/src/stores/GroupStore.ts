@@ -62,4 +62,13 @@ export class GroupStore {
       });
     }
   }
+
+  async createInviteCode(ttl?: number, inviteLimit?: number): Promise<string> {
+    if (!ttl && !inviteLimit) {
+      toast.info("Код не может существовать без ограничений!");
+      return "";
+    }
+    toast.info("Функционала создания кода пока нет");
+    return "типа-какой-то-код";
+  }
 }

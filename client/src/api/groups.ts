@@ -78,3 +78,9 @@ export async function updateGroupName(
     await apiErrorHandler(response);
   }
 }
+
+// await async function createInviteCode(ttl?: number, limitMembers?: number) {
+//   const response = await apiFetch(`/groups/invite?${new URLSearchParams({
+//     ttl, limitMembers
+//   })}`)
+// }
