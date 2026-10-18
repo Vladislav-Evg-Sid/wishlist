@@ -27,7 +27,9 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       )
       .select(GROUPS_COLUMNS.id, GROUPS_COLUMNS.title)
       .where(GROUPS_COLUMNS.creator_id, userID)
-      .orWhere(GROUP_MEMBER_COLUMNS.member_id, userID);
+      .orWhere(GROUP_MEMBER_COLUMNS.member_id, userID)
+      .groupBy(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id))
+      .orderBy(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.title));
   }
 
   async createGroup(userID: UUID, groupName: string): Promise<string> {

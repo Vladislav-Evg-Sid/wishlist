@@ -89,10 +89,12 @@ describe("groups repository", () => {
       const { creatorID, groupID } = await createGroupFixture();
       await addGroupMember(groupID, creatorID);
 
-      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject({
-        code: "23503",
-        constraint: "group_member_group_id_foreign",
-      });
+      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject(
+        {
+          code: "23503",
+          constraint: "group_member_group_id_foreign",
+        },
+      );
 
       const group = await db(TABLES.groups)
         .where(GROUPS_COLUMNS.id, groupID)
@@ -104,10 +106,12 @@ describe("groups repository", () => {
       const { creatorID, groupID } = await createGroupFixture();
       await createWishlistWithParantGroupID(groupID, creatorID);
 
-      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject({
-        code: "23503",
-        constraint: "wishlist_group_id_foreign",
-      });
+      await expect(groupsRepository.deleteGroup(groupID)).rejects.toMatchObject(
+        {
+          code: "23503",
+          constraint: "wishlist_group_id_foreign",
+        },
+      );
 
       const group = await db(TABLES.groups)
         .where(GROUPS_COLUMNS.id, groupID)
@@ -160,6 +164,28 @@ describe("groups repository", () => {
       const joinedID = await createGroupWithCreatorID(otherID);
       await addGroupMember(joinedID, creatorID);
       await createGroupWithCreatorID(otherID);
+
+      const groups = await groupsRepository.findGroupsByUserId(creatorID);
+
+      expect(groups).toHaveLength(2);
+      expect(groups).toEqual(
+        expect.arrayContaining([
+          { id: groupID, title: "Vlad's group" },
+          { id: joinedID, title: "Vlad's group" },
+        ]),
+      );
+    });
+
+    test("returns owned and joined groups with members", async () => {
+      const { creatorID, groupID } = await createGroupFixture();
+      const otherID = await createUser({
+        username: "Other",
+        email: "other@example.com",
+      });
+      const joinedID = await createGroupWithCreatorID(otherID);
+      await addGroupMember(joinedID, creatorID);
+      await createGroupWithCreatorID(otherID);
+      await addGroupMember(groupID, otherID);
 
       const groups = await groupsRepository.findGroupsByUserId(creatorID);
 
