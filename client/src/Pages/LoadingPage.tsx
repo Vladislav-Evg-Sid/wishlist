@@ -2,7 +2,11 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 
 import { logoCompany } from "../env";
 
-export default function LoadingPage() {
+interface LoadingPageProps {
+  text: string;
+}
+
+export default function LoadingPage({ text }: LoadingPageProps) {
   return (
     <Box
       component="main"
@@ -36,7 +40,7 @@ export default function LoadingPage() {
         <Box component="img" src={logoCompany} alt="" sx={{ width: 58 }} />
       </Box>
       <Typography sx={{ color: "text.secondary", mt: 1, mb: 3 }}>
-        Получаем данные пользователя…
+        {text}
       </Typography>
       <CircularProgress
         size={26}

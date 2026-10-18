@@ -13,7 +13,8 @@ const AuthSession = observer(({ children }: { children: React.ReactNode }) => {
     void authStore.authorise();
   }, [authStore]);
 
-  if (!authStore.isAuthInitialized) return <LoadingPage />;
+  if (!authStore.isAuthInitialized)
+    return <LoadingPage text="Получаем данные пользователя…" />;
 
   const isPublicPage = pathname === "/auth" || pathname === "/register";
   if (!userStore.currentUser && !isPublicPage) {
