@@ -1,16 +1,14 @@
 import type { ParantInfo } from "../types/shared";
 import type { WishlistData } from "../types/wishlists";
-import { apiFetch } from "./baseApi";
+import { apiErrorHandler, apiFetch } from "./baseApi";
 
 export async function getGroupWishlists(
   groupID: string,
 ): Promise<WishlistData[]> {
   const response = await apiFetch(`/wishlists/${groupID}`);
+
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 
   return await response.json();
@@ -29,10 +27,7 @@ export async function createWishlist(
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -40,10 +35,7 @@ export async function getWishlistInfo(wishlistID: string): Promise<ParantInfo> {
   const response = await apiFetch(`/wishlists/${wishlistID}/info`);
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 
   const wishlistInfoRaw = await response.json();
@@ -60,11 +52,7 @@ export async function deleteWishlist(wishlistID: string): Promise<void> {
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      const errorDetails = await response.json();
-      throw new Error(errorDetails.message);
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -83,10 +71,6 @@ export async function updateWishlistName(
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      const errorDetails = await response.json();
-      throw new Error(errorDetails.message);
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }

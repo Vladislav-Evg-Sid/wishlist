@@ -1,4 +1,4 @@
-import { apiFetch } from "./baseApi";
+import { apiErrorHandler, apiFetch } from "./baseApi";
 import type { GroupData } from "../types/groups";
 import type { GroupUsersList } from "../types/wishlists";
 import type { ParantInfo } from "../types/shared";
@@ -19,8 +19,9 @@ export async function createGroup(groupName: string): Promise<void> {
     },
     body: JSON.stringify({ group_name: groupName }),
   });
+
   if (!response.ok) {
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -28,10 +29,7 @@ export async function getGroupInfo(groupID: string): Promise<ParantInfo> {
   const response = await apiFetch(`/groups/${groupID}`);
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 
   const groupInfoRaw = await response.json();
@@ -46,16 +44,7 @@ export async function getGroupUsers(groupID: string): Promise<GroupUsersList> {
   const response = await apiFetch(`/groups/${groupID}/users`);
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a member or creator");
-    }
-    throw new Error(`${response.status}`);
-  }
-  if (
-    response.status === 404 &&
-    response.statusText === "Group's creator not found"
-  ) {
-    throw new Error(response.statusText);
+    await apiErrorHandler(response);
   }
 
   return await response.json();
@@ -67,10 +56,7 @@ export async function deleteGroup(groupID: string): Promise<void> {
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
 
@@ -89,9 +75,6 @@ export async function updateGroupName(
   });
 
   if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("User not a creator");
-    }
-    throw new Error(`${response.status}`);
+    await apiErrorHandler(response);
   }
 }
