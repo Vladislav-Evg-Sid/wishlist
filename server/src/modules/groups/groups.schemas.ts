@@ -16,3 +16,13 @@ export const getGroupInfoParamsSchema = z
 export const updateGroupNameBodySchema = z.object({
   title: z.string(),
 });
+
+export const createInviteLinkQuerySchema = z
+  .object({
+    ttl: z.coerce.number().int().positive().nullable().default(null),
+    limit_members: z.coerce.number().int().positive().nullable().default(null),
+  })
+  .transform(({ ttl, limit_members }) => ({
+    ttl,
+    limitMembers: limit_members,
+  }));

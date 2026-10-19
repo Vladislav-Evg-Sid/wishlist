@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
-import { createGroup, getUserGroups } from "../api/groups";
+import { createGroup, createInviteCode, getUserGroups } from "../api/groups";
 import type { GroupData } from "../types/groups";
 
 export class GroupStore {
@@ -68,7 +68,30 @@ export class GroupStore {
       toast.info("Код не может существовать без ограничений!");
       return "";
     }
-    toast.info("Функционала создания кода пока нет");
-    return "типа-какой-то-код";
+    try {
+      return createInviteCode(ttl, inviteLimit);
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "User not a creator":
+              toast.error(
+                "Отказано в доступе!\nВы не являетесь создателем группы",
+              );
+              break;
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже");
+              break;
+            default:
+              toast.error("Неизвестная ошибка.\nНе удалось создать группу");
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
+      });
+    }
+    return "";
   }
 }

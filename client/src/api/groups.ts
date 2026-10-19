@@ -79,8 +79,22 @@ export async function updateGroupName(
   }
 }
 
-// await async function createInviteCode(ttl?: number, limitMembers?: number) {
-//   const response = await apiFetch(`/groups/invite?${new URLSearchParams({
-//     ttl, limitMembers
-//   })}`)
-// }
+export async function createInviteCode(ttl?: number, limitMembers?: number) {
+  const params = new URLSearchParams();
+
+  if (ttl !== undefined) {
+    params.set("ttl", String(ttl));
+  }
+
+  if (limitMembers !== undefined) {
+    params.set("limit_members", String(limitMembers));
+  }
+
+  const response = await apiFetch(`/groups/invite?${params.toString()}`);
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+
+  return response.text();
+}

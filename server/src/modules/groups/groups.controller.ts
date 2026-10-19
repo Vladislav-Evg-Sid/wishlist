@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from "@nestjs/common";
 import type z from "zod";
 
@@ -15,6 +16,7 @@ import type { UUID } from "../../types/shared.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
   createGroupBodySchema,
+  createInviteLinkQuerySchema,
   getGroupInfoParamsSchema,
   updateGroupNameBodySchema,
 } from "./groups.schemas.js";
@@ -43,6 +45,14 @@ export class GroupsController {
   ) {
     await this.groupsServece.addGroup(userID, groupData);
     return "Successfully created";
+  }
+
+  @Get("invite")
+  async createInviteLink(
+    @Query({ schema: createInviteLinkQuerySchema })
+    query: z.output<typeof createInviteLinkQuerySchema>,
+  ) {
+    return `Какой-то код для ttl = ${query.ttl} и количества приглашений = ${query.limitMembers}`;
   }
 
   @Get(":group_id")
