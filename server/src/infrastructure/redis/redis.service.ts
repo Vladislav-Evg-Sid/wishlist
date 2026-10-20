@@ -120,14 +120,14 @@ export class RedisService
       local payload = ARGV[2]
 
       if redis.call("EXISTS", key) == 0 then
-        return false
+        return 0
       end
 
       local payloadValue = redis.call("HGET", key, payload)
       local value = tonumber(redis.call("HGET", key, field))
 
       if not value then
-        return false
+        return 0
       end
 
       -- Безлимитное приглашение
@@ -150,11 +150,11 @@ export class RedisService
       -- 0 — некорректное состояние
       if value == 0 then
         redis.call("DEL", key)
-        return false
+        return 0
       end
 
       -- На случай неожиданного значения < -1
-      return false
+      return 0
     `;
     const payload = await this.client.eval(script, {
       keys: [`${prefix}:${key}`],

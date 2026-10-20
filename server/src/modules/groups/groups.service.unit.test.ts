@@ -9,7 +9,7 @@ import {
 
 import type { UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
-import type { GroupData, GroupUser } from "./groups.types.js";
+import type { GroupData, GroupUser, UserData } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import {
   DataConflictError,
@@ -30,11 +30,13 @@ const createGroupMock =
   jest.fn<(userID: UUID, groupName: string) => Promise<string>>();
 const findGroupInfoMock = jest.fn<(groupID: UUID) => Promise<GroupInfoRaw>>();
 const findGroupCreatorMock =
-  jest.fn<(groupID: UUID) => Promise<GroupUser | undefined>>();
-const findGroupMembersMock = jest.fn<(groupID: UUID) => Promise<GroupUser[]>>();
+  jest.fn<(groupID: UUID) => Promise<UserData | undefined>>();
+const findGroupMembersMock = jest.fn<(groupID: UUID) => Promise<UserData[]>>();
 const updateGroupNameMock =
   jest.fn<GroupsRepositoryInterface["updateGroupName"]>();
 const deleteGroupMock = jest.fn<GroupsRepositoryInterface["deleteGroup"]>();
+const addGroupMemberMock =
+  jest.fn<(groupID: UUID, memberID: UUID) => Promise<void>>();
 class GroupsRepository implements GroupsRepositoryInterface {
   constructor(
     public readonly findGroupsByUserId: any,
@@ -44,6 +46,7 @@ class GroupsRepository implements GroupsRepositoryInterface {
     public readonly findGroupMembers: any,
     public readonly updateGroupName: GroupsRepositoryInterface["updateGroupName"],
     public readonly deleteGroup: GroupsRepositoryInterface["deleteGroup"],
+    public readonly addGroupMember: GroupsRepositoryInterface["addGroupMember"],
   ) {}
 }
 const groupsRepository = new GroupsRepository(
@@ -54,6 +57,7 @@ const groupsRepository = new GroupsRepository(
   findGroupMembersMock,
   updateGroupNameMock,
   deleteGroupMock,
+  addGroupMemberMock,
 );
 const setHashCounterValueMock =
   jest.fn<
@@ -76,8 +80,6 @@ const getHashValueWithDecrementingMock =
       payloadName: string,
     ) => Promise<any>
   >();
-const valueIsExistMock =
-  jest.fn<(prefix: string, key: string) => Promise<any>>();
 class RedisService implements redisServiceInviteInterface {
   constructor(
     readonly setHashCounterValue: (
@@ -335,21 +337,15 @@ describe("groups service", () => {
     test("returns creator and filters incomplete members, preserving hash zero", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
       const creator = { name: "Creator", hash: 1 };
-      findGroupCreatorMock.mockResolvedValue(creator);
+      findGroupCreatorMock.mockResolvedValue({ ...creator, id: userID });
       findGroupMembersMock.mockResolvedValue([
-        { name: "Member", hash: 0 },
-        // SQL left joins can return null even though GroupUser declares required fields.
+        { id: exampleUUID, name: "Member", hash: 0 },
         {
+          id: exampleUUID,
           name: null,
           hash: 2,
-        } as unknown as {
-          name: string;
-          hash: number;
-        },
-        { name: "Missing hash", hash: null } as unknown as {
-          name: string;
-          hash: number;
-        },
+        } as unknown as UserData,
+        { name: "Missing hash", hash: null } as unknown as UserData,
       ]);
       await expect(
         groupsService.getGroupUsers(userID, groupID),
@@ -479,6 +475,76 @@ describe("groups service", () => {
         limitMembers,
         ttl * 60 * 60,
       );
+    });
+  });
+
+  describe("addMemberByInviteCode", () => {
+    test("error with inknown code", async () => {
+      getHashValueWithDecrementingMock.mockResolvedValue(0);
+
+      await expect(
+        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupCreatorMock).not.toHaveBeenCalled();
+      expect(findGroupMembersMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("error with group not exist", async () => {
+      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+      findGroupCreatorMock.mockResolvedValue(undefined);
+
+      await expect(
+        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("error with user is creator", async () => {
+      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+      findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
+
+      await expect(
+        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("error with user is member", async () => {
+      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+      findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
+      findGroupMembersMock.mockResolvedValue([{ id: userID } as UserData]);
+
+      await expect(
+        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("error with user is member", async () => {
+      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+      findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
+      findGroupMembersMock.mockResolvedValue([
+        { id: null } as unknown as UserData,
+      ]);
+
+      await expect(
+        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
+      ).resolves.toBeUndefined();
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
+      expect(addGroupMemberMock).toHaveBeenCalledWith(groupID, userID);
     });
   });
 });

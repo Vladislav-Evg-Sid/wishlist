@@ -6,6 +6,7 @@ import type {
   GroupInfo,
   GroupUser,
   GroupUsersList,
+  UserData,
 } from "./groups.types.js";
 
 export const GROUPS_REPOSITORY = Symbol("GROUPS_REPOSITORY");
@@ -14,10 +15,11 @@ export interface GroupsRepositoryInterface {
   findGroupsByUserId(userID: UUID): Promise<GroupData[]>;
   createGroup(userID: UUID, groupName: string): Promise<string>;
   findGroupInfo(groupID: UUID): Promise<GroupInfoRaw>;
-  findGroupCreator(groupID: UUID): Promise<GroupUser | undefined>;
-  findGroupMembers(groupID: UUID): Promise<GroupUser[]>;
+  findGroupCreator(groupID: UUID): Promise<UserData | undefined>;
+  findGroupMembers(groupID: UUID): Promise<UserData[]>;
   updateGroupName(groupID: UUID, newName: string): Promise<void>;
   deleteGroup(groupID: UUID): Promise<void>;
+  addGroupMember(groupID: UUID, memberID: UUID): Promise<void>;
 }
 
 export const GROUPS_SERVICE = Symbol("GROUPS_SERVICE");
@@ -35,4 +37,5 @@ export interface GroupsServiceInterface {
     ttl: number | null,
     limitMembers: number | null,
   ): Promise<string>;
+  addMemberByInviteCode(userID: UUID, code: string): Promise<void>;
 }

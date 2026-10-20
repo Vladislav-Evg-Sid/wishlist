@@ -223,11 +223,11 @@ describe("groups repository", () => {
     });
 
     test("returns group creator", async () => {
-      const { groupID } = await createGroupFixture();
+      const { creatorID, groupID } = await createGroupFixture();
 
       const creator = await groupsRepository.findGroupCreator(groupID);
 
-      expect(creator).toEqual({ name: "Vlad", hash: 123 });
+      expect(creator).toEqual({ name: "Vlad", hash: 123, id: creatorID });
     });
   });
 
@@ -243,7 +243,7 @@ describe("groups repository", () => {
 
       const members = await groupsRepository.findGroupMembers(groupID);
 
-      expect(members).toEqual([{ name: null, hash: null }]);
+      expect(members).toEqual([{ name: null, hash: null, id: null }]);
     });
 
     test("returns only requested group's members", async () => {
@@ -263,7 +263,61 @@ describe("groups repository", () => {
 
       const members = await groupsRepository.findGroupMembers(groupID);
 
-      expect(members).toEqual([{ name: "Member", hash: 0 }]);
+      expect(members).toEqual([{ name: "Member", hash: 0, id: memberID }]);
+    });
+  });
+
+  describe("addGroupMember", () => {
+    test("sucess create member", async () => {
+      const { groupID } = await createGroupFixture();
+      const memberID = await createUser({
+        email: "member@example.com",
+        user_hash: 2,
+      });
+
+      await groupsRepository.addGroupMember(groupID, memberID);
+
+      const realMembers = await db(TABLES.group_member).select("*");
+
+      expect(realMembers).toHaveLength(1);
+    });
+
+    test("error with create duplicate", async () => {
+      const { groupID } = await createGroupFixture();
+      const memberID = await createUser({
+        email: "member@example.com",
+        user_hash: 2,
+      });
+
+      await groupsRepository.addGroupMember(groupID, memberID);
+      await expect(
+        groupsRepository.addGroupMember(groupID, memberID),
+      ).rejects.toMatchObject({
+        code: "23505",
+        constraint: "group_member_pkey",
+      });
+    });
+
+    test("error with adding unknown user", async () => {
+      const { groupID } = await createGroupFixture();
+
+      await expect(
+        groupsRepository.addGroupMember(groupID, missingID),
+      ).rejects.toMatchObject({
+        code: "23503",
+        constraint: "group_member_member_id_foreign",
+      });
+    });
+
+    test("error with adding unknown group", async () => {
+      const memberID = await createUser();
+
+      await expect(
+        groupsRepository.addGroupMember(missingID, memberID),
+      ).rejects.toMatchObject({
+        code: "23503",
+        constraint: "group_member_group_id_foreign",
+      });
     });
   });
 });

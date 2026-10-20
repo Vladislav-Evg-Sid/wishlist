@@ -15,6 +15,7 @@ import { GROUPS_SERVICE, type GroupsServiceInterface } from "./groups.di.js";
 import type { UUID } from "../../types/shared.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
+  addGroupMemberByCodeParamsSchema,
   createGroupBodySchema,
   createInviteLinkParamsSchema,
   createInviteLinkQuerySchema,
@@ -26,7 +27,7 @@ import {
 export class GroupsController {
   constructor(
     @Inject(GROUPS_SERVICE)
-    private readonly groupsServece: GroupsServiceInterface,
+    private readonly groupsService: GroupsServiceInterface,
   ) {}
 
   @Get()
@@ -34,7 +35,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    return await this.groupsServece.getGroupsByUserId(userID);
+    return await this.groupsService.getGroupsByUserId(userID);
   }
 
   @Post()
@@ -44,8 +45,18 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    await this.groupsServece.addGroup(userID, groupData);
+    await this.groupsService.addGroup(userID, groupData);
     return "Successfully created";
+  }
+
+  @Post("invite/:code")
+  async addGroupMemberByCode(
+    @Param({ schema: addGroupMemberByCodeParamsSchema })
+    params: z.output<typeof addGroupMemberByCodeParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsService.addMemberByInviteCode(userID, params.code);
   }
 
   @Get(":group_id")
@@ -55,7 +66,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    const { title, isCreator } = await this.groupsServece.getGroupInfo(
+    const { title, isCreator } = await this.groupsService.getGroupInfo(
       userID,
       params.groupID,
     );
@@ -70,7 +81,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    return await this.groupsServece.getGroupUsers(userID, params.groupID);
+    return await this.groupsService.getGroupUsers(userID, params.groupID);
   }
 
   @Put(":group_id")
@@ -82,7 +93,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    await this.groupsServece.updateGroupName(
+    await this.groupsService.updateGroupName(
       userID,
       params.groupID,
       groupName.title,
@@ -96,7 +107,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    await this.groupsServece.deleteGroup(userID, params.groupID);
+    await this.groupsService.deleteGroup(userID, params.groupID);
   }
 
   @Get(":group_id/invite")
@@ -108,7 +119,7 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    return this.groupsServece.createInviteCode(
+    return this.groupsService.createInviteCode(
       userID,
       params.groupID,
       query.ttl,

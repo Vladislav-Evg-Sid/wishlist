@@ -29,6 +29,8 @@ import {
 export class GroupsService implements GroupsServiceInterface {
   private readonly alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   private readonly redisPrrefix = "ic";
+  private readonly redisCounterName = "remaining";
+  private readonly redisValueName = "groupID";
 
   constructor(
     @Inject(GROUPS_REPOSITORY)
@@ -86,8 +88,11 @@ export class GroupsService implements GroupsServiceInterface {
     );
 
     return {
-      creator,
-      members: filteredMembers,
+      creator: {
+        name: creator.name,
+        hash: creator.hash,
+      },
+      members: filteredMembers.map(({ name, hash }) => ({ name, hash })),
     };
   }
 
@@ -136,9 +141,9 @@ export class GroupsService implements GroupsServiceInterface {
       const isCreated = await this.redisService.setHashCounterValue(
         this.redisPrrefix,
         code,
-        "groupID",
+        this.redisValueName,
         groupID,
-        "remaining",
+        this.redisCounterName,
         limitMembers ?? -1,
         ttl ? ttl * 60 * 60 : undefined,
       );
@@ -148,5 +153,39 @@ export class GroupsService implements GroupsServiceInterface {
     }
 
     throw new InternalServerError("Failed to generate unique invite code");
+  }
+
+  private async addGroupMember(memberID: UUID, groupID: UUID): Promise<void> {
+    const groupCreator = await this.groupsRepository.findGroupCreator(groupID);
+    if (!groupCreator) {
+      throw new NotFoundError("group not found");
+    }
+    if (groupCreator.id === memberID) {
+      throw new ForbidenError("group's creator can not be a group's member");
+    }
+
+    const groupMembers = await this.groupsRepository.findGroupMembers(groupID);
+    for (let member of groupMembers) {
+      if (member.id === memberID) {
+        throw new DataConflictError("user alredy group's member");
+      }
+    }
+
+    await this.groupsRepository.addGroupMember(groupID, memberID);
+  }
+
+  async addMemberByInviteCode(userID: UUID, code: string): Promise<void> {
+    const groupID: UUID | number =
+      await this.redisService.getHashValueWithDecrementing(
+        this.redisPrrefix,
+        code,
+        this.redisCounterName,
+        this.redisValueName,
+      );
+    if (typeof groupID === "number") {
+      throw new NotFoundError("invite code not found");
+    }
+
+    await this.addGroupMember(userID, groupID);
   }
 }

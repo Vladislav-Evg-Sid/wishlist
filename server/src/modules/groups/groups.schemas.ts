@@ -32,3 +32,5 @@ export const createInviteLinkParamsSchema = z
     group_id: UUIDSchema,
   })
   .transform((data) => ({ groupID: data.group_id }));
+
+export const addGroupMemberByCodeParamsSchema = z.object({ code: z.string() });

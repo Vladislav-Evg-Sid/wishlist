@@ -14,6 +14,12 @@ export interface GroupInfo {
   isCreator: boolean;
 }
 
+export interface UserData {
+  id: UUID;
+  name: string;
+  hash: number;
+}
+
 export interface GroupUser {
   name: string;
   hash: number;

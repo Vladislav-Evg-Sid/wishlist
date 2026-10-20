@@ -10,7 +10,7 @@ import {
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
-import type { GroupData, GroupUser } from "./groups.types.js";
+import type { GroupData, GroupUser, UserData } from "./groups.types.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
 
 @Injectable()
@@ -52,7 +52,7 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .first();
   }
 
-  async findGroupCreator(groupID: UUID): Promise<GroupUser | undefined> {
+  async findGroupCreator(groupID: UUID): Promise<UserData | undefined> {
     return db(TABLES.groups)
       .leftJoin(
         TABLES.users,
@@ -62,12 +62,13 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .select({
         name: USER_COLUMNS.username,
         hash: USER_COLUMNS.user_hash,
+        id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
       })
       .where(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id), groupID)
       .first();
   }
 
-  async findGroupMembers(groupID: UUID): Promise<GroupUser[]> {
+  async findGroupMembers(groupID: UUID): Promise<UserData[]> {
     return db(TABLES.groups)
       .leftJoin(
         TABLES.group_member,
@@ -88,6 +89,7 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .select({
         name: USER_COLUMNS.username,
         hash: USER_COLUMNS.user_hash,
+        id: concatTableAndColumn(TABLES.users, USER_COLUMNS.id),
       })
       .where(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id), groupID);
   }
@@ -102,5 +104,12 @@ export class GroupsRepository implements GroupsRepositoryInterface {
 
   async deleteGroup(groupID: UUID): Promise<void> {
     await db(TABLES.groups).delete().where(GROUPS_COLUMNS.id, groupID);
+  }
+
+  async addGroupMember(groupID: UUID, memberID: UUID): Promise<void> {
+    await db(TABLES.group_member).insert({
+      [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+      [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+    });
   }
 }
