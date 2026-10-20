@@ -16,6 +16,7 @@ import type { UUID } from "../../types/shared.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
   createGroupBodySchema,
+  createInviteLinkParamsSchema,
   createInviteLinkQuerySchema,
   getGroupInfoParamsSchema,
   updateGroupNameBodySchema,
@@ -45,14 +46,6 @@ export class GroupsController {
   ) {
     await this.groupsServece.addGroup(userID, groupData);
     return "Successfully created";
-  }
-
-  @Get("invite")
-  async createInviteLink(
-    @Query({ schema: createInviteLinkQuerySchema })
-    query: z.output<typeof createInviteLinkQuerySchema>,
-  ) {
-    return `Какой-то код для ttl = ${query.ttl} и количества приглашений = ${query.limitMembers}`;
   }
 
   @Get(":group_id")
@@ -104,5 +97,22 @@ export class GroupsController {
     userID: UUID,
   ) {
     await this.groupsServece.deleteGroup(userID, params.groupID);
+  }
+
+  @Get(":group_id/invite")
+  async createInviteLink(
+    @Query({ schema: createInviteLinkQuerySchema })
+    query: z.output<typeof createInviteLinkQuerySchema>,
+    @Param({ schema: createInviteLinkParamsSchema })
+    params: z.output<typeof createInviteLinkParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    return this.groupsServece.createInviteCode(
+      userID,
+      params.groupID,
+      query.ttl,
+      query.limitMembers,
+    );
   }
 }

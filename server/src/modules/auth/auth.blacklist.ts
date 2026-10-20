@@ -3,7 +3,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { AuthBlacklistServiceInterface } from "./auth.di.js";
 import {
   REDIS_SERVICE,
-  type redisServiceInterface,
+  type redisServiceAuthInterface,
 } from "../../infrastructure/redis/redis.di.js";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class AuthBlacklistService implements AuthBlacklistServiceInterface {
 
   constructor(
     @Inject(REDIS_SERVICE)
-    private readonly redisService: redisServiceInterface,
+    private readonly redisService: redisServiceAuthInterface,
   ) {}
 
   async isRefreshBlacklisted(jti: string): Promise<boolean> {

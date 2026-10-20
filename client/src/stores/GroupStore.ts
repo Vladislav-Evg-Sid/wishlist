@@ -63,13 +63,17 @@ export class GroupStore {
     }
   }
 
-  async createInviteCode(ttl?: number, inviteLimit?: number): Promise<string> {
+  async createInviteCode(
+    groupID: string,
+    ttl?: number,
+    inviteLimit?: number,
+  ): Promise<string> {
     if (!ttl && !inviteLimit) {
       toast.info("Код не может существовать без ограничений!");
       return "";
     }
     try {
-      return createInviteCode(ttl, inviteLimit);
+      return createInviteCode(groupID, ttl, inviteLimit);
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {

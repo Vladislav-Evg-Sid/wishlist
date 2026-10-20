@@ -11,7 +11,12 @@ import type { UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
 import type { GroupData, GroupUser } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
-import { ForbidenError, NotFoundError } from "../../shared/errors.js";
+import {
+  DataConflictError,
+  ForbidenError,
+  NotFoundError,
+} from "../../shared/errors.js";
+import type { redisServiceInviteInterface } from "../../infrastructure/redis/redis.di.js";
 
 // Мокаем функции
 type CheckUserGroup = typeof import("../../shared/checkUserGroup.js");
@@ -49,17 +54,54 @@ const groupsRepository = new GroupsRepository(
   updateGroupNameMock,
   deleteGroupMock,
 );
+const setHashCounterValueMock =
+  jest.fn<
+    (
+      prefix: string,
+      key: string,
+      payloadName: string,
+      payloadValue: any,
+      counterName: string,
+      counterValue: number,
+      ttl?: number,
+    ) => Promise<boolean>
+  >();
+const getHashValueWithDecrementingMock =
+  jest.fn<
+    (
+      prefix: string,
+      key: string,
+      counterName: string,
+      payloadName: string,
+    ) => Promise<any>
+  >();
+const valueIsExistMock =
+  jest.fn<(prefix: string, key: string) => Promise<any>>();
+class RedisService implements redisServiceInviteInterface {
+  constructor(
+    readonly setHashCounterValue: (
+      prefix: string,
+      key: string,
+      payloadName: string,
+      payloadValue: any,
+      counterName: string,
+      counterValue: number,
+      ttl?: number,
+    ) => Promise<boolean>,
+    readonly getHashValueWithDecrementing: (
+      prefix: string,
+      key: string,
+      counterName: string,
+      payloadName: string,
+    ) => Promise<any>,
+  ) {}
+}
+const redisService = new RedisService(
+  setHashCounterValueMock,
+  getHashValueWithDecrementingMock,
+);
 
 // Мокаем импорты этих функций
-jest.unstable_mockModule("./groups.repository.js", () => ({
-  findGroupsByUserId: findGroupsByUserIdMock,
-  createGroup: createGroupMock,
-  findGroupInfo: findGroupInfoMock,
-  findGroupCreator: findGroupCreatorMock,
-  findGroupMembers: findGroupMembersMock,
-  updateGroupName: updateGroupNameMock,
-  deleteGroup: deleteGroupMock,
-}));
 jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
   checkGroupUserAccess: checkGroupUserAccessMock,
 }));
@@ -68,22 +110,25 @@ jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
 let groupsService: any;
 beforeAll(async () => {
   const service = await import("./groups.service.js");
-  groupsService = new service.GroupsService(groupsRepository);
+  groupsService = new service.GroupsService(groupsRepository, redisService);
 });
 
 describe("groups service", () => {
   const userID = "00000000-0000-0000-0000-000000000001" as UUID;
   const groupID = "00000000-0000-0000-0000-000000000002" as UUID;
+  const exampleUUID = "00000000-0000-0000-0000-000000000003" as UUID;
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   describe("updateGroupName", () => {
     const newName = "Новое название группы";
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("updates group name when user is creator", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: userID,
+      });
 
       await groupsService.updateGroupName(userID, groupID, newName);
 
@@ -93,7 +138,10 @@ describe("groups service", () => {
     });
 
     test("throw when user is not creator", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: groupID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: groupID,
+      });
 
       await expect(
         groupsService.updateGroupName(userID, groupID, newName),
@@ -115,7 +163,10 @@ describe("groups service", () => {
     });
 
     test("propagates group update error", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: userID,
+      });
       const error = new Error("Failed to update group");
       updateGroupNameMock.mockRejectedValue(error);
 
@@ -128,12 +179,11 @@ describe("groups service", () => {
   });
 
   describe("deleteGroup", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("deletes group when user is creator", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: userID,
+      });
 
       await groupsService.deleteGroup(userID, groupID);
 
@@ -143,7 +193,10 @@ describe("groups service", () => {
     });
 
     test("throw when user is not creator", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: groupID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: groupID,
+      });
 
       await expect(
         groupsService.deleteGroup(userID, groupID),
@@ -157,31 +210,30 @@ describe("groups service", () => {
       const error = new Error("Database unavailable");
       findGroupInfoMock.mockRejectedValue(error);
 
-      await expect(
-        groupsService.deleteGroup(userID, groupID),
-      ).rejects.toBe(error);
+      await expect(groupsService.deleteGroup(userID, groupID)).rejects.toBe(
+        error,
+      );
 
       expect(deleteGroupMock).not.toHaveBeenCalled();
     });
 
     test("propagates group delete error", async () => {
-      findGroupInfoMock.mockResolvedValue({ title: "Family", creatorID: userID });
+      findGroupInfoMock.mockResolvedValue({
+        title: "Family",
+        creatorID: userID,
+      });
       const error = new Error("Failed to delete group");
       deleteGroupMock.mockRejectedValue(error);
 
-      await expect(
-        groupsService.deleteGroup(userID, groupID),
-      ).rejects.toBe(error);
+      await expect(groupsService.deleteGroup(userID, groupID)).rejects.toBe(
+        error,
+      );
 
       expect(deleteGroupMock).toHaveBeenCalledWith(groupID);
     });
   });
 
   describe("getGroupsByUserId", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("returns user's groups", async () => {
       const groups = [{ id: groupID, name: "Family" }];
       findGroupsByUserIdMock.mockResolvedValue(groups);
@@ -195,10 +247,6 @@ describe("groups service", () => {
   });
 
   describe("addGroup", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("creates a group for the user", async () => {
       await expect(
         groupsService.addGroup(userID, { groupName: "Family" }),
@@ -210,10 +258,6 @@ describe("groups service", () => {
   });
 
   describe("getGroupInfo", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("getGroupInfo denies access before reading group data", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
@@ -263,10 +307,6 @@ describe("groups service", () => {
   });
 
   describe("getGroupUsers", () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     test("getGroupUsers denies access before reading group data", async () => {
       checkGroupUserAccessMock.mockResolvedValue(false);
 
@@ -319,6 +359,111 @@ describe("groups service", () => {
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
+    });
+  });
+
+  describe("createInviteCode", () => {
+    const ttl = 1;
+    const limitMembers = 2;
+    test("error with user not a creator", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: exampleUUID,
+      } as GroupInfoRaw);
+
+      await expect(
+        groupsService.createInviteCode(userID, groupID, null, null),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).not.toHaveBeenCalled();
+    });
+
+    test("error with ttl and limitMembers are null", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: userID,
+      } as GroupInfoRaw);
+
+      await expect(
+        groupsService.createInviteCode(userID, groupID, null, null),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).not.toHaveBeenCalled();
+    });
+
+    test("success create invite code without ttl and with limitMembers", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: userID,
+      } as GroupInfoRaw);
+      setHashCounterValueMock.mockResolvedValue(true);
+
+      const createdCode = await groupsService.createInviteCode(
+        userID,
+        groupID,
+        null,
+        limitMembers,
+      );
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).toHaveBeenCalledWith(
+        "ic",
+        createdCode,
+        "groupID",
+        groupID,
+        "remaining",
+        limitMembers,
+        undefined,
+      );
+    });
+
+    test("success create invite code with ttl and without limitMembers", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: userID,
+      } as GroupInfoRaw);
+      setHashCounterValueMock.mockResolvedValue(true);
+
+      const createdCode = await groupsService.createInviteCode(
+        userID,
+        groupID,
+        ttl,
+        null,
+      );
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).toHaveBeenCalledWith(
+        "ic",
+        createdCode,
+        "groupID",
+        groupID,
+        "remaining",
+        -1,
+        ttl * 60 * 60,
+      );
+    });
+
+    test("success create invite code with ttl and limitMembers", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: userID,
+      } as GroupInfoRaw);
+      setHashCounterValueMock.mockResolvedValue(true);
+
+      const createdCode = await groupsService.createInviteCode(
+        userID,
+        groupID,
+        ttl,
+        limitMembers,
+      );
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).toHaveBeenCalledWith(
+        "ic",
+        createdCode,
+        "groupID",
+        groupID,
+        "remaining",
+        limitMembers,
+        ttl * 60 * 60,
+      );
     });
   });
 });

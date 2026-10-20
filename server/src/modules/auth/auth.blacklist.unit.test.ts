@@ -8,17 +8,16 @@ import {
   test,
 } from "@jest/globals";
 
-import type { redisServiceInterface } from "../../infrastructure/redis/redis.di.js";
+import type { redisServiceAuthInterface } from "../../infrastructure/redis/redis.di.js";
 
 // Мокаем функции
 const setValueMock =
   jest.fn<
     (prefix: string, key: string, value: any, ttl?: number) => Promise<void>
   >();
-const getValueMock = jest.fn<(prefix: string, key: string) => Promise<any>>();
 const valueIsExistMock =
   jest.fn<(prefix: string, key: string) => Promise<any>>();
-class RedisService implements redisServiceInterface {
+class RedisService implements redisServiceAuthInterface {
   constructor(
     readonly setValue: (
       prefix: string,
@@ -26,16 +25,11 @@ class RedisService implements redisServiceInterface {
       value: any,
       ttl?: number,
     ) => Promise<void>,
-    readonly getValue: (prefix: string, key: string) => Promise<any>,
     readonly valueIsExist: (prefix: string, key: string) => Promise<any>,
   ) {}
 }
 
-const redisService = new RedisService(
-  setValueMock,
-  getValueMock,
-  valueIsExistMock,
-);
+const redisService = new RedisService(setValueMock, valueIsExistMock);
 
 // Импорт тестируемых модулей после подмены импортов на моки
 let blacklistService: import("./auth.blacklist.js").AuthBlacklistService;

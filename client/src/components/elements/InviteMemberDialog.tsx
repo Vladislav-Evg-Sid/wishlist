@@ -23,6 +23,7 @@ import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 import { useStoreGroups } from "../../hooks/useStore";
 
 interface InviteMemberDialogProps {
+  groupID: string;
   open: boolean;
   onClose: () => void;
 }
@@ -56,7 +57,7 @@ const fieldSx = {
 } as const;
 
 const InviteMemberDialog = observer(
-  ({ open, onClose }: InviteMemberDialogProps) => {
+  ({ groupID, open, onClose }: InviteMemberDialogProps) => {
     const groupStore = useStoreGroups();
     const [ttl, setTtl] = useState("");
     const [inviteLimit, setInviteLimit] = useState("");
@@ -113,6 +114,7 @@ const InviteMemberDialog = observer(
       setIsCopied(false);
       try {
         const code = await groupStore.createInviteCode(
+          groupID,
           ttl ? +ttl : undefined,
           inviteLimit ? +inviteLimit : undefined,
         );

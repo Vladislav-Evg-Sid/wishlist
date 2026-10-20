@@ -79,7 +79,11 @@ export async function updateGroupName(
   }
 }
 
-export async function createInviteCode(ttl?: number, limitMembers?: number) {
+export async function createInviteCode(
+  groupID: string,
+  ttl?: number,
+  limitMembers?: number,
+) {
   const params = new URLSearchParams();
 
   if (ttl !== undefined) {
@@ -90,7 +94,9 @@ export async function createInviteCode(ttl?: number, limitMembers?: number) {
     params.set("limit_members", String(limitMembers));
   }
 
-  const response = await apiFetch(`/groups/invite?${params.toString()}`);
+  const response = await apiFetch(
+    `/groups/${groupID}/invite?${params.toString()}`,
+  );
 
   if (!response.ok) {
     await apiErrorHandler(response);

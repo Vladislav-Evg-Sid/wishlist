@@ -354,6 +354,7 @@ const GroupMembersDialog = observer(
           </DialogActions>
         </Dialog>
         <InviteMemberDialog
+          groupID={wishlistStore.parantGroupID}
           open={isInviteDialogOpen}
           onClose={() => setIsInviteDialogOpen(false)}
         />

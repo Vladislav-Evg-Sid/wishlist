@@ -4,6 +4,7 @@ import { GroupsController } from "./groups.controller.js";
 import { GROUPS_REPOSITORY, GROUPS_SERVICE } from "./groups.di.js";
 import { GroupsService } from "./groups.service.js";
 import { GroupsRepository } from "./groups.repository.js";
+import { RedisModule } from "../../infrastructure/redis/redis.module.js";
 
 @Module({
   controllers: [GroupsController],
@@ -11,5 +12,6 @@ import { GroupsRepository } from "./groups.repository.js";
     { provide: GROUPS_SERVICE, useClass: GroupsService },
     { provide: GROUPS_REPOSITORY, useClass: GroupsRepository },
   ],
+  imports: [RedisModule],
 })
 export class GroupModule {}

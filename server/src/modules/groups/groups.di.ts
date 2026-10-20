@@ -29,4 +29,10 @@ export interface GroupsServiceInterface {
   getGroupUsers(userID: UUID, groupID: UUID): Promise<GroupUsersList>;
   updateGroupName(userID: UUID, groupID: UUID, newName: string): Promise<void>;
   deleteGroup(userID: UUID, groupID: UUID): Promise<void>;
+  createInviteCode(
+    userID: UUID,
+    groupID: UUID,
+    ttl: number | null,
+    limitMembers: number | null,
+  ): Promise<string>;
 }

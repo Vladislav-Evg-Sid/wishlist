@@ -26,3 +26,9 @@ export const createInviteLinkQuerySchema = z
     ttl,
     limitMembers: limit_members,
   }));
+
+export const createInviteLinkParamsSchema = z
+  .object({
+    group_id: UUIDSchema,
+  })
+  .transform((data) => ({ groupID: data.group_id }));
