@@ -8,28 +8,34 @@ import {
   test,
 } from "@jest/globals";
 
-import type { RedisService } from "../../infrastructure/redis/redis.service.js";
+import type { redisServiceInterface } from "../../infrastructure/redis/redis.di.js";
 
 // Мокаем функции
-const existsMock = jest.fn<(key: string) => Promise<number>>();
-const setMock = jest.fn<
-  (
-    key: string,
-    value: string,
-    options: {
-      EX: number;
-    },
-  ) => Promise<unknown>
->();
+const setValueMock =
+  jest.fn<
+    (prefix: string, key: string, value: any, ttl?: number) => Promise<void>
+  >();
+const getValueMock = jest.fn<(prefix: string, key: string) => Promise<any>>();
+const valueIsExistMock =
+  jest.fn<(prefix: string, key: string) => Promise<any>>();
+class RedisService implements redisServiceInterface {
+  constructor(
+    readonly setValue: (
+      prefix: string,
+      key: string,
+      value: any,
+      ttl?: number,
+    ) => Promise<void>,
+    readonly getValue: (prefix: string, key: string) => Promise<any>,
+    readonly valueIsExist: (prefix: string, key: string) => Promise<any>,
+  ) {}
+}
 
-// Мокаем импорты этих функций
-jest.unstable_mockModule("../../infrastructure/redis/redis.service.js", () => ({
-  RedisService: jest.fn(),
-}));
-
-const redisService = {
-  client: { exists: existsMock, set: setMock },
-} as unknown as RedisService;
+const redisService = new RedisService(
+  setValueMock,
+  getValueMock,
+  valueIsExistMock,
+);
 
 // Импорт тестируемых модулей после подмены импортов на моки
 let blacklistService: import("./auth.blacklist.js").AuthBlacklistService;
@@ -51,34 +57,34 @@ describe("auth blacklist", () => {
     });
 
     test("maps redis exists 0 to false", async () => {
-      existsMock.mockResolvedValue(0);
+      valueIsExistMock.mockResolvedValue(0);
 
       await expect(blacklistService.isRefreshBlacklisted("jti")).resolves.toBe(
         false,
       );
 
-      expect(existsMock).toHaveBeenCalledWith("reft:bl:jti");
+      expect(valueIsExistMock).toHaveBeenCalledWith("reft:bl", "jti");
     });
 
     test("maps redis exists 1 to true", async () => {
-      existsMock.mockResolvedValue(1);
+      valueIsExistMock.mockResolvedValue(1);
 
       await expect(blacklistService.isRefreshBlacklisted("jti")).resolves.toBe(
         true,
       );
 
-      expect(existsMock).toHaveBeenCalledWith("reft:bl:jti");
+      expect(valueIsExistMock).toHaveBeenCalledWith("reft:bl", "jti");
     });
 
     test("propagates Redis lookup errors", async () => {
       const error = new Error("Redis unavailable");
-      existsMock.mockRejectedValue(error);
+      valueIsExistMock.mockRejectedValue(error);
 
-      await expect(
-        blacklistService.isRefreshBlacklisted("jti"),
-      ).rejects.toBe(error);
+      await expect(blacklistService.isRefreshBlacklisted("jti")).rejects.toBe(
+        error,
+      );
 
-      expect(existsMock).toHaveBeenCalledWith("reft:bl:jti");
+      expect(valueIsExistMock).toHaveBeenCalledWith("reft:bl", "jti");
     });
   });
 
@@ -99,13 +105,13 @@ describe("auth blacklist", () => {
         Date.now() / 1000 + 60,
       );
 
-      expect(setMock).toHaveBeenCalledWith("reft:bl:jti", "1", { EX: 60 });
+      expect(setValueMock).toHaveBeenCalledWith("reft:bl", "jti", "1", 60);
     });
 
     test("does not store expired refresh (offset 0)", async () => {
       await blacklistService.blacklistRefreshToken("jti", Date.now() / 1000);
 
-      expect(setMock).not.toHaveBeenCalled();
+      expect(setValueMock).not.toHaveBeenCalled();
     });
 
     test("does not store expired refresh (offset -1)", async () => {
@@ -114,11 +120,11 @@ describe("auth blacklist", () => {
         Date.now() / 1000 - 1,
       );
 
-      expect(setMock).not.toHaveBeenCalled();
+      expect(setValueMock).not.toHaveBeenCalled();
     });
 
     test("propagates Redis errors", async () => {
-      setMock.mockRejectedValue(new Error("Redis unavailable"));
+      setValueMock.mockRejectedValue(new Error("Redis unavailable"));
       await expect(
         blacklistService.blacklistRefreshToken("jti", Date.now() / 1000 + 60),
       ).rejects.toThrow("Redis unavailable");

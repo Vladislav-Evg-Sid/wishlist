@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 import type { AuthBlacklistServiceInterface } from "./auth.di.js";
-import { RedisService } from "../../infrastructure/redis/redis.service.js";
 import {
   REDIS_SERVICE,
   type redisServiceInterface,
