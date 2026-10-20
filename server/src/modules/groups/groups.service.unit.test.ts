@@ -14,6 +14,7 @@ import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import {
   DataConflictError,
   ForbidenError,
+  InternalServerError,
   NotFoundError,
 } from "../../shared/errors.js";
 import type { redisServiceInviteInterface } from "../../infrastructure/redis/redis.di.js";
@@ -389,6 +390,20 @@ describe("groups service", () => {
 
       expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
       expect(setHashCounterValueMock).not.toHaveBeenCalled();
+    });
+
+    test("error with cannot create uniq code", async () => {
+      findGroupInfoMock.mockResolvedValue({
+        creatorID: userID,
+      } as GroupInfoRaw);
+      setHashCounterValueMock.mockResolvedValue(false);
+
+      await expect(
+        groupsService.createInviteCode(userID, groupID, null, limitMembers),
+      ).rejects.toBeInstanceOf(InternalServerError);
+
+      expect(findGroupInfoMock).toHaveBeenCalledWith(groupID);
+      expect(setHashCounterValueMock).toHaveBeenCalledTimes(10);
     });
 
     test("success create invite code without ttl and with limitMembers", async () => {
