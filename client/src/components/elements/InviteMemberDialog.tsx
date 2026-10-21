@@ -113,7 +113,7 @@ const InviteMemberDialog = observer(
       setIsCreating(true);
       setIsCopied(false);
       try {
-        const code = await groupStore.createInviteCode(
+        const code = await groupStore.createInviteLink(
           groupID,
           ttl ? +ttl : undefined,
           inviteLimit ? +inviteLimit : undefined,

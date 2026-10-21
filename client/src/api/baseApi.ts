@@ -83,13 +83,10 @@ export async function apiErrorHandler(response: Response) {
   let errorMessage = "";
   try {
     const errorDetails = await response.json();
-    if (errorDetails instanceof ApiError) {
-      errorMessage = errorDetails.message;
+    errorMessage = errorDetails.message;
+    if (!errorMessage) {
+      errorMessage = errorDetails;
     }
-    if (errorDetails instanceof Error) {
-      errorMessage = errorDetails.message;
-    }
-    errorMessage = errorDetails;
   } catch {
     if (response.status === 403) {
       errorMessage = "User not a member or creator";
@@ -97,8 +94,8 @@ export async function apiErrorHandler(response: Response) {
     errorMessage = `${response.status}`;
   } finally {
     if (!errorMessage) {
-      throw new Error(errorMessage);
+      throw new Error("Unknown Error");
     }
-    throw new Error("Unknown Error");
+    throw new Error(errorMessage);
   }
 }

@@ -82,6 +82,7 @@ services:
     environment:
       VITE_SERVER_HOST: ${SERVER_HOST}
       VITE_SERVER_PORT: ${SERVER_CONTAINER_PORT}
+      VITE_CLIENT_DOMAIN: ${CLIENT_DOMAIN}
     depends_on:
       - backend
     networks:

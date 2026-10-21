@@ -37,5 +37,5 @@ export interface GroupsServiceInterface {
     ttl: number | null,
     limitMembers: number | null,
   ): Promise<string>;
-  addMemberByInviteCode(userID: UUID, code: string): Promise<void>;
+  addMemberByInviteCode(userID: UUID, code: string): Promise<UUID>;
 }

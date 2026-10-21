@@ -1,8 +1,14 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
-import { createGroup, createInviteCode, getUserGroups } from "../api/groups";
+import {
+  createGroup,
+  createInviteCode,
+  getUserGroups,
+  inviteGroupByCode,
+} from "../api/groups";
 import type { GroupData } from "../types/groups";
+import { DOMAIN } from "../env";
 
 export class GroupStore {
   groups: GroupData[] = [];
@@ -63,7 +69,7 @@ export class GroupStore {
     }
   }
 
-  async createInviteCode(
+  async createInviteLink(
     groupID: string,
     ttl?: number,
     inviteLimit?: number,
@@ -73,7 +79,8 @@ export class GroupStore {
       return "";
     }
     try {
-      return createInviteCode(groupID, ttl, inviteLimit);
+      const code = await createInviteCode(groupID, ttl, inviteLimit);
+      return `${DOMAIN}/invite/${code}`;
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {
@@ -97,5 +104,35 @@ export class GroupStore {
       });
     }
     return "";
+  }
+
+  async inviteGroupByLink(code?: string) {
+    if (!code) {
+      toast.error("Необходим код");
+      return;
+    }
+    try {
+      const groupID = await inviteGroupByCode(code);
+      toast.success("Группа добавленна");
+      return groupID;
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже");
+              break;
+            default:
+              toast.error(
+                "Неизвестная ошибка.\nНе удалось подключиться к группе",
+              );
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
+      });
+    }
   }
 }

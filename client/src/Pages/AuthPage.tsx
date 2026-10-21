@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from "react";
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import AuthLayout from "../components/layout/auth/AuthLayout";
 import { useStore } from "../hooks/useStore";
@@ -12,6 +12,7 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const isRegistration = mode === "register";
 
   function handleEmailChange(event: ChangeEvent<HTMLInputElement>) {
@@ -39,7 +40,12 @@ export default function AuthPage({ mode }: { mode: "login" | "register" }) {
       } else {
         isAuthorised = await authStore.login(email, password);
       }
-      if (isAuthorised) navigate("/group", { replace: true });
+      if (isAuthorised) {
+        const from = location.state?.from ?? "/group";
+        console.log(from);
+
+        navigate(from, { replace: true });
+      }
     };
     fetchAuth();
   }

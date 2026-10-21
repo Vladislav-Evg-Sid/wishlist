@@ -108,7 +108,7 @@ export class RedisService
     throw new InternalServerError("Unknown redis error");
   }
 
-  async getHashValueWithDecrementing(
+  async getHashValue(
     prefix: string,
     key: string,
     counterName: string,
@@ -123,38 +123,13 @@ export class RedisService
         return 0
       end
 
-      local payloadValue = redis.call("HGET", key, payload)
       local value = tonumber(redis.call("HGET", key, field))
 
-      if not value then
+      if not value or value == 0 or value < -1 then
         return 0
       end
 
-      -- Безлимитное приглашение
-      if value == -1 then
-        return payloadValue
-      end
-
-      -- Осталось больше одного использования
-      if value > 1 then
-        redis.call("HINCRBY", key, field, -1)
-        return payloadValue
-      end
-
-      -- Последнее использование
-      if value == 1 then
-        redis.call("DEL", key)
-        return payloadValue
-      end
-
-      -- 0 — некорректное состояние
-      if value == 0 then
-        redis.call("DEL", key)
-        return 0
-      end
-
-      -- На случай неожиданного значения < -1
-      return 0
+      return redis.call("HGET", key, payload)
     `;
     const payload = await this.client.eval(script, {
       keys: [`${prefix}:${key}`],
@@ -162,5 +137,54 @@ export class RedisService
     });
 
     return payload;
+  }
+
+  async decrementHashCounter(
+    prefix: string,
+    key: string,
+    counterName: string,
+  ): Promise<void> {
+    const script = `
+      local key = KEYS[1]
+      local field = ARGV[1]
+
+      if redis.call("EXISTS", key) == 0 then
+        return
+      end
+
+      local value = tonumber(redis.call("HGET", key, field))
+
+      if not value then
+        return
+      end
+
+      -- Безлимитное использование
+      if value == -1 then
+        return
+      end
+
+      -- Осталось больше одного использования
+      if value > 1 then
+        redis.call("HINCRBY", key, field, -1)
+        return
+      end
+
+      -- Последнее использование
+      if value == 1 then
+        redis.call("DEL", key)
+        return
+      end
+
+      -- Некорректное состояние
+      if value == 0 or value < -1 then
+        redis.call("DEL", key)
+        return
+      end
+    `;
+
+    await this.client.eval(script, {
+      keys: [`${prefix}:${key}`],
+      arguments: [counterName],
+    });
   }
 }

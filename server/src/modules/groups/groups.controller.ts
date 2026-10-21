@@ -56,7 +56,11 @@ export class GroupsController {
     @CurrentUserID()
     userID: UUID,
   ) {
-    await this.groupsService.addMemberByInviteCode(userID, params.code);
+    const groupID = await this.groupsService.addMemberByInviteCode(
+      userID,
+      params.code,
+    );
+    return { group_id: groupID };
   }
 
   @Get(":group_id")

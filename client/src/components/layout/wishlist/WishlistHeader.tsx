@@ -54,7 +54,7 @@ const WishlistHeader = observer(() => {
           <IconButton
             type="button"
             aria-label="Назад"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/group")}
             sx={{
               width: 40,
               height: 40,
@@ -184,7 +184,7 @@ const WishlistHeader = observer(() => {
                 onConfirm={async () => {
                   await wishlistStore.deleteParantGroup();
                   setIsDeleteDialogOpen(false);
-                  navigate(-1);
+                  navigate("/group");
                 }}
                 title="Удалить группу?"
               />

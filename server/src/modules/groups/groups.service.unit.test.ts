@@ -538,13 +538,15 @@ describe("groups service", () => {
         { id: null } as unknown as UserData,
       ]);
 
-      await expect(
-        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
-      ).resolves.toBeUndefined();
+      const memberGroupID = await groupsService.addMemberByInviteCode(
+        userID,
+        "AAAAAA",
+      );
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
       expect(addGroupMemberMock).toHaveBeenCalledWith(groupID, userID);
+      expect(memberGroupID).toBe(groupID);
     });
   });
 });

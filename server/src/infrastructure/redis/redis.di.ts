@@ -20,10 +20,15 @@ export interface redisServiceInviteInterface {
     counterValue: number,
     ttl?: number,
   ): Promise<boolean>;
-  getHashValueWithDecrementing(
+  getHashValue(
     prefix: string,
     key: string,
     counterName: string,
     payloadName: string,
   ): Promise<any>;
+  decrementHashCounter(
+    prefix: string,
+    key: string,
+    counterName: string,
+  ): Promise<void>;
 }

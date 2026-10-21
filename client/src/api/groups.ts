@@ -83,7 +83,7 @@ export async function createInviteCode(
   groupID: string,
   ttl?: number,
   limitMembers?: number,
-) {
+): Promise<string> {
   const params = new URLSearchParams();
 
   if (ttl !== undefined) {
@@ -103,4 +103,15 @@ export async function createInviteCode(
   }
 
   return response.text();
+}
+
+export async function inviteGroupByCode(code: string): Promise<string> {
+  const response = await apiFetch(`/groups/invite/${code}`, { method: "POST" });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+
+  const result = await response.json();
+  return result.group_id;
 }

@@ -18,7 +18,15 @@ const AuthSession = observer(({ children }: { children: React.ReactNode }) => {
 
   const isPublicPage = pathname === "/auth" || pathname === "/register";
   if (!userStore.currentUser && !isPublicPage) {
-    return <Navigate to="/auth" replace />;
+    return (
+      <Navigate
+        to="/auth"
+        replace
+        state={{
+          from: location.pathname + location.search + location.hash,
+        }}
+      />
+    );
   }
 
   return <>{children}</>;

@@ -38,6 +38,9 @@ export class AuthStore {
         runInAction(() => {
           if (error instanceof Error) {
             switch (error.message) {
+              case "Authorization header missing":
+                toast.error("Вы не авторизованы");
+                break;
               case "Failed to fetch":
                 toast.error("Недоступен сервис авторизации.\nПопробуйте позже");
                 break;

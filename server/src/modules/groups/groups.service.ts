@@ -174,18 +174,33 @@ export class GroupsService implements GroupsServiceInterface {
     await this.groupsRepository.addGroupMember(groupID, memberID);
   }
 
-  async addMemberByInviteCode(userID: UUID, code: string): Promise<void> {
-    const groupID: UUID | number =
-      await this.redisService.getHashValueWithDecrementing(
-        this.redisPrrefix,
-        code,
-        this.redisCounterName,
-        this.redisValueName,
-      );
+  async addMemberByInviteCode(userID: UUID, code: string): Promise<UUID> {
+    const groupID: UUID | number = await this.redisService.getHashValue(
+      this.redisPrrefix,
+      code,
+      this.redisCounterName,
+      this.redisValueName,
+    );
     if (typeof groupID === "number") {
       throw new NotFoundError("invite code not found");
     }
 
-    await this.addGroupMember(userID, groupID);
+    try {
+      await this.addGroupMember(userID, groupID);
+      await this.redisService.decrementHashCounter(
+        this.redisPrrefix,
+        code,
+        this.redisCounterName,
+      );
+      return groupID;
+    } catch (error) {
+      if (
+        error instanceof DataConflictError ||
+        error instanceof ForbidenError
+      ) {
+        return groupID;
+      }
+      throw error;
+    }
   }
 }
