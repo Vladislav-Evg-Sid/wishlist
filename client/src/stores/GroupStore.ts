@@ -135,4 +135,17 @@ export class GroupStore {
       });
     }
   }
+
+  async changeCreator(groupID: string, newCreatorID: string) {
+    console.log(groupID, newCreatorID);
+    toast.info("Функция передачи послномочий создателя пока не доступна");
+  }
+
+  async deleteMember(groupID: string, memberID?: string) {
+    if (!memberID) {
+      toast.error("Не удалось получить id пользователя для удаления");
+    }
+    console.log(groupID, memberID);
+    toast.info("Функция удаления участника группы пока не доступна");
+  }
 }

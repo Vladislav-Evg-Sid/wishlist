@@ -21,7 +21,11 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import { observer } from "mobx-react-lite";
 
-import { useStoreWishlists } from "../../hooks/useStore";
+import {
+  useStore,
+  useStoreGroups,
+  useStoreWishlists,
+} from "../../hooks/useStore";
 import type { GroupUser } from "../../types/wishlists";
 import InviteMemberDialog from "./InviteMemberDialog";
 
@@ -31,15 +35,19 @@ interface GroupMembersDialogProps {
 }
 
 interface UserRowProps {
+  groupID: string;
   user: GroupUser;
   isCreator?: boolean;
   canManage?: boolean;
 }
 
-const unavailable = (feature: string) => () =>
-  alert(`Функция ${feature} пока не доступна`);
-
-function UserRow({ user, isCreator = false, canManage = false }: UserRowProps) {
+function UserRow({
+  groupID,
+  user,
+  isCreator = false,
+  canManage = false,
+}: UserRowProps) {
+  const groupsStore = useStoreGroups();
   const initial = user.name.trim().charAt(0).toUpperCase() || "?";
 
   return (
@@ -102,7 +110,7 @@ function UserRow({ user, isCreator = false, canManage = false }: UserRowProps) {
             type="button"
             aria-label={`Назначить ${user.name} создателем`}
             title="Сделать создателем"
-            onClick={unavailable("назначения пользователя создателем")}
+            onClick={() => groupsStore.changeCreator(groupID, user.id)}
             sx={{
               display: { xs: "inline-flex", sm: "none" },
               color: "primary.main",
@@ -113,7 +121,7 @@ function UserRow({ user, isCreator = false, canManage = false }: UserRowProps) {
           <Button
             type="button"
             size="small"
-            onClick={unavailable("назначения пользователя создателем")}
+            onClick={() => groupsStore.changeCreator(groupID, user.id)}
             sx={{
               display: { xs: "none", sm: "inline-flex" },
               borderRadius: "10px",
@@ -127,7 +135,7 @@ function UserRow({ user, isCreator = false, canManage = false }: UserRowProps) {
             type="button"
             aria-label={`Удалить участника ${user.name}`}
             title="Удалить участника"
-            onClick={unavailable("удаления пользователя")}
+            onClick={() => groupsStore.deleteMember(groupID, user.id)}
             sx={{ color: "error.main" }}
           >
             <DeleteOutlineRoundedIcon />
@@ -141,6 +149,8 @@ function UserRow({ user, isCreator = false, canManage = false }: UserRowProps) {
 const GroupMembersDialog = observer(
   ({ open, onClose }: GroupMembersDialogProps) => {
     const wishlistStore = useStoreWishlists();
+    const groupsStore = useStoreGroups();
+    const { userStore } = useStore();
     const users = wishlistStore.parantGroupUsers;
     const isCreator = wishlistStore.isParantGroupCreator;
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -252,7 +262,11 @@ const GroupMembersDialog = observer(
                 >
                   Создатель
                 </Typography>
-                <UserRow user={users.creator} isCreator />
+                <UserRow
+                  groupID={wishlistStore.parantGroupID}
+                  user={users.creator}
+                  isCreator
+                />
                 <Divider sx={{ my: 1.5 }} />
                 <Box
                   sx={{
@@ -290,6 +304,7 @@ const GroupMembersDialog = observer(
                     {users.members.map((user) => (
                       <UserRow
                         key={`${user.name}-${user.hash}`}
+                        groupID={wishlistStore.parantGroupID}
                         user={user}
                         canManage={isCreator}
                       />
@@ -343,7 +358,12 @@ const GroupMembersDialog = observer(
                 type="button"
                 color="error"
                 startIcon={<LogoutRoundedIcon />}
-                onClick={unavailable("выхода из группы")}
+                onClick={() =>
+                  groupsStore.deleteMember(
+                    wishlistStore.parantGroupID,
+                    userStore.currentUser?.id,
+                  )
+                }
               >
                 Выйти из группы
               </Button>

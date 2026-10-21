@@ -21,6 +21,7 @@ import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
 import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 
 import { useStoreGroups } from "../../hooks/useStore";
+import { toast } from "react-toastify";
 
 interface InviteMemberDialogProps {
   groupID: string;
@@ -34,7 +35,7 @@ async function copyToClipboard(value: string) {
       await navigator.clipboard.writeText(value);
       return;
     } catch {
-      alert("Ошибка сохранения");
+      toast.info("Ошибка. Не удалось сохранить код");
     }
   }
 

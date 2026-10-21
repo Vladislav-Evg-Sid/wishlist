@@ -4,6 +4,7 @@ export interface WishlistData {
 }
 
 export interface GroupUser {
+  id: string;
   name: string;
   hash: number;
 }

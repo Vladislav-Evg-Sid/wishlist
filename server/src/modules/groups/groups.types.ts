@@ -20,12 +20,7 @@ export interface UserData {
   hash: number;
 }
 
-export interface GroupUser {
-  name: string;
-  hash: number;
-}
-
 export interface GroupUsersList {
-  creator: GroupUser;
-  members: GroupUser[];
+  creator: UserData;
+  members: UserData[];
 }

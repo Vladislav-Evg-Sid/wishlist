@@ -88,11 +88,8 @@ export class GroupsService implements GroupsServiceInterface {
     );
 
     return {
-      creator: {
-        name: creator.name,
-        hash: creator.hash,
-      },
-      members: filteredMembers.map(({ name, hash }) => ({ name, hash })),
+      creator,
+      members: filteredMembers,
     };
   }
 

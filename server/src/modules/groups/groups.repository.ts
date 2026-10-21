@@ -10,7 +10,7 @@ import {
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
 import type { UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
-import type { GroupData, GroupUser, UserData } from "./groups.types.js";
+import type { GroupData, UserData } from "./groups.types.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
 
 @Injectable()

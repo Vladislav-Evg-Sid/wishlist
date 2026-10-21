@@ -4,7 +4,6 @@ import type {
   CreateGroup,
   GroupData,
   GroupInfo,
-  GroupUser,
   GroupUsersList,
   UserData,
 } from "./groups.types.js";

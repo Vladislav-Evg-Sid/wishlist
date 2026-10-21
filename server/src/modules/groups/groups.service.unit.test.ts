@@ -9,7 +9,7 @@ import {
 
 import type { UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
-import type { GroupData, GroupUser, UserData } from "./groups.types.js";
+import type { GroupData, UserData } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import {
   DataConflictError,
@@ -346,8 +346,8 @@ describe("groups service", () => {
 
     test("returns creator and filters incomplete members, preserving hash zero", async () => {
       checkGroupUserAccessMock.mockResolvedValue(true);
-      const creator = { name: "Creator", hash: 1 };
-      findGroupCreatorMock.mockResolvedValue({ ...creator, id: userID });
+      const creator = { name: "Creator", hash: 1, id: userID };
+      findGroupCreatorMock.mockResolvedValue(creator);
       findGroupMembersMock.mockResolvedValue([
         { id: exampleUUID, name: "Member", hash: 0 },
         {
@@ -361,7 +361,7 @@ describe("groups service", () => {
         groupsService.getGroupUsers(userID, groupID),
       ).resolves.toEqual({
         creator,
-        members: [{ name: "Member", hash: 0 }],
+        members: [{ name: "Member", hash: 0, id: exampleUUID }],
       });
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
