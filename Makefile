@@ -1,5 +1,32 @@
 include .env
 
+# ==============================
+# Variables
+# ==============================
+
+SERVER_DIR := ./server
+
+DEV_COMPOSE_FILE := ./docker-compose-develop.yml
+TEST_COMPOSE_FILE := ./docker-compose-testing.yml
+TEST_ENV_FILE := $(SERVER_DIR)/.env.test
+
+DEV_COMPOSE := docker compose -f $(DEV_COMPOSE_FILE)
+TEST_COMPOSE := docker compose --env-file $(TEST_ENV_FILE) -f $(TEST_COMPOSE_FILE)
+
+DB_CONTAINER := wishlist-db
+DB_TEST_CONTAINER := wishlist-db-test
+REDIS_CONTAINER := wishlist-redis
+
+DB_USER := postgres
+DB_NAME := wishlist
+
+BACKUP_DIR := ./backups
+
+
+# ==============================
+# Help
+# ==============================
+
 .PHONY: help
 help:
 ifeq ($(OS),Windows_NT)
@@ -9,9 +36,11 @@ endif
 	@echo = Разработка:
 	@echo -- run-dev:          запуск в режиме разработки
 	@echo -- stop-dev:         остановка контейнеров в режиме разработки
-	@echo = Тестрование:
+	@echo -- db-create-backup: создать бэкап базы
+	@echo = Тестирование:
 	@echo -- test-unit:        запуск unit-тестов
 	@echo -- test-integration: запуск интеграционных тестов
+	@echo -- test-all:         запуск всех тестов
 	@echo -- run-dev-test:     запуск БД с миграциями для интеграционных тестов
 	@echo -- stop-dev-test:    остановка контейнеров для интеграционных тестов
 	@echo = Подключения:
@@ -19,40 +48,64 @@ endif
 	@echo -- connect-db-test:  подключение к тестовой БД
 	@echo -- connect-redis:    подключение к Redis
 
-.PHONY: run-dev stop-dev
+
+# ==============================
+# Development
+# ==============================
+
+.PHONY: run-dev stop-dev db-create-backup
+
 run-dev:
-	docker compose -f ./docker-compose-develop.yml up --build --watch
+	$(DEV_COMPOSE) up --build --watch
 
 stop-dev:
-	docker compose -f ./docker-compose-develop.yml stop
+	$(DEV_COMPOSE) stop
+
+db-create-backup:
+	@mkdir -p $(BACKUP_DIR)
+	docker exec $(DB_CONTAINER) \
+		pg_dump -U $(DB_USER) -d $(DB_NAME) -F c \
+		> "$(BACKUP_DIR)/wishlist_$$(date +%Y-%m-%d_%H-%M-%S).backup"
+
+
+# ==============================
+# Tests
+# ==============================
 
 .PHONY: run-dev-test stop-dev-test test-unit test-integration test-all
+
 test-unit:
-	cd ./server && npm run test:unit
+	cd $(SERVER_DIR) && npm run test:unit
 
-test-integration:
-	make run-dev-test
-	cd ./server && npm run test:integration
-	make stop-dev-test
+test-integration: run-dev-test
+	cd $(SERVER_DIR) && npm run test:integration
+	$(MAKE) stop-dev-test
 
-test-all:
-	make run-dev-test
-	cd ./server && npm run test
-	make stop-dev-test
+test-all: run-dev-test
+	cd $(SERVER_DIR) && npm run test
+	$(MAKE) stop-dev-test
 
 run-dev-test:
-	docker compose --env-file ./server/.env.test -f ./docker-compose-testing.yml up -d db-test
-	docker compose --env-file ./server/.env.test -f ./docker-compose-testing.yml run --rm --build db-migrate
+	$(TEST_COMPOSE) up -d db-test
+	$(TEST_COMPOSE) run --rm --build db-migrate
 
 stop-dev-test:
-	docker compose --env-file ./server/.env.test -f ./docker-compose-testing.yml stop
+	$(TEST_COMPOSE) stop
+
+
+# ==============================
+# Connections
+# ==============================
 
 .PHONY: connect-db connect-db-test connect-redis
+
 connect-db:
-	docker exec -it wishlist-db psql -U postgres -d wishlist
+	docker exec -it $(DB_CONTAINER) \
+		psql -U $(DB_USER) -d $(DB_NAME)
 
 connect-db-test:
-	docker exec -it wishlist-db-test sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
+	docker exec -it $(DB_TEST_CONTAINER) \
+		sh -c 'exec psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 connect-redis:
-	docker exec -it wishlist-redis redis-cli
+	docker exec -it $(REDIS_CONTAINER) redis-cli
