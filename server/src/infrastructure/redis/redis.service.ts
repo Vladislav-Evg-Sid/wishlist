@@ -10,7 +10,6 @@ import type {
   redisServiceAuthInterface,
   redisServiceInviteInterface,
 } from "./redis.di.js";
-import type { UUID } from "../../types/shared.js";
 import { InternalServerError } from "../../shared/errors.js";
 import { logger } from "../../config/logger.js";
 

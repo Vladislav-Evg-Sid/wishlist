@@ -71,7 +71,7 @@ const setHashCounterValueMock =
       ttl?: number,
     ) => Promise<boolean>
   >();
-const getHashValueWithDecrementingMock =
+const getHashValueMock =
   jest.fn<
     (
       prefix: string,
@@ -79,6 +79,10 @@ const getHashValueWithDecrementingMock =
       counterName: string,
       payloadName: string,
     ) => Promise<any>
+  >();
+const decrementHashCounterMock =
+  jest.fn<
+    (prefix: string, key: string, counterName: string) => Promise<void>
   >();
 class RedisService implements redisServiceInviteInterface {
   constructor(
@@ -91,17 +95,23 @@ class RedisService implements redisServiceInviteInterface {
       counterValue: number,
       ttl?: number,
     ) => Promise<boolean>,
-    readonly getHashValueWithDecrementing: (
+    readonly getHashValue: (
       prefix: string,
       key: string,
       counterName: string,
       payloadName: string,
     ) => Promise<any>,
+    readonly decrementHashCounter: (
+      prefix: string,
+      key: string,
+      counterName: string,
+    ) => Promise<void>,
   ) {}
 }
 const redisService = new RedisService(
   setHashCounterValueMock,
-  getHashValueWithDecrementingMock,
+  getHashValueMock,
+  decrementHashCounterMock,
 );
 
 // Мокаем импорты этих функций
@@ -480,7 +490,7 @@ describe("groups service", () => {
 
   describe("addMemberByInviteCode", () => {
     test("error with inknown code", async () => {
-      getHashValueWithDecrementingMock.mockResolvedValue(0);
+      getHashValueMock.mockResolvedValue(0);
 
       await expect(
         groupsService.addMemberByInviteCode(userID, "AAAAAA"),
@@ -489,10 +499,11 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).not.toHaveBeenCalled();
       expect(findGroupMembersMock).not.toHaveBeenCalled();
       expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(decrementHashCounterMock).not.toHaveBeenCalled();
     });
 
     test("error with group not exist", async () => {
-      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+      getHashValueMock.mockResolvedValue(groupID);
       findGroupCreatorMock.mockResolvedValue(undefined);
 
       await expect(
@@ -502,37 +513,44 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).not.toHaveBeenCalled();
       expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(decrementHashCounterMock).not.toHaveBeenCalled();
     });
 
-    test("error with user is creator", async () => {
-      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+    test("sucess with user is creator", async () => {
+      getHashValueMock.mockResolvedValue(groupID);
       findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
 
-      await expect(
-        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
-      ).rejects.toBeInstanceOf(ForbidenError);
+      const memberGroupID = await groupsService.addMemberByInviteCode(
+        userID,
+        "AAAAAA",
+      );
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).not.toHaveBeenCalled();
       expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(decrementHashCounterMock).not.toHaveBeenCalled();
+      expect(memberGroupID).toBe(groupID);
     });
 
-    test("error with user is member", async () => {
-      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+    test("sucess with user is member", async () => {
+      getHashValueMock.mockResolvedValue(groupID);
       findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
       findGroupMembersMock.mockResolvedValue([{ id: userID } as UserData]);
 
-      await expect(
-        groupsService.addMemberByInviteCode(userID, "AAAAAA"),
-      ).rejects.toBeInstanceOf(DataConflictError);
+      const memberGroupID = await groupsService.addMemberByInviteCode(
+        userID,
+        "AAAAAA",
+      );
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
       expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(decrementHashCounterMock).not.toHaveBeenCalled();
+      expect(memberGroupID).toBe(groupID);
     });
 
-    test("error with user is member", async () => {
-      getHashValueWithDecrementingMock.mockResolvedValue(groupID);
+    test("sucess with user not a member", async () => {
+      getHashValueMock.mockResolvedValue(groupID);
       findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
       findGroupMembersMock.mockResolvedValue([
         { id: null } as unknown as UserData,
