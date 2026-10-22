@@ -112,4 +112,21 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       [GROUP_MEMBER_COLUMNS.member_id]: memberID,
     });
   }
+
+  async deleteMember(groupID: UUID, memberID: UUID): Promise<void> {
+    await db(TABLES.group_member)
+      .delete()
+      .where({
+        [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+        [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+      });
+  }
+
+  async changeCreator(groupID: UUID, newCreatorID: UUID): Promise<void> {
+    await db(TABLES.groups)
+      .update({
+        [GROUPS_COLUMNS.creator_id]: newCreatorID,
+      })
+      .where(GROUPS_COLUMNS.id, groupID);
+  }
 }

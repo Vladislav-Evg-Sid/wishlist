@@ -9,7 +9,11 @@ import {
 import { createUser } from "../../../tests/integration/fixtures/users.js";
 import { createWishlistWithParantGroupID } from "../../../tests/integration/fixtures/wishlists.js";
 import { db } from "../../db/knex.js";
-import { TABLES, GROUPS_COLUMNS } from "../../db/schema.js";
+import {
+  TABLES,
+  GROUPS_COLUMNS,
+  GROUP_MEMBER_COLUMNS,
+} from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
 
 const groupsRepository = new GroupsRepository();
@@ -317,6 +321,126 @@ describe("groups repository", () => {
       ).rejects.toMatchObject({
         code: "23503",
         constraint: "group_member_group_id_foreign",
+      });
+    });
+  });
+
+  describe("deleteMember", () => {
+    test("delete member", async () => {
+      const { groupID } = await createGroupFixture();
+      const memberID = await createUser({
+        email: "test@example.com",
+        user_hash: 2,
+      });
+
+      await db(TABLES.group_member).insert({
+        [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+        [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+      });
+      const membersBeforeTest = await db(TABLES.group_member).select("*");
+
+      await expect(
+        groupsRepository.deleteMember(groupID, memberID),
+      ).resolves.toBeUndefined();
+      const membersAfterTest = await db(TABLES.group_member).select("*");
+
+      expect(membersBeforeTest).toHaveLength(1);
+      expect(membersAfterTest).toHaveLength(0);
+    });
+
+    test("delete member from once of groups", async () => {
+      const { groupID } = await createGroupFixture();
+      const memberID = await createUser({
+        email: "test1@example.com",
+        user_hash: 2,
+      });
+      const creatorID = await createUser({
+        email: "test2@example.com",
+        user_hash: 3,
+      });
+      const secondGroupID = await createGroupWithCreatorID(creatorID);
+
+      await db(TABLES.group_member).insert([
+        {
+          [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+          [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+        },
+        {
+          [GROUP_MEMBER_COLUMNS.member_id]: memberID,
+          [GROUP_MEMBER_COLUMNS.group_id]: secondGroupID,
+        },
+      ]);
+      const membersBeforeTest = await db(TABLES.group_member).select("*");
+
+      await expect(
+        groupsRepository.deleteMember(groupID, memberID),
+      ).resolves.toBeUndefined();
+      const membersAfterTest = await db(TABLES.group_member).select("*");
+
+      expect(membersBeforeTest).toHaveLength(2);
+      expect(membersAfterTest).toHaveLength(1);
+    });
+
+    test("delete once of members from group", async () => {
+      const { groupID } = await createGroupFixture();
+      const member1ID = await createUser({
+        email: "test1@example.com",
+        user_hash: 2,
+      });
+      const member2ID = await createUser({
+        email: "test2@example.com",
+        user_hash: 3,
+      });
+
+      await db(TABLES.group_member).insert([
+        {
+          [GROUP_MEMBER_COLUMNS.member_id]: member1ID,
+          [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+        },
+        {
+          [GROUP_MEMBER_COLUMNS.member_id]: member2ID,
+          [GROUP_MEMBER_COLUMNS.group_id]: groupID,
+        },
+      ]);
+      const membersBeforeTest = await db(TABLES.group_member).select("*");
+
+      await expect(
+        groupsRepository.deleteMember(groupID, member1ID),
+      ).resolves.toBeUndefined();
+      const membersAfterTest = await db(TABLES.group_member).select("*");
+
+      expect(membersBeforeTest).toHaveLength(2);
+      expect(membersAfterTest).toHaveLength(1);
+    });
+  });
+
+  describe("changeCreator", () => {
+    test("sucess change creator", async () => {
+      const { groupID } = await createGroupFixture();
+      const newCreatorId = await createUser({
+        email: "test@example.com",
+        user_hash: 2,
+      });
+
+      await expect(
+        groupsRepository.changeCreator(groupID, newCreatorId),
+      ).resolves.toBeUndefined();
+      const groupData = await db(TABLES.groups)
+        .select({ creatorID: GROUPS_COLUMNS.creator_id })
+        .where(GROUPS_COLUMNS.id, groupID)
+        .first();
+
+      expect(groupData.creatorID).toBe(newCreatorId);
+    });
+
+    test("change creator to unknown", async () => {
+      const { groupID } = await createGroupFixture();
+
+      await expect(
+        groupsRepository.changeCreator(groupID, missingID),
+      ).rejects.toMatchObject({
+        code: "23503",
+        constraint: "groups_creator_id_foreign",
       });
     });
   });

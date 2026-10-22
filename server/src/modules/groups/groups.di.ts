@@ -19,6 +19,8 @@ export interface GroupsRepositoryInterface {
   updateGroupName(groupID: UUID, newName: string): Promise<void>;
   deleteGroup(groupID: UUID): Promise<void>;
   addGroupMember(groupID: UUID, memberID: UUID): Promise<void>;
+  deleteMember(groupID: UUID, memberID: UUID): Promise<void>;
+  changeCreator(groupID: UUID, newCreatorID: UUID): Promise<void>;
 }
 
 export const GROUPS_SERVICE = Symbol("GROUPS_SERVICE");
