@@ -34,3 +34,23 @@ export const createInviteLinkParamsSchema = z
   .transform((data) => ({ groupID: data.group_id }));
 
 export const addGroupMemberByCodeParamsSchema = z.object({ code: z.string() });
+
+export const deleteMemberParamsSchema = z
+  .object({
+    group_id: UUIDSchema,
+    member_id: UUIDSchema,
+  })
+  .transform((data) => ({
+    groupID: data.group_id,
+    memberID: data.member_id,
+  }));
+
+export const changeCreatorParamsSchema = z
+  .object({
+    group_id: UUIDSchema,
+    new_creator_id: UUIDSchema,
+  })
+  .transform((data) => ({
+    groupID: data.group_id,
+    newCreatorID: data.new_creator_id,
+  }));

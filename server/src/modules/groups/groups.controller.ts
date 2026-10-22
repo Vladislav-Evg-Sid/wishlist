@@ -16,9 +16,11 @@ import type { UUID } from "../../types/shared.js";
 import { CurrentUserID } from "../auth/decorator/currentUserID.decorator.js";
 import {
   addGroupMemberByCodeParamsSchema,
+  changeCreatorParamsSchema,
   createGroupBodySchema,
   createInviteLinkParamsSchema,
   createInviteLinkQuerySchema,
+  deleteMemberParamsSchema,
   getGroupInfoParamsSchema,
   updateGroupNameBodySchema,
 } from "./groups.schemas.js";
@@ -112,6 +114,34 @@ export class GroupsController {
     userID: UUID,
   ) {
     await this.groupsService.deleteGroup(userID, params.groupID);
+  }
+
+  @Delete(":group_id/:member_id")
+  async deleteMember(
+    @Param({ schema: deleteMemberParamsSchema })
+    params: z.output<typeof deleteMemberParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsService.deleteMember(
+      userID,
+      params.groupID,
+      params.memberID,
+    );
+  }
+
+  @Put(":group_id/:member_id")
+  async changeCreator(
+    @Param({ schema: changeCreatorParamsSchema })
+    params: z.output<typeof changeCreatorParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsService.changeCreator(
+      userID,
+      params.groupID,
+      params.newCreatorID,
+    );
   }
 
   @Get(":group_id/invite")
