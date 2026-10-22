@@ -61,11 +61,28 @@ run-dev:
 stop-dev:
 	$(DEV_COMPOSE) stop
 
+db-create-backup: BACKUP_TIMESTAMP := $(shell node -e "process.stdout.write(new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, ''))")
+db-create-backup: BACKUP_FILE := $(BACKUP_DIR)/wishlist_$(BACKUP_TIMESTAMP).backup
 db-create-backup:
-	@mkdir -p $(BACKUP_DIR)
+	@node -e "require('fs').mkdirSync('$(BACKUP_DIR)', { recursive: true })"
 	docker exec $(DB_CONTAINER) \
 		pg_dump -U $(DB_USER) -d $(DB_NAME) -F c \
-		> "$(BACKUP_DIR)/wishlist_$$(date +%Y-%m-%d_%H-%M-%S).backup"
+		> "$(BACKUP_FILE)"
+	@echo Backup created: $(BACKUP_FILE)
+
+db-restore-backup:
+ifndef FILE
+	$(error FILE is required. Usage: make db-restore-backup FILE=./backups/wishlist_xxx.backup)
+endif
+	docker exec -i $(DB_CONTAINER) \
+		pg_restore \
+		-U $(DB_USER) \
+		-d $(DB_NAME) \
+		--clean \
+		--if-exists \
+		--no-owner \
+		< "$(FILE)"
+	@echo Backup restored: $(FILE)
 
 
 # ==============================
