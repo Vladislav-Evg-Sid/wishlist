@@ -200,4 +200,46 @@ export class GroupsService implements GroupsServiceInterface {
       throw error;
     }
   }
+
+  async deleteMember(
+    userID: UUID,
+    groupID: UUID,
+    memberID: UUID,
+  ): Promise<void> {
+    const creatorData = await this.groupsRepository.findGroupCreator(groupID);
+    if (!creatorData) {
+      throw new NotFoundError("group not found");
+    }
+
+    if (creatorData.id !== userID) {
+      if (memberID !== userID) {
+        throw new ForbidenError("user not a creator of group");
+      }
+    }
+
+    await this.groupsRepository.deleteMember(groupID, memberID);
+  }
+
+  async changeCreator(
+    userID: UUID,
+    groupID: UUID,
+    newCreatorID: UUID,
+  ): Promise<void> {
+    const creatorData = await this.groupsRepository.findGroupCreator(groupID);
+    if (!creatorData) {
+      throw new NotFoundError("group not found");
+    }
+
+    if (creatorData.id !== userID) {
+      throw new ForbidenError("user not a creator of group");
+    }
+
+    const groupMembers = await this.groupsRepository.findGroupMembers(groupID);
+
+    if (groupMembers.filter(({ id }) => id === newCreatorID).length !== 1) {
+      throw new DataConflictError("new creator is not member of group");
+    }
+
+    await this.groupsRepository.changeCreator(groupID, newCreatorID);
+  }
 }

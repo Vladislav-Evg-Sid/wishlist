@@ -39,4 +39,6 @@ export interface GroupsServiceInterface {
     limitMembers: number | null,
   ): Promise<string>;
   addMemberByInviteCode(userID: UUID, code: string): Promise<UUID>;
+  deleteMember(userID: UUID, groupID: UUID, memberID: UUID): Promise<void>;
+  changeCreator(userID: UUID, groupID: UUID, newCreatorID: UUID): Promise<void>;
 }

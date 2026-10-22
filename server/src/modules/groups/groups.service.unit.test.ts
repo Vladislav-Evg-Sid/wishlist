@@ -37,6 +37,10 @@ const updateGroupNameMock =
 const deleteGroupMock = jest.fn<GroupsRepositoryInterface["deleteGroup"]>();
 const addGroupMemberMock =
   jest.fn<(groupID: UUID, memberID: UUID) => Promise<void>>();
+const deleteMemberMock =
+  jest.fn<(groupID: UUID, memberID: UUID) => Promise<void>>();
+const changeCreatorMock =
+  jest.fn<(groupID: UUID, newCreatorID: UUID) => Promise<void>>();
 class GroupsRepository implements GroupsRepositoryInterface {
   constructor(
     public readonly findGroupsByUserId: any,
@@ -47,6 +51,14 @@ class GroupsRepository implements GroupsRepositoryInterface {
     public readonly updateGroupName: GroupsRepositoryInterface["updateGroupName"],
     public readonly deleteGroup: GroupsRepositoryInterface["deleteGroup"],
     public readonly addGroupMember: GroupsRepositoryInterface["addGroupMember"],
+    public readonly deleteMember: (
+      groupID: UUID,
+      memberID: UUID,
+    ) => Promise<void>,
+    public readonly changeCreator: (
+      groupID: UUID,
+      newCreatorID: UUID,
+    ) => Promise<void>,
   ) {}
 }
 const groupsRepository = new GroupsRepository(
@@ -58,6 +70,8 @@ const groupsRepository = new GroupsRepository(
   updateGroupNameMock,
   deleteGroupMock,
   addGroupMemberMock,
+  deleteMemberMock,
+  changeCreatorMock,
 );
 const setHashCounterValueMock =
   jest.fn<
@@ -130,6 +144,7 @@ describe("groups service", () => {
   const userID = "00000000-0000-0000-0000-000000000001" as UUID;
   const groupID = "00000000-0000-0000-0000-000000000002" as UUID;
   const exampleUUID = "00000000-0000-0000-0000-000000000003" as UUID;
+  const memberID = "00000000-0000-0000-0000-000000000004" as UUID;
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -565,6 +580,107 @@ describe("groups service", () => {
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
       expect(addGroupMemberMock).toHaveBeenCalledWith(groupID, userID);
       expect(memberGroupID).toBe(groupID);
+    });
+  });
+
+  describe("deleteMember", () => {
+    test("group not found", async () => {
+      findGroupCreatorMock.mockResolvedValue(undefined);
+
+      await expect(
+        groupsService.deleteMember(userID, groupID, memberID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(deleteMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("error with not creatore deleting some member", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
+
+      await expect(
+        groupsService.deleteMember(userID, groupID, memberID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(deleteMemberMock).not.toHaveBeenCalled();
+    });
+
+    test("sucess deleting some member by creator", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
+
+      await expect(
+        groupsService.deleteMember(userID, groupID, memberID),
+      ).resolves.toBeUndefined();
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(deleteMemberMock).toHaveBeenCalledWith(groupID, memberID);
+    });
+
+    test("sucess deleting member by himself", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
+
+      await expect(
+        groupsService.deleteMember(memberID, groupID, memberID),
+      ).resolves.toBeUndefined();
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(deleteMemberMock).toHaveBeenCalledWith(groupID, memberID);
+    });
+  });
+
+  describe("changeCreator", () => {
+    test("group not found", async () => {
+      findGroupCreatorMock.mockResolvedValue(undefined);
+
+      await expect(
+        groupsService.changeCreator(userID, groupID, memberID),
+      ).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).not.toHaveBeenCalled();
+      expect(changeCreatorMock).not.toHaveBeenCalled();
+    });
+
+    test("user not a creator", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: exampleUUID } as UserData);
+
+      await expect(
+        groupsService.changeCreator(userID, groupID, memberID),
+      ).rejects.toBeInstanceOf(ForbidenError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).not.toHaveBeenCalled();
+      expect(changeCreatorMock).not.toHaveBeenCalled();
+    });
+
+    test("new creator not a member", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
+      findGroupMembersMock.mockResolvedValue([{ id: exampleUUID } as UserData]);
+
+      await expect(
+        groupsService.changeCreator(userID, groupID, memberID),
+      ).rejects.toBeInstanceOf(DataConflictError);
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
+      expect(changeCreatorMock).not.toHaveBeenCalled();
+    });
+
+    test("sucess change creator", async () => {
+      findGroupCreatorMock.mockResolvedValue({ id: userID } as UserData);
+      findGroupMembersMock.mockResolvedValue([
+        { id: exampleUUID } as UserData,
+        { id: memberID } as UserData,
+      ]);
+
+      await expect(
+        groupsService.changeCreator(userID, groupID, memberID),
+      ).resolves.toBeUndefined();
+
+      expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
+      expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
+      expect(changeCreatorMock).toHaveBeenCalledWith(groupID, memberID);
     });
   });
 });
