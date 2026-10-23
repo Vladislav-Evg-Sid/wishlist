@@ -5,6 +5,7 @@ import {
   changeCreator,
   createGroup,
   createInviteCode,
+  deleteMember,
   getUserGroups,
   inviteGroupByCode,
 } from "../api/groups";
@@ -13,11 +14,15 @@ import { DOMAIN } from "../env";
 
 export class GroupStore {
   groups: GroupData[] = [];
+  loadGroupUserList: () => Promise<void> = async () => {};
 
-  constructor() {
+  constructor(loadGroupUsersList?: () => Promise<void>) {
     makeAutoObservable(this);
 
     this.loadUserGroups();
+    if (loadGroupUsersList) {
+      this.loadGroupUserList = loadGroupUsersList;
+    }
   }
 
   async loadUserGroups() {
@@ -140,7 +145,7 @@ export class GroupStore {
   async changeCreator(groupID: string, newCreatorID: string) {
     try {
       await changeCreator(groupID, newCreatorID);
-      await this.loadUserGroups();
+      await this.loadGroupUserList();
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {
@@ -150,7 +155,7 @@ export class GroupStore {
               break;
             default:
               toast.error(
-                "Неизвестная ошибка.\nНе удалось подключиться к группе",
+                "Неизвестная ошибка.\nНе удалось изменить создателя к группе",
               );
               console.error(error.message);
               break;
@@ -165,8 +170,31 @@ export class GroupStore {
   async deleteMember(groupID: string, memberID?: string) {
     if (!memberID) {
       toast.error("Не удалось получить id пользователя для удаления");
+      return;
     }
-    console.log(groupID, memberID);
-    toast.info("Функция удаления участника группы пока не доступна");
+    try {
+      await deleteMember(groupID, memberID);
+      await this.loadGroupUserList();
+      await this.loadUserGroups();
+      toast.success("Участник успешно удалён");
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже");
+              break;
+            default:
+              toast.error(
+                "Неизвестная ошибка.\nНе удалось удалить участника группы",
+              );
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
+      });
+    }
   }
 }

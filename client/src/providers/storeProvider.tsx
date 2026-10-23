@@ -13,14 +13,18 @@ import OrderStore from "../stores/OrderStore";
 
 interface StoreProviderProps {
   children: React.ReactNode;
+  loadGroupUsersList?: () => Promise<void>;
 }
 
 export function RootStoreProvider({ children }: StoreProviderProps) {
   return <RootStoreContext value={rootStore}>{children}</RootStoreContext>;
 }
 
-export function GroupStoreProvider({ children }: StoreProviderProps) {
-  const [groupContext] = useState(() => new GroupStore());
+export function GroupStoreProvider({
+  children,
+  loadGroupUsersList,
+}: StoreProviderProps) {
+  const [groupContext] = useState(() => new GroupStore(loadGroupUsersList));
 
   return (
     <GroupsStoreContext value={groupContext}>{children}</GroupsStoreContext>

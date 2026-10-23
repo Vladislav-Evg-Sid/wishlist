@@ -125,3 +125,13 @@ export async function changeCreator(groupID: string, newCreatorID: string) {
     await apiErrorHandler(response);
   }
 }
+
+export async function deleteMember(groupID: string, memberID: string) {
+  const response = await apiFetch(`/groups/${groupID}/${memberID}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+}

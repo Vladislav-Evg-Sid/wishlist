@@ -40,6 +40,12 @@ const WishlistHeader = observer(() => {
     [wishlistStore.parantGroupTitle],
   );
 
+  const handleLoadGroupUsers = async () => {
+    if (wishlistStore.isParantGroupCreator) {
+      wishlistStore.loadParantGroupUsers();
+    }
+  };
+
   return (
     <Box component="header" sx={{ mb: { xs: 4, md: 5 } }}>
       <Box
@@ -231,7 +237,7 @@ const WishlistHeader = observer(() => {
         open={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
       />
-      <GroupStoreProvider>
+      <GroupStoreProvider loadGroupUsersList={handleLoadGroupUsers}>
         <GroupMembersDialog
           open={isMembersOpen}
           onClose={() => setIsMembersOpen(false)}

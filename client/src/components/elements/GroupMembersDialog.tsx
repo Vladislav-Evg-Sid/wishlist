@@ -20,6 +20,7 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 
 import {
   useStore,
@@ -154,6 +155,7 @@ const GroupMembersDialog = observer(
     const users = wishlistStore.parantGroupUsers;
     const isCreator = wishlistStore.isParantGroupCreator;
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const navigate = useNavigate();
 
     const handleClose = () => {
       setIsInviteDialogOpen(false);
@@ -358,12 +360,13 @@ const GroupMembersDialog = observer(
                 type="button"
                 color="error"
                 startIcon={<LogoutRoundedIcon />}
-                onClick={() =>
-                  groupsStore.deleteMember(
+                onClick={async () => {
+                  await groupsStore.deleteMember(
                     wishlistStore.parantGroupID,
                     userStore.currentUser?.id,
-                  )
-                }
+                  );
+                  navigate("/group");
+                }}
               >
                 Выйти из группы
               </Button>
