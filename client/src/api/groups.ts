@@ -115,3 +115,13 @@ export async function inviteGroupByCode(code: string): Promise<string> {
   const result = await response.json();
   return result.group_id;
 }
+
+export async function changeCreator(groupID: string, newCreatorID: string) {
+  const response = await apiFetch(`/groups/${groupID}/${newCreatorID}`, {
+    method: "PUT",
+  });
+
+  if (!response.ok) {
+    await apiErrorHandler(response);
+  }
+}

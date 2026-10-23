@@ -90,6 +90,20 @@ export class GroupsController {
     return await this.groupsService.getGroupUsers(userID, params.groupID);
   }
 
+  @Put(":group_id/:member_id")
+  async changeCreator(
+    @Param({ schema: changeCreatorParamsSchema })
+    params: z.output<typeof changeCreatorParamsSchema>,
+    @CurrentUserID()
+    userID: UUID,
+  ) {
+    await this.groupsService.changeCreator(
+      userID,
+      params.groupID,
+      params.newCreatorID,
+    );
+  }
+
   @Put(":group_id")
   async updateGroupName(
     @Param({ schema: getGroupInfoParamsSchema })
@@ -127,20 +141,6 @@ export class GroupsController {
       userID,
       params.groupID,
       params.memberID,
-    );
-  }
-
-  @Put(":group_id/:member_id")
-  async changeCreator(
-    @Param({ schema: changeCreatorParamsSchema })
-    params: z.output<typeof changeCreatorParamsSchema>,
-    @CurrentUserID()
-    userID: UUID,
-  ) {
-    await this.groupsService.changeCreator(
-      userID,
-      params.groupID,
-      params.newCreatorID,
     );
   }
 

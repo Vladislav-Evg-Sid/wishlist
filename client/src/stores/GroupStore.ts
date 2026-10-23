@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
 import {
+  changeCreator,
   createGroup,
   createInviteCode,
   getUserGroups,
@@ -137,8 +138,28 @@ export class GroupStore {
   }
 
   async changeCreator(groupID: string, newCreatorID: string) {
-    console.log(groupID, newCreatorID);
-    toast.info("Функция передачи послномочий создателя пока не доступна");
+    try {
+      await changeCreator(groupID, newCreatorID);
+      await this.loadUserGroups();
+    } catch (error) {
+      runInAction(() => {
+        if (error instanceof Error) {
+          switch (error.message) {
+            case "Failed to fetch":
+              toast.error("Сервис недоступен.\nПопробуйте позже");
+              break;
+            default:
+              toast.error(
+                "Неизвестная ошибка.\nНе удалось подключиться к группе",
+              );
+              console.error(error.message);
+              break;
+          }
+        } else {
+          console.error(error);
+        }
+      });
+    }
   }
 
   async deleteMember(groupID: string, memberID?: string) {
