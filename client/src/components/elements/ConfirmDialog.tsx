@@ -13,6 +13,7 @@ interface DeleteDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title?: string;
+  confirmButtonColor?: "error" | "primary";
 }
 
 export default function ConfirmDialog({
@@ -21,6 +22,7 @@ export default function ConfirmDialog({
   onClose,
   onConfirm,
   title = "Удалить запись?",
+  confirmButtonColor = "error",
 }: DeleteDialogProps) {
   return (
     <Dialog
@@ -90,7 +92,7 @@ export default function ConfirmDialog({
         <Button
           type="button"
           variant="contained"
-          color="error"
+          color={confirmButtonColor}
           disableElevation
           onClick={onConfirm}
         >

@@ -29,6 +29,7 @@ import {
 } from "../../hooks/useStore";
 import type { GroupUser } from "../../types/wishlists";
 import InviteMemberDialog from "./InviteMemberDialog";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface GroupMembersDialogProps {
   open: boolean;
@@ -36,19 +37,20 @@ interface GroupMembersDialogProps {
 }
 
 interface UserRowProps {
-  groupID: string;
   user: GroupUser;
   isCreator?: boolean;
   canManage?: boolean;
+  onChangeCreator?: () => void;
+  onDeleteMember?: () => void;
 }
 
 function UserRow({
-  groupID,
   user,
   isCreator = false,
   canManage = false,
+  onChangeCreator,
+  onDeleteMember,
 }: UserRowProps) {
-  const groupsStore = useStoreGroups();
   const initial = user.name.trim().charAt(0).toUpperCase() || "?";
 
   return (
@@ -111,7 +113,7 @@ function UserRow({
             type="button"
             aria-label={`Назначить ${user.name} создателем`}
             title="Сделать создателем"
-            onClick={() => groupsStore.changeCreator(groupID, user.id)}
+            onClick={onChangeCreator}
             sx={{
               display: { xs: "inline-flex", sm: "none" },
               color: "primary.main",
@@ -122,7 +124,7 @@ function UserRow({
           <Button
             type="button"
             size="small"
-            onClick={() => groupsStore.changeCreator(groupID, user.id)}
+            onClick={onChangeCreator}
             sx={{
               display: { xs: "none", sm: "inline-flex" },
               borderRadius: "10px",
@@ -136,7 +138,7 @@ function UserRow({
             type="button"
             aria-label={`Удалить участника ${user.name}`}
             title="Удалить участника"
-            onClick={() => groupsStore.deleteMember(groupID, user.id)}
+            onClick={onDeleteMember}
             sx={{ color: "error.main" }}
           >
             <DeleteOutlineRoundedIcon />
@@ -155,11 +157,37 @@ const GroupMembersDialog = observer(
     const users = wishlistStore.parantGroupUsers;
     const isCreator = wishlistStore.isParantGroupCreator;
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [confirmation, setConfirmation] = useState<
+      | { type: "leave" }
+      | { type: "delete" | "transfer"; user: GroupUser }
+      | null
+    >(null);
     const navigate = useNavigate();
 
     const handleClose = () => {
       setIsInviteDialogOpen(false);
+      setConfirmation(null);
       onClose();
+    };
+
+    const handleConfirm = async () => {
+      if (!confirmation) return;
+
+      setConfirmation(null);
+      const groupID = wishlistStore.parantGroupID;
+
+      switch (confirmation.type) {
+        case "leave":
+          await groupsStore.deleteMember(groupID, userStore.currentUser?.id);
+          navigate("/group");
+          break;
+        case "delete":
+          await groupsStore.deleteMember(groupID, confirmation.user.id);
+          break;
+        case "transfer":
+          await groupsStore.changeCreator(groupID, confirmation.user.id);
+          break;
+      }
     };
 
     return (
@@ -264,11 +292,7 @@ const GroupMembersDialog = observer(
                 >
                   Создатель
                 </Typography>
-                <UserRow
-                  groupID={wishlistStore.parantGroupID}
-                  user={users.creator}
-                  isCreator
-                />
+                <UserRow user={users.creator} isCreator />
                 <Divider sx={{ my: 1.5 }} />
                 <Box
                   sx={{
@@ -306,9 +330,14 @@ const GroupMembersDialog = observer(
                     {users.members.map((user) => (
                       <UserRow
                         key={`${user.name}-${user.hash}`}
-                        groupID={wishlistStore.parantGroupID}
                         user={user}
                         canManage={isCreator}
+                        onChangeCreator={() =>
+                          setConfirmation({ type: "transfer", user })
+                        }
+                        onDeleteMember={() =>
+                          setConfirmation({ type: "delete", user })
+                        }
                       />
                     ))}
                   </Stack>
@@ -360,13 +389,7 @@ const GroupMembersDialog = observer(
                 type="button"
                 color="error"
                 startIcon={<LogoutRoundedIcon />}
-                onClick={async () => {
-                  await groupsStore.deleteMember(
-                    wishlistStore.parantGroupID,
-                    userStore.currentUser?.id,
-                  );
-                  navigate("/group");
-                }}
+                onClick={() => setConfirmation({ type: "leave" })}
               >
                 Выйти из группы
               </Button>
@@ -376,6 +399,34 @@ const GroupMembersDialog = observer(
             </Button>
           </DialogActions>
         </Dialog>
+        {confirmation && (
+          <ConfirmDialog
+            open={open}
+            title={
+              confirmation.type === "leave"
+                ? "Выйти из группы?"
+                : confirmation.type === "delete"
+                  ? "Удалить участника?"
+                  : "Передать роль создателя?"
+            }
+            deleteMessage={
+              confirmation.type === "leave"
+                ? "Вы уверены, что хотите выйти из группы?"
+                : confirmation.type === "delete"
+                  ? `Вы уверены, что хотите удалить участника ${confirmation.user.name} из группы?`
+                  : `Вы уверены, что хотите передать роль создателя участнику ${confirmation.user.name}? Вы станете обычным участником группы.`
+            }
+            onClose={() => setConfirmation(null)}
+            onConfirm={handleConfirm}
+            confirmButtonColor={
+              confirmation.type === "leave"
+                ? "error"
+                : confirmation.type === "delete"
+                  ? "error"
+                  : "primary"
+            }
+          />
+        )}
         <InviteMemberDialog
           groupID={wishlistStore.parantGroupID}
           open={isInviteDialogOpen}
