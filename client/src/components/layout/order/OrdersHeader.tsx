@@ -18,7 +18,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 import { useStoreOrders } from "../../../hooks/useStore";
 import CreateOrderDialog from "../../elements/CreateOrderDialog";
-import DeleteOrderDialog from "../../elements/DeleteDialog";
+import ConfirmDialog from "../../elements/ConfirmDialog";
 
 const OrdersHeader = observer(() => {
   const orderStore = useStoreOrders();
@@ -174,9 +174,9 @@ const OrdersHeader = observer(() => {
                 Удалить вишлист
               </Button>
 
-              <DeleteOrderDialog
+              <ConfirmDialog
                 open={isDeleteDialogOpen}
-                elementTitle={wishlistName}
+                deleteMessage={`Вы уверены, что хотите удалить ${wishlistName}?`}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={async () => {
                   await orderStore.deleteParantWishlist();

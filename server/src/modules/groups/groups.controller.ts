@@ -90,7 +90,7 @@ export class GroupsController {
     return await this.groupsService.getGroupUsers(userID, params.groupID);
   }
 
-  @Put(":group_id/:member_id")
+  @Put(":group_id/:new_creator_id")
   async changeCreator(
     @Param({ schema: changeCreatorParamsSchema })
     params: z.output<typeof changeCreatorParamsSchema>,

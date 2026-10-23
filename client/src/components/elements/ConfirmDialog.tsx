@@ -9,15 +9,15 @@ import {
 
 interface DeleteDialogProps {
   open: boolean;
-  elementTitle: string;
+  deleteMessage: string;
   onClose: () => void;
   onConfirm: () => void;
   title?: string;
 }
 
-export default function DeleteOrderDialog({
+export default function ConfirmDialog({
   open,
-  elementTitle,
+  deleteMessage,
   onClose,
   onConfirm,
   title = "Удалить запись?",
@@ -62,7 +62,7 @@ export default function DeleteOrderDialog({
           id="delete-order-description"
           sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.7 }}
         >
-          Вы уверены, что хотите удалить {elementTitle}?
+          {deleteMessage}
         </Typography>
       </DialogContent>
       <DialogActions
@@ -94,7 +94,7 @@ export default function DeleteOrderDialog({
           disableElevation
           onClick={onConfirm}
         >
-          Удалить
+          Подтвердить
         </Button>
       </DialogActions>
     </Dialog>

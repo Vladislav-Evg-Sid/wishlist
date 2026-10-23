@@ -240,6 +240,9 @@ export class GroupsService implements GroupsServiceInterface {
       throw new DataConflictError("new creator is not member of group");
     }
 
+    // TODO: Сделать транзавкцией
     await this.groupsRepository.changeCreator(groupID, newCreatorID);
+    await this.groupsRepository.deleteMember(groupID, newCreatorID);
+    await this.groupsRepository.addGroupMember(groupID, userID);
   }
 }

@@ -14,14 +14,14 @@ import { DOMAIN } from "../env";
 
 export class GroupStore {
   groups: GroupData[] = [];
-  loadGroupUserList: () => Promise<void> = async () => {};
+  loadGroupInfo: () => Promise<void> = async () => {};
 
   constructor(loadGroupUsersList?: () => Promise<void>) {
     makeAutoObservable(this);
 
     this.loadUserGroups();
     if (loadGroupUsersList) {
-      this.loadGroupUserList = loadGroupUsersList;
+      this.loadGroupInfo = loadGroupUsersList;
     }
   }
 
@@ -145,7 +145,7 @@ export class GroupStore {
   async changeCreator(groupID: string, newCreatorID: string) {
     try {
       await changeCreator(groupID, newCreatorID);
-      await this.loadGroupUserList();
+      await this.loadGroupInfo();
     } catch (error) {
       runInAction(() => {
         if (error instanceof Error) {
@@ -174,7 +174,7 @@ export class GroupStore {
     }
     try {
       await deleteMember(groupID, memberID);
-      await this.loadGroupUserList();
+      await this.loadGroupInfo();
       await this.loadUserGroups();
       toast.success("Участник успешно удалён");
     } catch (error) {

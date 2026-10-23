@@ -20,7 +20,7 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import CreateWishlistDialog from "../../elements/CreateWishlistDialog";
 import GroupMembersDialog from "../../elements/GroupMembersDialog";
 import { useStoreWishlists } from "../../../hooks/useStore";
-import DeleteOrderDialog from "../../elements/DeleteDialog";
+import ConfirmDialog from "../../elements/ConfirmDialog";
 import { GroupStoreProvider } from "../../../providers/storeProvider";
 
 const WishlistHeader = observer(() => {
@@ -43,6 +43,7 @@ const WishlistHeader = observer(() => {
   const handleLoadGroupUsers = async () => {
     if (wishlistStore.isParantGroupCreator) {
       wishlistStore.loadParantGroupUsers();
+      wishlistStore.loadParantGroupInfo();
     }
   };
 
@@ -183,9 +184,9 @@ const WishlistHeader = observer(() => {
                 Удалить группу
               </Button>
 
-              <DeleteOrderDialog
+              <ConfirmDialog
                 open={isDeleteDialogOpen}
-                elementTitle={paranrGroupName}
+                deleteMessage={`Вы уверены, что хотите удалить ${paranrGroupName}?`}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={async () => {
                   await wishlistStore.deleteParantGroup();
@@ -237,7 +238,7 @@ const WishlistHeader = observer(() => {
         open={isCreateWishlistOpen}
         onClose={() => setIsCreateWishlistOpen(false)}
       />
-      <GroupStoreProvider loadGroupUsersList={handleLoadGroupUsers}>
+      <GroupStoreProvider loadGroupInfo={handleLoadGroupUsers}>
         <GroupMembersDialog
           open={isMembersOpen}
           onClose={() => setIsMembersOpen(false)}

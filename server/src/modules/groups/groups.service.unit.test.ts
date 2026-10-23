@@ -640,6 +640,8 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).not.toHaveBeenCalled();
       expect(changeCreatorMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(deleteMemberMock).not.toHaveBeenCalled();
     });
 
     test("user not a creator", async () => {
@@ -652,6 +654,8 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).not.toHaveBeenCalled();
       expect(changeCreatorMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(deleteMemberMock).not.toHaveBeenCalled();
     });
 
     test("new creator not a member", async () => {
@@ -665,6 +669,8 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
       expect(changeCreatorMock).not.toHaveBeenCalled();
+      expect(addGroupMemberMock).not.toHaveBeenCalled();
+      expect(deleteMemberMock).not.toHaveBeenCalled();
     });
 
     test("sucess change creator", async () => {
@@ -681,6 +687,8 @@ describe("groups service", () => {
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
       expect(changeCreatorMock).toHaveBeenCalledWith(groupID, memberID);
+      expect(addGroupMemberMock).toHaveBeenCalledWith(groupID, userID);
+      expect(deleteMemberMock).toHaveBeenCalledWith(groupID, memberID);
     });
   });
 });

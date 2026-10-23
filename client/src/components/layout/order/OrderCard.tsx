@@ -24,7 +24,7 @@ import { getWishIcon } from "../../../constants/wishIcons";
 import { useStore, useStoreOrders } from "../../../hooks/useStore";
 import type { OrderData, OrderDataChange } from "../../../types/orders";
 import { getDisplayHostname, normalizeHttpUrl } from "../../../utils/url";
-import DeleteOrderDialog from "../../elements/DeleteDialog";
+import ConfirmDialog from "../../elements/ConfirmDialog";
 
 const statusStyles = {
   Свободно: { bgcolor: "#E8F7EF", color: "#177447" },
@@ -215,9 +215,9 @@ function OrderActions({
             Удалить
           </Button>
         </Box>
-        <DeleteOrderDialog
+        <ConfirmDialog
           open={isDeleteDialogOpen}
-          elementTitle={order.title}
+          deleteMessage={`Вы уверены, что хотите удалить ${order.title}?`}
           onClose={() => setIsDeleteDialogOpen(false)}
           onConfirm={() => {
             orderStore.deleteOrder(order.id);
