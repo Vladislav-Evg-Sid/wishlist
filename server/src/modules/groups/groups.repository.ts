@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import type { Knex } from "knex";
 
 import { db } from "../../db/knex.js";
 import {
@@ -15,8 +16,11 @@ import type { GroupsRepositoryInterface } from "./groups.di.js";
 
 @Injectable()
 export class GroupsRepository implements GroupsRepositoryInterface {
-  async findGroupsByUserId(userID: UUID): Promise<GroupData[]> {
-    return await db(TABLES.groups)
+  async findGroupsByUserId(
+    userID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<GroupData[]> {
+    return await connection(TABLES.groups)
       .leftJoin(
         TABLES.group_member,
         concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id),
@@ -32,8 +36,12 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .orderBy(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.title));
   }
 
-  async createGroup(userID: UUID, groupName: string): Promise<string> {
-    const groupID = await db(TABLES.groups)
+  async createGroup(
+    userID: UUID,
+    groupName: string,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<string> {
+    const groupID = await connection(TABLES.groups)
       .insert({
         [GROUPS_COLUMNS.creator_id]: userID,
         [GROUPS_COLUMNS.title]: groupName,
@@ -42,8 +50,11 @@ export class GroupsRepository implements GroupsRepositoryInterface {
     return String(groupID[0]);
   }
 
-  async findGroupInfo(groupID: UUID): Promise<GroupInfoRaw> {
-    return db(TABLES.groups)
+  async findGroupInfo(
+    groupID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<GroupInfoRaw> {
+    return connection(TABLES.groups)
       .select({
         title: GROUPS_COLUMNS.title,
         creatorID: GROUPS_COLUMNS.creator_id,
@@ -52,8 +63,11 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .first();
   }
 
-  async findGroupCreator(groupID: UUID): Promise<UserData | undefined> {
-    return db(TABLES.groups)
+  async findGroupCreator(
+    groupID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<UserData | undefined> {
+    return connection(TABLES.groups)
       .leftJoin(
         TABLES.users,
         concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.creator_id),
@@ -68,8 +82,11 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .first();
   }
 
-  async findGroupMembers(groupID: UUID): Promise<UserData[]> {
-    return db(TABLES.groups)
+  async findGroupMembers(
+    groupID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<UserData[]> {
+    return connection(TABLES.groups)
       .leftJoin(
         TABLES.group_member,
         concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id),
@@ -94,27 +111,42 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       .where(concatTableAndColumn(TABLES.groups, GROUPS_COLUMNS.id), groupID);
   }
 
-  async updateGroupName(groupID: UUID, newName: string): Promise<void> {
-    await db(TABLES.groups)
+  async updateGroupName(
+    groupID: UUID,
+    newName: string,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<void> {
+    await connection(TABLES.groups)
       .update({
         [GROUPS_COLUMNS.title]: newName,
       })
       .where(GROUPS_COLUMNS.id, groupID);
   }
 
-  async deleteGroup(groupID: UUID): Promise<void> {
-    await db(TABLES.groups).delete().where(GROUPS_COLUMNS.id, groupID);
+  async deleteGroup(
+    groupID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<void> {
+    await connection(TABLES.groups).delete().where(GROUPS_COLUMNS.id, groupID);
   }
 
-  async addGroupMember(groupID: UUID, memberID: UUID): Promise<void> {
-    await db(TABLES.group_member).insert({
+  async addGroupMember(
+    groupID: UUID,
+    memberID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<void> {
+    await connection(TABLES.group_member).insert({
       [GROUP_MEMBER_COLUMNS.group_id]: groupID,
       [GROUP_MEMBER_COLUMNS.member_id]: memberID,
     });
   }
 
-  async deleteMember(groupID: UUID, memberID: UUID): Promise<void> {
-    await db(TABLES.group_member)
+  async deleteMember(
+    groupID: UUID,
+    memberID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<void> {
+    await connection(TABLES.group_member)
       .delete()
       .where({
         [GROUP_MEMBER_COLUMNS.group_id]: groupID,
@@ -122,8 +154,12 @@ export class GroupsRepository implements GroupsRepositoryInterface {
       });
   }
 
-  async changeCreator(groupID: UUID, newCreatorID: UUID): Promise<void> {
-    await db(TABLES.groups)
+  async changeCreator(
+    groupID: UUID,
+    newCreatorID: UUID,
+    connection: Knex | Knex.Transaction = db,
+  ): Promise<void> {
+    await connection(TABLES.groups)
       .update({
         [GROUPS_COLUMNS.creator_id]: newCreatorID,
       })

@@ -24,6 +24,7 @@ import {
   REDIS_SERVICE,
   type redisServiceInviteInterface,
 } from "../../infrastructure/redis/redis.di.js";
+import { db } from "../../db/knex.js";
 
 @Injectable()
 export class GroupsService implements GroupsServiceInterface {
@@ -240,9 +241,10 @@ export class GroupsService implements GroupsServiceInterface {
       throw new DataConflictError("new creator is not member of group");
     }
 
-    // TODO: Сделать транзавкцией
-    await this.groupsRepository.changeCreator(groupID, newCreatorID);
-    await this.groupsRepository.deleteMember(groupID, newCreatorID);
-    await this.groupsRepository.addGroupMember(groupID, userID);
+    await db.transaction(async (trx) => {
+      await this.groupsRepository.changeCreator(groupID, newCreatorID, trx);
+      await this.groupsRepository.deleteMember(groupID, newCreatorID, trx);
+      await this.groupsRepository.addGroupMember(groupID, userID, trx);
+    });
   }
 }

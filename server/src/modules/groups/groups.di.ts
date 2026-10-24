@@ -1,3 +1,5 @@
+import type { Knex } from "knex";
+
 import type { UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import type {
@@ -11,16 +13,51 @@ import type {
 export const GROUPS_REPOSITORY = Symbol("GROUPS_REPOSITORY");
 
 export interface GroupsRepositoryInterface {
-  findGroupsByUserId(userID: UUID): Promise<GroupData[]>;
-  createGroup(userID: UUID, groupName: string): Promise<string>;
-  findGroupInfo(groupID: UUID): Promise<GroupInfoRaw>;
-  findGroupCreator(groupID: UUID): Promise<UserData | undefined>;
-  findGroupMembers(groupID: UUID): Promise<UserData[]>;
-  updateGroupName(groupID: UUID, newName: string): Promise<void>;
-  deleteGroup(groupID: UUID): Promise<void>;
-  addGroupMember(groupID: UUID, memberID: UUID): Promise<void>;
-  deleteMember(groupID: UUID, memberID: UUID): Promise<void>;
-  changeCreator(groupID: UUID, newCreatorID: UUID): Promise<void>;
+  findGroupsByUserId(
+    userID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<GroupData[]>;
+  createGroup(
+    userID: UUID,
+    groupName: string,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<string>;
+  findGroupInfo(
+    groupID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<GroupInfoRaw>;
+  findGroupCreator(
+    groupID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<UserData | undefined>;
+  findGroupMembers(
+    groupID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<UserData[]>;
+  updateGroupName(
+    groupID: UUID,
+    newName: string,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<void>;
+  deleteGroup(
+    groupID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<void>;
+  addGroupMember(
+    groupID: UUID,
+    memberID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<void>;
+  deleteMember(
+    groupID: UUID,
+    memberID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<void>;
+  changeCreator(
+    groupID: UUID,
+    newCreatorID: UUID,
+    connection?: Knex | Knex.Transaction,
+  ): Promise<void>;
 }
 
 export const GROUPS_SERVICE = Symbol("GROUPS_SERVICE");

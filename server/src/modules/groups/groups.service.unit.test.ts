@@ -6,10 +6,11 @@ import {
   jest,
   test,
 } from "@jest/globals";
+import type { Knex } from "knex";
 
 import type { UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
-import type { GroupData, UserData } from "./groups.types.js";
+import type { UserData } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import {
   DataConflictError,
@@ -25,22 +26,20 @@ const checkGroupUserAccessMock =
   jest.fn<CheckUserGroup["checkGroupUserAccess"]>();
 
 const findGroupsByUserIdMock =
-  jest.fn<(userID: UUID) => Promise<GroupData[]>>();
-const createGroupMock =
-  jest.fn<(userID: UUID, groupName: string) => Promise<string>>();
-const findGroupInfoMock = jest.fn<(groupID: UUID) => Promise<GroupInfoRaw>>();
+  jest.fn<GroupsRepositoryInterface["findGroupsByUserId"]>();
+const createGroupMock = jest.fn<GroupsRepositoryInterface["createGroup"]>();
+const findGroupInfoMock = jest.fn<GroupsRepositoryInterface["findGroupInfo"]>();
 const findGroupCreatorMock =
-  jest.fn<(groupID: UUID) => Promise<UserData | undefined>>();
-const findGroupMembersMock = jest.fn<(groupID: UUID) => Promise<UserData[]>>();
+  jest.fn<GroupsRepositoryInterface["findGroupCreator"]>();
+const findGroupMembersMock =
+  jest.fn<GroupsRepositoryInterface["findGroupMembers"]>();
 const updateGroupNameMock =
   jest.fn<GroupsRepositoryInterface["updateGroupName"]>();
 const deleteGroupMock = jest.fn<GroupsRepositoryInterface["deleteGroup"]>();
 const addGroupMemberMock =
-  jest.fn<(groupID: UUID, memberID: UUID) => Promise<void>>();
-const deleteMemberMock =
-  jest.fn<(groupID: UUID, memberID: UUID) => Promise<void>>();
-const changeCreatorMock =
-  jest.fn<(groupID: UUID, newCreatorID: UUID) => Promise<void>>();
+  jest.fn<GroupsRepositoryInterface["addGroupMember"]>();
+const deleteMemberMock = jest.fn<GroupsRepositoryInterface["deleteMember"]>();
+const changeCreatorMock = jest.fn<GroupsRepositoryInterface["changeCreator"]>();
 class GroupsRepository implements GroupsRepositoryInterface {
   constructor(
     public readonly findGroupsByUserId: any,
@@ -128,9 +127,23 @@ const redisService = new RedisService(
   decrementHashCounterMock,
 );
 
+const trxMock = {} as Knex.Transaction;
+
+const dbMock = {
+  transaction: jest.fn(
+    async (callback: (trx: Knex.Transaction) => Promise<unknown>) => {
+      return callback(trxMock);
+    },
+  ),
+};
+
 // Мокаем импорты этих функций
 jest.unstable_mockModule("../../shared/checkUserGroup.js", () => ({
   checkGroupUserAccess: checkGroupUserAccessMock,
+}));
+
+jest.unstable_mockModule("../../db/knex.js", () => ({
+  db: dbMock,
 }));
 
 // Импорт тестируемых модулей после подмены импортов на моки
@@ -146,7 +159,7 @@ describe("groups service", () => {
   const exampleUUID = "00000000-0000-0000-0000-000000000003" as UUID;
   const memberID = "00000000-0000-0000-0000-000000000004" as UUID;
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe("updateGroupName", () => {
@@ -686,9 +699,21 @@ describe("groups service", () => {
 
       expect(findGroupCreatorMock).toHaveBeenCalledWith(groupID);
       expect(findGroupMembersMock).toHaveBeenCalledWith(groupID);
-      expect(changeCreatorMock).toHaveBeenCalledWith(groupID, memberID);
-      expect(addGroupMemberMock).toHaveBeenCalledWith(groupID, userID);
-      expect(deleteMemberMock).toHaveBeenCalledWith(groupID, memberID);
+      expect(changeCreatorMock).toHaveBeenCalledWith(
+        groupID,
+        memberID,
+        expect.anything(),
+      );
+      expect(addGroupMemberMock).toHaveBeenCalledWith(
+        groupID,
+        userID,
+        expect.anything(),
+      );
+      expect(deleteMemberMock).toHaveBeenCalledWith(
+        groupID,
+        memberID,
+        expect.anything(),
+      );
     });
   });
 });
