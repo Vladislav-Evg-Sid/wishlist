@@ -1,3 +1,4 @@
+import type { UUID } from "../types/shared";
 import type {
   OrderData,
   OrderDataChange,
@@ -6,7 +7,7 @@ import type {
 import { apiErrorHandler, apiFetch } from "./baseApi";
 
 export async function getWishlistOrders(
-  wishlistID: string,
+  wishlistID: UUID,
 ): Promise<OrderData[]> {
   const response = await apiFetch(`/orders/${wishlistID}`);
 

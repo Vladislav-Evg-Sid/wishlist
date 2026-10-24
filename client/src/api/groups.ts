@@ -1,7 +1,7 @@
 import { apiErrorHandler, apiFetch } from "./baseApi";
 import type { GroupData } from "../types/groups";
 import type { GroupUsersList } from "../types/wishlists";
-import type { ParantInfo } from "../types/shared";
+import type { ParantInfo, UUID } from "../types/shared";
 
 export async function getUserGroups(): Promise<GroupData[]> {
   const response = await apiFetch("/groups");
@@ -25,7 +25,7 @@ export async function createGroup(groupName: string): Promise<void> {
   }
 }
 
-export async function getGroupInfo(groupID: string): Promise<ParantInfo> {
+export async function getGroupInfo(groupID: UUID): Promise<ParantInfo> {
   const response = await apiFetch(`/groups/${groupID}`);
 
   if (!response.ok) {
@@ -40,7 +40,7 @@ export async function getGroupInfo(groupID: string): Promise<ParantInfo> {
   };
 }
 
-export async function getGroupUsers(groupID: string): Promise<GroupUsersList> {
+export async function getGroupUsers(groupID: UUID): Promise<GroupUsersList> {
   const response = await apiFetch(`/groups/${groupID}/users`);
 
   if (!response.ok) {
@@ -50,7 +50,7 @@ export async function getGroupUsers(groupID: string): Promise<GroupUsersList> {
   return await response.json();
 }
 
-export async function deleteGroup(groupID: string): Promise<void> {
+export async function deleteGroup(groupID: UUID): Promise<void> {
   const response = await apiFetch(`/groups/${groupID}`, {
     method: "DELETE",
   });
@@ -61,7 +61,7 @@ export async function deleteGroup(groupID: string): Promise<void> {
 }
 
 export async function updateGroupName(
-  groupID: string,
+  groupID: UUID,
   groupName: string,
 ): Promise<void> {
   const response = await apiFetch(`/groups/${groupID}`, {
@@ -80,7 +80,7 @@ export async function updateGroupName(
 }
 
 export async function createInviteCode(
-  groupID: string,
+  groupID: UUID,
   ttl?: number,
   limitMembers?: number,
 ): Promise<string> {
@@ -105,7 +105,7 @@ export async function createInviteCode(
   return response.text();
 }
 
-export async function inviteGroupByCode(code: string): Promise<string> {
+export async function inviteGroupByCode(code: string): Promise<UUID> {
   const response = await apiFetch(`/groups/invite/${code}`, { method: "POST" });
 
   if (!response.ok) {
@@ -116,7 +116,7 @@ export async function inviteGroupByCode(code: string): Promise<string> {
   return result.group_id;
 }
 
-export async function changeCreator(groupID: string, newCreatorID: string) {
+export async function changeCreator(groupID: UUID, newCreatorID: UUID) {
   const response = await apiFetch(`/groups/${groupID}/${newCreatorID}`, {
     method: "PUT",
   });
@@ -126,7 +126,7 @@ export async function changeCreator(groupID: string, newCreatorID: string) {
   }
 }
 
-export async function deleteMember(groupID: string, memberID: string) {
+export async function deleteMember(groupID: UUID, memberID: UUID) {
   const response = await apiFetch(`/groups/${groupID}/${memberID}`, {
     method: "DELETE",
   });

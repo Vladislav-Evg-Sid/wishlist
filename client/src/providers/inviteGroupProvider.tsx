@@ -1,3 +1,4 @@
+import type { UUID } from "../types/shared";
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate, useParams } from "react-router-dom";
@@ -8,7 +9,7 @@ import { useStoreGroups } from "../hooks/useStore";
 
 const pendingInviteRequests = new Map<
   string,
-  Promise<string | undefined>
+  Promise<UUID | undefined>
 >();
 
 const InviteGroupProvider = observer(() => {

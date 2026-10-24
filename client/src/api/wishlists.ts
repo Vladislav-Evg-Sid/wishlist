@@ -1,9 +1,9 @@
-import type { ParantInfo } from "../types/shared";
+import type { ParantInfo, UUID } from "../types/shared";
 import type { WishlistData } from "../types/wishlists";
 import { apiErrorHandler, apiFetch } from "./baseApi";
 
 export async function getGroupWishlists(
-  groupID: string,
+  groupID: UUID,
 ): Promise<WishlistData[]> {
   const response = await apiFetch(`/wishlists/${groupID}`);
 
@@ -15,7 +15,7 @@ export async function getGroupWishlists(
 }
 
 export async function createWishlist(
-  groupID: string,
+  groupID: UUID,
   wishlistName: string,
 ): Promise<void> {
   const response = await apiFetch("/wishlists", {
@@ -31,7 +31,7 @@ export async function createWishlist(
   }
 }
 
-export async function getWishlistInfo(wishlistID: string): Promise<ParantInfo> {
+export async function getWishlistInfo(wishlistID: UUID): Promise<ParantInfo> {
   const response = await apiFetch(`/wishlists/${wishlistID}/info`);
 
   if (!response.ok) {
@@ -46,7 +46,7 @@ export async function getWishlistInfo(wishlistID: string): Promise<ParantInfo> {
   };
 }
 
-export async function deleteWishlist(wishlistID: string): Promise<void> {
+export async function deleteWishlist(wishlistID: UUID): Promise<void> {
   const response = await apiFetch(`/wishlists/${wishlistID}`, {
     method: "DELETE",
   });
@@ -57,7 +57,7 @@ export async function deleteWishlist(wishlistID: string): Promise<void> {
 }
 
 export async function updateWishlistName(
-  wishlistID: string,
+  wishlistID: UUID,
   wishlistName: string,
 ): Promise<void> {
   const response = await apiFetch(`/wishlists/${wishlistID}`, {

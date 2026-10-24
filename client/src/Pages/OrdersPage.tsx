@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { isUUID } from "../utils/uuid";
+import { Navigate, useParams } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import SideBar from "../components/elements/Sidebar";
@@ -7,6 +8,10 @@ import { OrderStoreProvider } from "../providers/storeProvider";
 
 export default function OrdersPage() {
   const { wishlistID } = useParams();
+
+  if (!isUUID(wishlistID)) {
+    return <Navigate to="/group" replace />;
+  }
 
   return (
     <Box
@@ -44,7 +49,7 @@ export default function OrdersPage() {
           py: { xs: 4, md: 6 },
         }}
       >
-        <OrderStoreProvider wishlistID={wishlistID ?? ""}>
+        <OrderStoreProvider wishlistID={wishlistID}>
           <OrdersMain />
         </OrderStoreProvider>
       </Box>

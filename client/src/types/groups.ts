@@ -1,4 +1,5 @@
+import type { UUID } from "./shared";
 export interface GroupData {
-  id: string;
+  id: UUID;
   title: string;
 }

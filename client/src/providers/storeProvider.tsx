@@ -1,3 +1,4 @@
+import type { UUID } from "../types/shared";
 import { useState } from "react";
 
 import { rootStore } from "../stores/RootStore";
@@ -32,7 +33,7 @@ export function GroupStoreProvider({
 }
 interface WishlistStoreProviderProps {
   children: React.ReactNode;
-  groupID: string;
+  groupID: UUID;
 }
 
 export function WishlistStoreProvider({
@@ -50,7 +51,7 @@ export function WishlistStoreProvider({
 
 interface OrderStoreProviderProps {
   children: React.ReactNode;
-  wishlistID: string;
+  wishlistID: UUID;
 }
 
 export function OrderStoreProvider({

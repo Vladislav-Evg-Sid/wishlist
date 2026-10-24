@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { isUUID } from "../utils/uuid";
+import { Navigate, useParams } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { Box } from "@mui/material";
 
@@ -8,6 +9,10 @@ import WishlistMain from "../components/layout/wishlist/WishlistMain";
 
 const WishlistPage = observer(() => {
   const { groupID } = useParams();
+
+  if (!isUUID(groupID)) {
+    return <Navigate to="/group" replace />;
+  }
 
   return (
     <Box
@@ -45,7 +50,7 @@ const WishlistPage = observer(() => {
           py: { xs: 4, md: 6 },
         }}
       >
-        <WishlistStoreProvider groupID={groupID ?? ""}>
+        <WishlistStoreProvider groupID={groupID}>
           <WishlistMain />
         </WishlistStoreProvider>
       </Box>

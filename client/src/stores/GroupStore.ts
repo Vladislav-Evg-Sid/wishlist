@@ -1,3 +1,4 @@
+import type { UUID } from "../types/shared";
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
@@ -76,7 +77,7 @@ export class GroupStore {
   }
 
   async createInviteLink(
-    groupID: string,
+    groupID: UUID,
     ttl?: number,
     inviteLimit?: number,
   ): Promise<string> {
@@ -142,7 +143,7 @@ export class GroupStore {
     }
   }
 
-  async changeCreator(groupID: string, newCreatorID: string) {
+  async changeCreator(groupID: UUID, newCreatorID: UUID) {
     try {
       await changeCreator(groupID, newCreatorID);
       await this.loadGroupInfo();
@@ -167,7 +168,7 @@ export class GroupStore {
     }
   }
 
-  async deleteMember(groupID: string, memberID?: string) {
+  async deleteMember(groupID: UUID, memberID?: UUID) {
     if (!memberID) {
       toast.error("Не удалось получить id пользователя для удаления");
       return;

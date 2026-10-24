@@ -1,3 +1,4 @@
+import type { UUID } from "../types/shared";
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
@@ -20,11 +21,11 @@ import {
 
 export class OrderStore {
   orders: OrderData[] = [];
-  parantWishlistID: string;
+  parantWishlistID: UUID;
   parantWishlistTitle: string = "";
   isParantWishlistCreator: boolean = true;
 
-  constructor(parantWishlistID: string) {
+  constructor(parantWishlistID: UUID) {
     makeAutoObservable(this);
 
     this.parantWishlistID = parantWishlistID;

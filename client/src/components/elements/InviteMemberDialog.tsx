@@ -1,3 +1,4 @@
+import type { UUID } from "../../types/shared";
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import {
@@ -24,7 +25,7 @@ import { useStoreGroups } from "../../hooks/useStore";
 import { toast } from "react-toastify";
 
 interface InviteMemberDialogProps {
-  groupID: string;
+  groupID: UUID;
   open: boolean;
   onClose: () => void;
 }

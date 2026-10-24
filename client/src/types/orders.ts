@@ -1,3 +1,4 @@
+import type { UUID } from "./shared";
 import type { WishIconValue } from "../constants/wishIcons";
 import type { User } from "./user";
 
@@ -11,14 +12,14 @@ export interface OrderData {
   createdAt: string | Date;
   status: Status;
   author: User;
-  reservedBy: string | null;
+  reservedBy: UUID | null;
   href: string;
 }
 
 export interface OrderDataInsert {
   title: string;
   description: string;
-  wishlistID: string;
+  wishlistID: UUID;
   icon: WishIconValue;
   href: string;
 }
