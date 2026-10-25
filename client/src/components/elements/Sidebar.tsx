@@ -49,6 +49,7 @@ const SideBar = observer(() => {
         }}
       >
         <NavButton to="/group" text="Группы" />
+        <NavButton to="/secret-santa" text="Тайный Санта" />
       </Box>
       <Button
         type="button"

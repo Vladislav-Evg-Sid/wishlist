@@ -25,6 +25,7 @@ import { useStore, useStoreOrders } from "../../../hooks/useStore";
 import type { OrderData, OrderDataChange } from "../../../types/orders";
 import { getDisplayHostname, normalizeHttpUrl } from "../../../utils/url";
 import ConfirmDialog from "../../elements/ConfirmDialog";
+import { formatDate } from "../../../shared/formatDate";
 
 const statusStyles = {
   Свободно: { bgcolor: "#E8F7EF", color: "#177447" },
@@ -38,18 +39,6 @@ interface OrderCardProps {
   isAnimating: boolean;
   onToggle: () => void;
   onInitEdit: (orderData: OrderDataChange) => void;
-}
-
-function formatDate(value: string | Date, withTime = false) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Дата не указана";
-
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    ...(withTime ? { hour: "2-digit", minute: "2-digit" } : {}),
-  }).format(date);
 }
 
 function getInitials(name: string) {
