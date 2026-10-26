@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 
 import type { UpcomingEvent, SecretSantaTeam } from "../types/secretSanta";
 import type { UUID } from "../types/shared";
+import { createTeam, getUserTeams } from "../api/secretSanta";
 
 const MOCK_TEAMS: SecretSantaTeam[] = [
   {
@@ -35,6 +36,23 @@ export class SecretSantaStore {
 
   async loadUserTeams() {
     this.teams = MOCK_TEAMS;
+    try {
+      await getUserTeams();
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось создать группу");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+    }
   }
 
   get upcomingEvent(): UpcomingEvent | null {
@@ -91,7 +109,25 @@ export class SecretSantaStore {
     return this.teams;
   }
 
-  createTeam() {
-    toast.info("Эта функция пока не реализована");
+  async createTeam(teamName: string, deliveryDate: Date): Promise<boolean> {
+    try {
+      await createTeam(teamName, deliveryDate);
+      return true;
+    } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "Failed to fetch":
+            toast.error("Сервис недоступен.\nПопробуйте позже");
+            break;
+          default:
+            toast.error("Неизвестная ошибка.\nНе удалось создать группу");
+            console.error(error.message);
+            break;
+        }
+      } else {
+        console.error(error);
+      }
+      return false;
+    }
   }
 }

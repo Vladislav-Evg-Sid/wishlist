@@ -1,7 +1,9 @@
 import { Box } from "@mui/material";
+import { useState } from "react";
 import { observer } from "mobx-react-lite";
 
 import SideBar from "../components/elements/Sidebar";
+import CreateSecretSantaTeamDialog from "../components/elements/CreateSecretSantaTeamDialog";
 import SecretSantaBanner from "../components/layout/secretSanta/SecretSantaBanner";
 import SecretSantaCountdown from "../components/layout/secretSanta/SecretSantaCountdown";
 import SecretSantaTeamGrid from "../components/layout/secretSanta/SecretSantaTeamGrid";
@@ -9,6 +11,7 @@ import { useStore } from "../hooks/useStore";
 
 const SecretSantaPage = observer(() => {
   const { secretSantaStore } = useStore();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   return (
     <Box
@@ -48,10 +51,14 @@ const SecretSantaPage = observer(() => {
       >
         <Box sx={{ maxWidth: 1360, mx: "auto" }}>
           <SecretSantaBanner
-            onCreateTeam={() => secretSantaStore.createTeam()}
+            onCreateTeam={() => setIsCreateDialogOpen(true)}
           />
           <SecretSantaCountdown event={secretSantaStore.upcomingEvent} />
           <SecretSantaTeamGrid teams={secretSantaStore.teams} />
+          <CreateSecretSantaTeamDialog
+            open={isCreateDialogOpen}
+            onClose={() => setIsCreateDialogOpen(false)}
+          />
         </Box>
       </Box>
     </Box>

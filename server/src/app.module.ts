@@ -6,6 +6,7 @@ import { AuthModule } from "./modules/auth/auth.module.js";
 import { GroupModule } from "./modules/groups/groups.module.js";
 import { WishlistsModule } from "./modules/wishlist/wishlists.module.js";
 import { OrdersModule } from "./modules/orders/orders.module.js";
+import { SecretSantaModule } from "./modules/secretSanta/secretSanta.module.js";
 
 @Module({
   providers: [
@@ -14,6 +15,12 @@ import { OrdersModule } from "./modules/orders/orders.module.js";
       useClass: AppErrorFilter,
     },
   ],
-  imports: [AuthModule, GroupModule, WishlistsModule, OrdersModule],
+  imports: [
+    AuthModule,
+    GroupModule,
+    WishlistsModule,
+    OrdersModule,
+    SecretSantaModule,
+  ],
 })
 export class AppModule {}

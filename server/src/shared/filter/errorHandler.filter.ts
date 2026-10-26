@@ -22,6 +22,7 @@ export class AppErrorFilter implements ExceptionFilter {
         {
           errorCode: error.code,
           message: error.message,
+          ...(error.details !== undefined ? { details: error.details } : {}),
         },
         `${error.code}: ${error.message}`,
       );

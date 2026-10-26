@@ -3,6 +3,7 @@ export class AppError extends Error {
     message: string,
     public readonly statusCode: number,
     public readonly code: string,
+    public readonly details?: unknown,
   ) {
     super(message);
     this.name = new.target.name;
@@ -16,7 +17,7 @@ export interface ValidationIssue {
 
 export class ValidationError extends AppError {
   constructor(public readonly errors: ValidationIssue[]) {
-    super("Invalid request data", 400, "VALIDATION_ERROR");
+    super("Invalid request data", 400, "VALIDATION_ERROR", errors);
   }
 }
 
