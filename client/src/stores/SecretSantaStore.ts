@@ -101,14 +101,6 @@ export class SecretSantaStore {
     return Math.max(0, Math.ceil(milliseconds / (1000 * 60 * 60 * 24)));
   }
 
-  getTeamByID(teamID: UUID): SecretSantaTeam | undefined {
-    return this.teams.find((team) => team.id === teamID);
-  }
-
-  async loadTeams(): Promise<SecretSantaTeam[]> {
-    return this.teams;
-  }
-
   async createTeam(teamName: string, deliveryDate: Date): Promise<boolean> {
     try {
       await createTeam(teamName, deliveryDate);
