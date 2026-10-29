@@ -186,7 +186,7 @@ const WishlistHeader = observer(() => {
 
               <ConfirmDialog
                 open={isDeleteDialogOpen}
-                deleteMessage={`Вы уверены, что хотите удалить ${paranrGroupName}?`}
+                informationMessage={`Вы уверены, что хотите удалить ${paranrGroupName}?`}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={async () => {
                   await wishlistStore.deleteParantGroup();

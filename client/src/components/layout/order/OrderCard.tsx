@@ -206,7 +206,7 @@ function OrderActions({
         </Box>
         <ConfirmDialog
           open={isDeleteDialogOpen}
-          deleteMessage={`Вы уверены, что хотите удалить ${order.title}?`}
+          informationMessage={`Вы уверены, что хотите удалить ${order.title}?`}
           onClose={() => setIsDeleteDialogOpen(false)}
           onConfirm={() => {
             orderStore.deleteOrder(order.id);

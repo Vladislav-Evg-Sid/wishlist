@@ -176,7 +176,7 @@ const OrdersHeader = observer(() => {
 
               <ConfirmDialog
                 open={isDeleteDialogOpen}
-                deleteMessage={`Вы уверены, что хотите удалить ${wishlistName}?`}
+                informationMessage={`Вы уверены, что хотите удалить ${wishlistName}?`}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={async () => {
                   await orderStore.deleteParantWishlist();

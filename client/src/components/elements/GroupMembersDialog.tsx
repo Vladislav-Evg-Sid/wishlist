@@ -409,7 +409,7 @@ const GroupMembersDialog = observer(
                   ? "Удалить участника?"
                   : "Передать роль создателя?"
             }
-            deleteMessage={
+            informationMessage={
               confirmation.type === "leave"
                 ? "Вы уверены, что хотите выйти из группы?"
                 : confirmation.type === "delete"

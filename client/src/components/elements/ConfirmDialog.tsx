@@ -9,7 +9,7 @@ import {
 
 interface DeleteDialogProps {
   open: boolean;
-  deleteMessage: string;
+  informationMessage: string;
   onClose: () => void;
   onConfirm: () => void;
   title?: string;
@@ -18,7 +18,7 @@ interface DeleteDialogProps {
 
 export default function ConfirmDialog({
   open,
-  deleteMessage,
+  informationMessage,
   onClose,
   onConfirm,
   title = "Удалить запись?",
@@ -64,7 +64,7 @@ export default function ConfirmDialog({
           id="delete-order-description"
           sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.7 }}
         >
-          {deleteMessage}
+          {informationMessage}
         </Typography>
       </DialogContent>
       <DialogActions
