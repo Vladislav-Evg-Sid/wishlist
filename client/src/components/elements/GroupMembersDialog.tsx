@@ -27,7 +27,7 @@ import {
   useStoreGroups,
   useStoreWishlists,
 } from "../../hooks/useStore";
-import type { GroupUser } from "../../types/wishlists";
+import type { UserInfo } from "../../types/shared";
 import InviteMemberDialog from "./InviteMemberDialog";
 import ConfirmDialog from "./ConfirmDialog";
 
@@ -37,7 +37,7 @@ interface GroupMembersDialogProps {
 }
 
 interface UserRowProps {
-  user: GroupUser;
+  user: UserInfo;
   isCreator?: boolean;
   canManage?: boolean;
   onChangeCreator?: () => void;
@@ -158,9 +158,7 @@ const GroupMembersDialog = observer(
     const isCreator = wishlistStore.isParantGroupCreator;
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
     const [confirmation, setConfirmation] = useState<
-      | { type: "leave" }
-      | { type: "delete" | "transfer"; user: GroupUser }
-      | null
+      { type: "leave" } | { type: "delete" | "transfer"; user: UserInfo } | null
     >(null);
     const navigate = useNavigate();
 

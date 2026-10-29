@@ -2,7 +2,8 @@ import type { UUID } from "../types/shared";
 import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
-import type { GroupUsersList, WishlistData } from "../types/wishlists";
+import type { WishlistData } from "../types/wishlists";
+import type { UsersListInGroup } from "../types/shared";
 import { createWishlist, getGroupWishlists } from "../api/wishlists";
 import {
   deleteGroup,
@@ -16,7 +17,7 @@ export class WishlistStore {
   parantGroupID: UUID;
   parantGroupTitle: string = "";
   isParantGroupCreator: boolean = false;
-  parantGroupUsers: GroupUsersList | null = null;
+  parantGroupUsers: UsersListInGroup | null = null;
 
   constructor(parantGroupID: UUID) {
     makeAutoObservable(this);

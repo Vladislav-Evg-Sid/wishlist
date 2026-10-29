@@ -1,6 +1,6 @@
 import { apiErrorHandler, apiFetch } from "./baseApi";
 import type { GroupData } from "../types/groups";
-import type { GroupUsersList } from "../types/wishlists";
+import type { UsersListInGroup } from "../types/shared";
 import type { ParantInfo, UUID } from "../types/shared";
 
 export async function getUserGroups(): Promise<GroupData[]> {
@@ -40,7 +40,7 @@ export async function getGroupInfo(groupID: UUID): Promise<ParantInfo> {
   };
 }
 
-export async function getGroupUsers(groupID: UUID): Promise<GroupUsersList> {
+export async function getGroupUsers(groupID: UUID): Promise<UsersListInGroup> {
   const response = await apiFetch(`/groups/${groupID}/users`);
 
   if (!response.ok) {
