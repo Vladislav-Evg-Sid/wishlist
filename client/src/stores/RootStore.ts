@@ -13,7 +13,7 @@ export class RootStore {
     makeAutoObservable(this);
     this.authStore = new AuthStore(this);
     this.userStore = new UserStore(this);
-    this.secretSantaStore = new SecretSantaStore();
+    this.secretSantaStore = new SecretSantaStore(this);
   }
 }
 

@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import type { UpcomingEvent, SecretSantaTeam } from "../types/secretSanta";
 import type { UUID } from "../types/shared";
 import { createTeam, getUserTeams } from "../api/secretSanta";
+import type { RootStore } from "./RootStore";
+import { SecretSantaTeamStore } from "./SecretSantaTeamStore";
 
 const MOCK_TEAMS: SecretSantaTeam[] = [
   {
@@ -25,12 +27,16 @@ const MOCK_TEAMS: SecretSantaTeam[] = [
 ];
 
 export class SecretSantaStore {
+  rootStore: RootStore;
+  teamStore: SecretSantaTeamStore;
   teams: SecretSantaTeam[] = [];
   isLoading = false;
 
-  constructor() {
+  constructor(rootStore: RootStore) {
     makeAutoObservable(this);
 
+    this.rootStore = rootStore;
+    this.teamStore = new SecretSantaTeamStore(this);
     this.loadUserTeams();
   }
 
