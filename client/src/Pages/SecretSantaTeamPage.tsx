@@ -15,6 +15,7 @@ import { isUUID } from "../utils/uuid";
 import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
 import SecretSantaTeamBanner from "../components/layout/secretSantaTeam/SecretSantaTeamBanner";
 import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
+import ConfirmDialog from "../components/elements/ConfirmDialog";
 
 type Confirmation = "draw" | "mark-prepared" | "dissolve" | null;
 
@@ -208,10 +209,9 @@ const SecretSantaTeamPage = observer(() => {
             setIsMembersOpen(false);
             navigate("/secret-santa");
           }}
-        /> // TODO: переделать, окно не правильное
+        />
       ) : null}
       {activeConfirmation && (
-        /*
         <ConfirmDialog
           open
           title={activeConfirmation.title}
@@ -220,7 +220,6 @@ const SecretSantaTeamPage = observer(() => {
           onClose={() => setConfirmation(null)}
           onConfirm={handleConfirm}
         />
-      */ <></>
       )}
     </Box>
   );
