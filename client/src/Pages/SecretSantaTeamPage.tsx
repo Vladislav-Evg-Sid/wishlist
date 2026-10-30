@@ -17,6 +17,7 @@ import SecretSantaTeamBanner from "../components/layout/secretSantaTeam/SecretSa
 import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
 import ConfirmDialog from "../components/elements/ConfirmDialog";
 import SecretSantaJourney from "../components/layout/secretSantaTeam/SecretSantaJourney";
+import SecretSantaRecipientCard from "../components/layout/secretSantaTeam/SecretSantaRecipientCard";
 
 type Confirmation = "draw" | "mark-prepared" | "dissolve" | null;
 
@@ -166,7 +167,7 @@ const SecretSantaTeamPage = observer(() => {
                 onDissolve={() => setConfirmation("dissolve")}
               />
               <SecretSantaJourney team={team} />
-              {/*<Box
+              <Box
                 sx={{
                   display: "grid",
                   gridTemplateColumns: {
@@ -183,13 +184,13 @@ const SecretSantaTeamPage = observer(() => {
                   }
                   onMarkPrepared={() => setConfirmation("mark-prepared")}
                 />
-                <SecretSantaWishesCard
+                {/*<SecretSantaWishesCard
                   team={team}
                   onEditWishes={() =>
                     alert("Функция изменения списка подарков пока не готова")
                   }
-                />
-              </Box>*/}
+                />*/}
+              </Box>
             </>
           ) : (
             <>Добавить анимацию загрузки</> // TODO: Добавить анимацию загрузки

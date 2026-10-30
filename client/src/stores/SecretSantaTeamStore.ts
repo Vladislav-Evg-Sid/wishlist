@@ -66,6 +66,7 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
     members: MOCK_USERS_IN_TEAM,
     recipient: MOCK_MEMBERS[0],
     isSantaGiftPrepared: false,
+    isOwnGiftPrepared: false,
   },
   {
     id: "00000000-0000-0000-0000-000000000001" as UUID,
@@ -77,6 +78,7 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
     members: MOCK_USERS_IN_TEAM,
     recipient: null,
     isSantaGiftPrepared: false,
+    isOwnGiftPrepared: false,
   },
   {
     id: "00000000-0000-0000-0000-000000000002" as UUID,
@@ -88,6 +90,7 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
     members: MOCK_USERS_IN_TEAM,
     recipient: MOCK_MEMBERS[1],
     isSantaGiftPrepared: true,
+    isOwnGiftPrepared: false,
   },
   {
     id: "00000000-0000-0000-0000-000000000003" as UUID,
@@ -99,6 +102,7 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
     members: MOCK_USERS_IN_TEAM,
     recipient: MOCK_MEMBERS[2],
     isSantaGiftPrepared: true,
+    isOwnGiftPrepared: false,
   },
   {
     id: "00000000-0000-0000-0000-000000000004" as UUID,
@@ -110,6 +114,7 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
     members: MOCK_USERS_IN_TEAM,
     recipient: null,
     isSantaGiftPrepared: false,
+    isOwnGiftPrepared: false,
   },
 ];
 

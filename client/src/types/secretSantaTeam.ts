@@ -12,4 +12,5 @@ export interface SecretSantaTeamDetails {
   members: UsersListInGroup;
   recipient: UserInfo | null;
   isSantaGiftPrepared: boolean;
+  isOwnGiftPrepared: boolean;
 }
