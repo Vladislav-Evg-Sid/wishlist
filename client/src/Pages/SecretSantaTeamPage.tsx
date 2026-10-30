@@ -18,6 +18,7 @@ import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersD
 import ConfirmDialog from "../components/elements/ConfirmDialog";
 import SecretSantaJourney from "../components/layout/secretSantaTeam/SecretSantaJourney";
 import SecretSantaRecipientCard from "../components/layout/secretSantaTeam/SecretSantaRecipientCard";
+import SecretSantaWishesCard from "../components/layout/secretSantaTeam/SecretSantaWishesCard";
 
 type Confirmation = "draw" | "mark-prepared" | "dissolve" | null;
 
@@ -184,12 +185,11 @@ const SecretSantaTeamPage = observer(() => {
                   }
                   onMarkPrepared={() => setConfirmation("mark-prepared")}
                 />
-                {/*<SecretSantaWishesCard
-                  team={team}
+                <SecretSantaWishesCard
                   onEditWishes={() =>
                     alert("Функция изменения списка подарков пока не готова")
                   }
-                />*/}
+                />
               </Box>
             </>
           ) : (

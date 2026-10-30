@@ -14,3 +14,7 @@ export interface SecretSantaTeamDetails {
   isSantaGiftPrepared: boolean;
   isOwnGiftPrepared: boolean;
 }
+
+export interface UserWish {
+  id: number;
+}

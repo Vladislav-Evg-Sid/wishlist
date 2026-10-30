@@ -1,7 +1,10 @@
 import { makeAutoObservable } from "mobx";
 import { toast } from "react-toastify";
 
-import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
+import type {
+  SecretSantaTeamDetails,
+  UserWish,
+} from "../types/secretSantaTeam";
 import type { UUID, UserInfo, UsersListInGroup } from "../types/shared";
 import { DOMAIN } from "../env";
 import type { SecretSantaStore } from "./SecretSantaStore";
@@ -118,10 +121,20 @@ const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
   },
 ];
 
+const MOCK_USER_WISHES: UserWish[] = [
+  { id: 1 },
+  { id: 2 },
+  { id: 3 },
+  { id: 4 },
+  { id: 5 },
+  { id: 6 },
+];
+
 export class SecretSantaTeamStore {
   secretSantaStore: SecretSantaStore;
   currentTeamID: UUID | undefined;
   currentTeamDetails: SecretSantaTeamDetails | undefined;
+  currentUserWishes: UserWish[] | undefined;
 
   constructor(secretSantaStore: SecretSantaStore) {
     makeAutoObservable(this);
@@ -139,9 +152,19 @@ export class SecretSantaTeamStore {
     ); // TODO: Подключить к API
   }
 
+  async loadCurrentUserWishes(): Promise<void> {
+    if (!this.currentTeamID) {
+      toast.error("ID команды не обнаружен");
+      console.error("teamID is undefined");
+      return;
+    }
+    this.currentUserWishes = MOCK_USER_WISHES; // TODO: заменить на API
+  }
+
   async changeTeamByID(teamID: UUID): Promise<void> {
     this.currentTeamID = teamID;
     await this.loadCurrentTeamDetails();
+    await this.loadCurrentUserWishes();
   }
 
   get teamUsers(): UsersListInGroup | null {
@@ -156,6 +179,10 @@ export class SecretSantaTeamStore {
     const milliseconds =
       this.currentTeamDetails.deliveryDate.getTime() - Date.now();
     return Math.ceil(milliseconds / (1000 * 60 * 60 * 24));
+  }
+
+  get userWishesCount() {
+    return this.currentUserWishes?.length ?? 0;
   }
 
   drawTeamMembers() {
