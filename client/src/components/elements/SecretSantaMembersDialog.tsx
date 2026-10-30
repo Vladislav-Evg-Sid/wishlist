@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
@@ -56,20 +55,6 @@ function MemberRow({
         minWidth: 0,
       }}
     >
-      <Avatar
-        aria-hidden="true"
-        sx={{
-          width: 42,
-          height: 42,
-          flexShrink: 0,
-          bgcolor: isCreator ? "primary.main" : "#EDF2F7",
-          color: isCreator ? "primary.contrastText" : "text.primary",
-          fontSize: 17,
-          fontWeight: 700,
-        }}
-      >
-        del
-      </Avatar>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
           <Typography
