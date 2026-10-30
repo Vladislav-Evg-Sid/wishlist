@@ -16,6 +16,7 @@ import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
 import SecretSantaTeamBanner from "../components/layout/secretSantaTeam/SecretSantaTeamBanner";
 import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
 import ConfirmDialog from "../components/elements/ConfirmDialog";
+import SecretSantaJourney from "../components/layout/secretSantaTeam/SecretSantaJourney";
 
 type Confirmation = "draw" | "mark-prepared" | "dissolve" | null;
 
@@ -164,7 +165,7 @@ const SecretSantaTeamPage = observer(() => {
                 onDraw={() => setConfirmation("draw")}
                 onDissolve={() => setConfirmation("dissolve")}
               />
-              {/*<SecretSantaJourney team={team} />*/}
+              <SecretSantaJourney team={team} />
               {/*<Box
                 sx={{
                   display: "grid",
