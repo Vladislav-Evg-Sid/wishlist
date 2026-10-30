@@ -6,7 +6,8 @@ import OrdersPage from "../Pages/OrdersPage";
 import InviteGroupProvider from "./inviteGroupProvider";
 import { GroupStoreProvider } from "./storeProvider";
 import SecretSantaPage from "../Pages/SecretSantaPage";
-import { Typography } from "@mui/material";
+import SecretSantaTeamPage from "../Pages/SecretSantaTeamPage";
+import SecretSantaInviteProvider from "./secretSantaInviteProvider";
 
 /*export const router = createBrowserRouter([
   {
@@ -48,9 +49,10 @@ export default function RouteProvider() {
       />
       <Route path="secret-santa" element={<SecretSantaPage />} />
       <Route
-        path="secret-santa/:teamID"
-        element={<Typography>Страницы нету</Typography>}
+        path="secret-santa/invite/:inviteCode"
+        element={<SecretSantaInviteProvider />}
       />
+      <Route path="secret-santa/:teamID" element={<SecretSantaTeamPage />} />
     </Routes>
   );
 }
