@@ -6,11 +6,9 @@ import { useStore } from "../hooks/useStore";
 
 export default function SecretSantaInviteProvider() {
   const { inviteCode } = useParams();
-  const { secretSantaStore } = useStore();
+  const { secretSantaTeamStore } = useStore();
   const navigate = useNavigate();
   const hasHandledInvite = useRef(false);
-
-  const secretSantaTeamStore = secretSantaStore.teamStore;
 
   useEffect(() => {
     if (!inviteCode || hasHandledInvite.current) return;
@@ -18,7 +16,7 @@ export default function SecretSantaInviteProvider() {
     hasHandledInvite.current = true;
     secretSantaTeamStore.joinTeamByInviteCode(inviteCode);
     navigate("/secret-santa", { replace: true });
-  }, [inviteCode, navigate, secretSantaStore]);
+  }, [inviteCode, navigate, secretSantaTeamStore]);
 
   if (!inviteCode) return <Navigate to="/secret-santa" replace />;
 
