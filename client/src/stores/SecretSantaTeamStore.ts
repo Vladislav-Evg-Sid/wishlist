@@ -143,6 +143,16 @@ export class SecretSantaTeamStore {
     return this.currentTeamDetails?.members ?? null;
   }
 
+  get daysUntilDelivery(): number {
+    if (!this.currentTeamDetails) {
+      return 0;
+    }
+
+    const milliseconds =
+      this.currentTeamDetails.deliveryDate.getTime() - Date.now();
+    return Math.ceil(milliseconds / (1000 * 60 * 60 * 24));
+  }
+
   drawTeamMembers() {
     if (!this.currentTeamID) {
       toast.error("Команда не определена");

@@ -5,16 +5,16 @@ import { observer } from "mobx-react-lite";
 import {
   Link as RouterLink,
   Navigate,
-  // useNavigate,
+  useNavigate,
   useParams,
 } from "react-router-dom";
 
-// import ConfirmDialog from "../components/elements/ConfirmDialog";
-// import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
 import SideBar from "../components/elements/Sidebar";
 import { useStore } from "../hooks/useStore";
 import { isUUID } from "../utils/uuid";
 import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
+import SecretSantaTeamBanner from "../components/layout/secretSantaTeam/SecretSantaTeamBanner";
+import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
 
 type Confirmation = "draw" | "mark-prepared" | "dissolve" | null;
 
@@ -44,9 +44,9 @@ const confirmationContent: Record<
 
 const SecretSantaTeamPage = observer(() => {
   const { teamID } = useParams();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { secretSantaTeamStore } = useStore();
-  // const [isMembersOpen, setIsMembersOpen] = useState(false);
+  const [isMembersOpen, setIsMembersOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
   const [team, setTeam] = useState<SecretSantaTeamDetails>();
 
@@ -158,12 +158,11 @@ const SecretSantaTeamPage = observer(() => {
 
           {team ? (
             <>
-              {/*<SecretSantaTeamBanner
-                team={team}
+              <SecretSantaTeamBanner
                 onOpenMembers={() => setIsMembersOpen(true)}
                 onDraw={() => setConfirmation("draw")}
                 onDissolve={() => setConfirmation("dissolve")}
-              />*/}
+              />
               {/*<SecretSantaJourney team={team} />*/}
               {/*<Box
                 sx={{
@@ -196,9 +195,7 @@ const SecretSantaTeamPage = observer(() => {
         </Box>
       </Box>
 
-      {team
-        ? false && (
-            /*
+      {team ? (
         <SecretSantaMembersDialog
           open={isMembersOpen}
           team={team}
@@ -212,9 +209,7 @@ const SecretSantaTeamPage = observer(() => {
             navigate("/secret-santa");
           }}
         /> // TODO: переделать, окно не правильное
-      */ <></>
-          )
-        : null}
+      ) : null}
       {activeConfirmation && (
         /*
         <ConfirmDialog
