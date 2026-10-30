@@ -1,18 +1,18 @@
 import { makeAutoObservable } from "mobx";
 import { toast } from "react-toastify";
 
-import type { UUID } from "../types/shared";
+import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
+import type { UUID, UserInfo, UsersListInGroup } from "../types/shared";
 import { DOMAIN } from "../env";
 import type { SecretSantaStore } from "./SecretSantaStore";
 
-const MOCK_MEMBERS: any[] = [
-  {
-    id: "10000000-0000-0000-0000-000000000001" as UUID,
-    name: "Владислав К.",
-    hash: 1,
-    isOrganizer: true,
-    isCurrentUser: true,
-  },
+const MOCK_CREATOR: UserInfo = {
+  id: "d10f8f16-f004-4721-a248-0be9d4bfd078" as UUID,
+  name: "Владислав",
+  hash: 1,
+};
+
+const MOCK_MEMBERS: UserInfo[] = [
   {
     id: "10000000-0000-0000-0000-000000000002" as UUID,
     name: "Анна Смирнова",
@@ -50,15 +50,12 @@ const MOCK_MEMBERS: any[] = [
   },
 ];
 
-const MOCK_MEMBERS_FOR_PARTICIPANT: any[] = MOCK_MEMBERS.map(
-  (member, index) => ({
-    ...member,
-    isOrganizer: index === 1,
-    isCurrentUser: index === 0,
-  }),
-);
+const MOCK_USERS_IN_TEAM: UsersListInGroup = {
+  creator: MOCK_CREATOR,
+  members: MOCK_MEMBERS,
+};
 
-const MOCK_TEAM_DETAILS: any[] = [
+const MOCK_TEAM_DETAILS: SecretSantaTeamDetails[] = [
   {
     id: "00000000-0000-0000-0000-000000000000" as UUID,
     title: "Семья · Новый год",
@@ -139,7 +136,7 @@ const MOCK_TEAM_DETAILS: any[] = [
 export class SecretSantaTeamStore {
   secretSantaStore: SecretSantaStore;
   currentTeamID: UUID | undefined;
-  currentTeamDetails: any | undefined;
+  currentTeamDetails: SecretSantaTeamDetails | undefined;
 
   constructor(secretSantaStore: SecretSantaStore) {
     makeAutoObservable(this);
@@ -162,7 +159,7 @@ export class SecretSantaTeamStore {
     await this.loadCurrentTeamDetails();
   }
 
-  getTeamMembers(): any[] {
+  getTeamMembers(): SecretSantaMember[] {
     return this.currentTeamDetails?.members ?? [];
   }
 
