@@ -5,6 +5,7 @@ import type {
   SecretSantaStage,
   SecretSantaTeamDetails,
 } from "../../../types/secretSantaTeam";
+import { formatDate } from "../../../shared/formatDate";
 
 interface SecretSantaJourneyProps {
   team: SecretSantaTeamDetails;
@@ -13,14 +14,6 @@ interface SecretSantaJourneyProps {
 interface StepPresentation {
   title: string;
   description: string;
-}
-
-function formatShortDate(date: Date) {
-  // TODO: рассмотреть вариант замены на функцию из shared
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-  }).format(date);
 }
 
 function getStepPresentation(
@@ -70,7 +63,7 @@ function getStepPresentation(
   return {
     title: "Вручение подарков",
     description:
-      team.stage === 4 ? "Вручите подарок" : formatShortDate(team.deliveryDate),
+      team.stage === 4 ? "Вручите подарок" : formatDate(team.deliveryDate),
   };
 }
 

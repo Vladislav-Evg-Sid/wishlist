@@ -6,18 +6,12 @@ import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 
 import type { SecretSantaTeamDetails } from "../../../types/secretSantaTeam";
 import { useStore } from "../../../hooks/useStore";
+import { formatDate } from "../../../shared/formatDate";
 
 interface SecretSantaTeamBannerProps {
   onOpenMembers: () => void;
   onDraw: () => void;
   onDissolve: () => void;
-}
-
-function formatShortDate(date: Date) {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-  }).format(date);
 }
 
 function getDayLabel(days: number) {
@@ -130,7 +124,7 @@ const SecretSantaTeamBanner = observer(
             </Typography>
             {secretSantaTeamStore.currentTeamDetails && (
               <Typography sx={{ mt: 1, color: "rgba(255,255,255,0.72)" }}>
-                {`${formatShortDate(secretSantaTeamStore.currentTeamDetails.deliveryDate)} · ${getBannerStatus(secretSantaTeamStore.currentTeamDetails)}`}
+                {`${formatDate(secretSantaTeamStore.currentTeamDetails.deliveryDate)} · ${getBannerStatus(secretSantaTeamStore.currentTeamDetails)}`}
               </Typography>
             )}
           </Box>
