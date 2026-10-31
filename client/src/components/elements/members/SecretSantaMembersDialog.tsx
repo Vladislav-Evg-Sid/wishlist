@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import type { UserInfo } from "../../../types/shared";
 import type { SecretSantaTeamDetails } from "../../../types/secretSantaTeam";
 import ConfirmDialog from "../ConfirmDialog";
-import InviteSecretSantaMemberDialog from "../InviteSecretSantaMemberDialog";
+import InviteSecretSantaMemberDialog from "../invites/InviteSecretSantaMemberDialog";
 import MembersDialog from "./MembersDialog";
 
 interface SecretSantaMembersDialogProps {

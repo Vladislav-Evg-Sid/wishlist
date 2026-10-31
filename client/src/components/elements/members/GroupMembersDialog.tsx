@@ -9,7 +9,7 @@ import {
 } from "../../../hooks/useStore";
 import type { UserInfo } from "../../../types/shared";
 import ConfirmDialog from "../ConfirmDialog";
-import InviteMemberDialog from "../InviteMemberDialog";
+import InviteMemberDialog from "../invites/InviteMemberDialog";
 import MembersDialog from "./MembersDialog";
 
 interface GroupMembersDialogProps {
