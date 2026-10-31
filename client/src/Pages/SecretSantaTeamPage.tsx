@@ -14,7 +14,7 @@ import { useStore } from "../hooks/useStore";
 import { isUUID } from "../utils/uuid";
 import type { SecretSantaTeamDetails } from "../types/secretSantaTeam";
 import SecretSantaTeamBanner from "../components/layout/secretSantaTeam/SecretSantaTeamBanner";
-import SecretSantaMembersDialog from "../components/elements/SecretSantaMembersDialog";
+import SecretSantaMembersDialog from "../components/elements/members/SecretSantaMembersDialog";
 import ConfirmDialog from "../components/elements/ConfirmDialog";
 import SecretSantaJourney from "../components/layout/secretSantaTeam/SecretSantaJourney";
 import SecretSantaRecipientCard from "../components/layout/secretSantaTeam/SecretSantaRecipientCard";

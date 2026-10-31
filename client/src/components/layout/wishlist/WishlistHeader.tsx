@@ -18,7 +18,7 @@ import DeleteForeverRoundedIcon from "@mui/icons-material/DeleteForeverRounded";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 
 import CreateWishlistDialog from "../../elements/CreateWishlistDialog";
-import GroupMembersDialog from "../../elements/GroupMembersDialog";
+import GroupMembersDialog from "../../elements/members/GroupMembersDialog";
 import { useStoreWishlists } from "../../../hooks/useStore";
 import ConfirmDialog from "../../elements/ConfirmDialog";
 import { GroupStoreProvider } from "../../../providers/storeProvider";
