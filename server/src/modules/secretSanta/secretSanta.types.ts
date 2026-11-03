@@ -15,3 +15,10 @@ export interface SecretSantaTeamData {
   teamName: string;
   deliveryDate: Date;
 }
+
+export interface SecretSantaTeamInfo {
+  ID: UUID;
+  name: string;
+  deliveryDate: Date;
+  creatorID: UUID;
+}
