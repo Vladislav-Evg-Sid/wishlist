@@ -33,7 +33,6 @@ export class SecretSantaService implements SecretSantaServiceInterface {
 
   async createTeam(userID: UUID, teamData: SecretSantaTeamData): Promise<void> {
     // TODO: добавить проверку на дату (нельзя сделать с датой до текущей)
-    // TODO: добавить транзакцию для записи создателя в участники группы
 
     await db.transaction(async (trx) => {
       const teamID = await this.secretSantaRepository.createTeam(
