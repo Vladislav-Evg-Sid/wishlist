@@ -1,6 +1,10 @@
 import type { UUID } from "./shared";
 
-export type SecretSantaTeamStatus = "pairs-ready" | "collecting-members";
+export type SecretSantaTeamStatus =
+  | "finding-gift"
+  | "create-team"
+  | "gift-ready"
+  | "delivery";
 
 export interface SecretSantaTeam {
   id: UUID;

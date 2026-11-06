@@ -1,30 +1,10 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { toast } from "react-toastify";
 
 import type { UpcomingEvent, SecretSantaTeam } from "../types/secretSanta";
-import type { UUID } from "../types/shared";
 import { createTeam, getUserTeams } from "../api/secretSanta";
 import type { RootStore } from "./RootStore";
 import { SecretSantaTeamStore } from "./SecretSantaTeamStore";
-
-const MOCK_TEAMS: SecretSantaTeam[] = [
-  {
-    id: "00000000-0000-0000-0000-000000000000" as UUID,
-    title: "Семья · Новый год",
-    membersCount: 8,
-    createdDate: new Date("2026-09-25"),
-    deliveryDate: new Date("2026-12-31"),
-    status: "pairs-ready",
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000001" as UUID,
-    title: "Команда Wish Box",
-    membersCount: 12,
-    createdDate: new Date("2026-10-10"),
-    deliveryDate: new Date("2026-12-25"),
-    status: "collecting-members",
-  },
-];
 
 export class SecretSantaStore {
   rootStore: RootStore;
@@ -41,9 +21,11 @@ export class SecretSantaStore {
   }
 
   async loadUserTeams() {
-    this.teams = MOCK_TEAMS;
     try {
-      await getUserTeams();
+      const teams = await getUserTeams();
+      runInAction(() => {
+        this.teams = teams;
+      });
     } catch (error) {
       if (error instanceof Error) {
         switch (error.message) {

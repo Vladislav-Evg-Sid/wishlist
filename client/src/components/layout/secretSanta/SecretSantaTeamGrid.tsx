@@ -17,15 +17,25 @@ const statusPresentation: Record<
   SecretSantaTeamStatus,
   { label: string; color: string; backgroundColor: string }
 > = {
-  "pairs-ready": {
+  "finding-gift": {
     label: "Пары готовы",
     color: "#16634B",
     backgroundColor: "#EAF8F2",
   },
-  "collecting-members": {
+  "create-team": {
     label: "Сбор участников",
     color: "#8B6216",
     backgroundColor: "#FFF8DF",
+  },
+  "gift-ready": {
+    label: "Подарок подготовлен",
+    color: "#16634B",
+    backgroundColor: "#EAF8F2",
+  },
+  delivery: {
+    label: "Вручение",
+    color: "#16634B",
+    backgroundColor: "#EAF8F2",
   },
 };
 
@@ -82,6 +92,7 @@ export default function SecretSantaTeamGrid({
         }}
       >
         {teams.map((team) => {
+          console.log(team.status);
           const status = statusPresentation[team.status];
 
           return (
