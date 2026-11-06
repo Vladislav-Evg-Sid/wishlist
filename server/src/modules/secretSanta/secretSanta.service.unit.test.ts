@@ -113,7 +113,7 @@ describe("secret Santa service", () => {
           membersCount: 3,
           createdDate: new Date("2026-12-01T00:00:00Z"),
           deliveryDate: new Date("2026-12-31T00:00:00Z"),
-          status: "collecting-members",
+          stage: "create-team",
         },
         {
           id: exampleUUID,
@@ -121,7 +121,7 @@ describe("secret Santa service", () => {
           membersCount: 5,
           createdDate: new Date("2026-11-01T00:00:00Z"),
           deliveryDate: new Date("2026-12-25T00:00:00Z"),
-          status: "pairs-ready",
+          stage: "finding-gift",
         },
       ];
       findUserTeamsMock.mockResolvedValue(teams);

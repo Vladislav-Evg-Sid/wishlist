@@ -5,6 +5,9 @@ export const TABLES = {
   wishlist: "wishlist",
   card: "card",
   refresh_tokens: "refresh_tokens",
+  secret_santa_team: "secret_santa_team",
+  secret_santa_members: "secret_santa_members",
+  secret_santa_member_wish: "secret_santa_member_wish",
 } as const;
 
 export type statuses = "Новая" | "Завершена";
@@ -61,4 +64,32 @@ export const REFRESH_TOKENS_COLUMNS = {
   created_at: "created_at",
   expires_at: "expires_at",
   revoked_at: "revoked_at",
+} as const;
+
+export type SecretSantaTeamStage =
+  | "create-team"
+  | "finding-gift"
+  | "gift-ready"
+  | "delivery";
+
+export const SS_TEAM_COLUMNS = {
+  id: "id",
+  title: "title",
+  creator_id: "creator_id",
+  stage: "stage",
+  delivery_date: "delivery_date",
+  created_at: "created_at",
+} as const;
+
+export const SS_MEMBERS_COLUMNS = {
+  id: "id",
+  recipient_id: "recipient_id",
+  member_id: "member_id",
+  team_id: "team_id",
+  is_gift_prepaired: "is_gift_prepaired",
+} as const;
+
+export const SS_MEMBER_WISH_COLUMNS = {
+  member_id: "member_id",
+  wish_id: "wish_id",
 } as const;

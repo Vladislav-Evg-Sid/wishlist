@@ -1,6 +1,5 @@
+import type { SecretSantaTeamStage } from "../../db/schema.js";
 import type { UUID } from "../../types/shared.js";
-
-export type SecretSantaTeamStatus = "pairs-ready" | "collecting-members";
 
 export interface SecretSantaTeam {
   id: UUID;
@@ -8,7 +7,7 @@ export interface SecretSantaTeam {
   membersCount: number;
   createdDate: Date;
   deliveryDate: Date;
-  status: SecretSantaTeamStatus;
+  stage: SecretSantaTeamStage;
 }
 
 export interface SecretSantaTeamData {
@@ -17,7 +16,7 @@ export interface SecretSantaTeamData {
 }
 
 export interface SecretSantaTeamInfo {
-  ID: UUID;
+  id: UUID;
   name: string;
   deliveryDate: Date;
   creatorID: UUID;
