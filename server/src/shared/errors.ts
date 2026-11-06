@@ -45,6 +45,12 @@ export class DataConflictError extends AppError {
   }
 }
 
+export class UnprocessableEntityError extends AppError {
+  constructor(message: string) {
+    super(message, 409, "UNPROCESSABLE ENTITY");
+  }
+}
+
 export class InternalServerError extends AppError {
   constructor(message: string) {
     super(message, 500, "INTERNAL_ERROR");

@@ -10,7 +10,11 @@ import type {
   SecretSantaTeam,
   SecretSantaTeamData,
 } from "./secretSanta.types.js";
-import { ForbidenError, NotFoundError } from "../../shared/errors.js";
+import {
+  ForbidenError,
+  NotFoundError,
+  UnprocessableEntityError,
+} from "../../shared/errors.js";
 import { db } from "../../db/knex.js";
 
 @Injectable()
@@ -32,7 +36,12 @@ export class SecretSantaService implements SecretSantaServiceInterface {
   }
 
   async createTeam(userID: UUID, teamData: SecretSantaTeamData): Promise<void> {
-    // TODO: добавить проверку на дату (нельзя сделать с датой до текущей)
+    const nowDate = new Date();
+    if (teamData.deliveryDate < nowDate) {
+      throw new UnprocessableEntityError(
+        "cannot create team with date before now",
+      );
+    }
 
     await db.transaction(async (trx) => {
       const teamID = await this.secretSantaRepository.createTeam(
