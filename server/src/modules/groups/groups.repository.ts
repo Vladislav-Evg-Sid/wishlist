@@ -40,14 +40,14 @@ export class GroupsRepository implements GroupsRepositoryInterface {
     userID: UUID,
     groupName: string,
     connection: Knex | Knex.Transaction = db,
-  ): Promise<string> {
+  ): Promise<UUID> {
     const groupID = await connection(TABLES.groups)
       .insert({
         [GROUPS_COLUMNS.creator_id]: userID,
         [GROUPS_COLUMNS.title]: groupName,
       })
       .returning(GROUPS_COLUMNS.id);
-    return String(groupID[0]);
+    return String(groupID[0]) as UUID;
   }
 
   async findGroupInfo(
