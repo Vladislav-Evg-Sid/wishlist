@@ -7,12 +7,12 @@ import {
   jest,
   test,
 } from "@jest/globals";
+import type { Knex } from "knex";
 
 import type {
   SecretSantaRepositoryInterface,
   SecretSantaServiceInterface,
 } from "./secretSanta.di.ts";
-import type { Knex } from "knex";
 import type { UUID } from "../../types/shared.ts";
 import {
   ForbidenError,
