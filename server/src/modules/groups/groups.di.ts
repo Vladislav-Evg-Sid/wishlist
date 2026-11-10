@@ -1,13 +1,12 @@
 import type { Knex } from "knex";
 
-import type { UUID } from "../../types/shared.js";
+import type { UserData, UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import type {
   CreateGroup,
   GroupData,
   GroupInfo,
   GroupUsersList,
-  UserData,
 } from "./groups.types.js";
 
 export const GROUPS_REPOSITORY = Symbol("GROUPS_REPOSITORY");

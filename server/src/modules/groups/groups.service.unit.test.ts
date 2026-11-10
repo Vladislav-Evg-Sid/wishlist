@@ -8,9 +8,8 @@ import {
 } from "@jest/globals";
 import type { Knex } from "knex";
 
-import type { UUID } from "../../types/shared.js";
+import type { UserData, UUID } from "../../types/shared.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
-import type { UserData } from "./groups.types.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
 import {
   DataConflictError,

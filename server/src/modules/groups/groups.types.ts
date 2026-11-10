@@ -1,5 +1,4 @@
-import type { UUID } from "../../types/shared.js";
-import type { UserData } from "../auth/auth.types.js";
+import type { UserData, UUID } from "../../types/shared.js";
 
 export interface GroupData {
   id: UUID;

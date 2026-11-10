@@ -9,9 +9,9 @@ import {
   USER_COLUMNS,
 } from "../../db/schema.js";
 import { concatTableAndColumn } from "../../shared/dbUtils.js";
-import type { UUID } from "../../types/shared.js";
+import type { UserData, UUID } from "../../types/shared.js";
 import type { GroupInfoRaw } from "./groups.repository.dto.js";
-import type { GroupData, UserData } from "./groups.types.js";
+import type { GroupData } from "./groups.types.js";
 import type { GroupsRepositoryInterface } from "./groups.di.js";
 
 @Injectable()
