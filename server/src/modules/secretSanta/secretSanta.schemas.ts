@@ -32,3 +32,28 @@ export const deleteTeamParamsSchema = z
     team_id: UUIDSchema,
   })
   .transform(({ team_id }) => ({ teamID: team_id }));
+
+export const teamRoutsParamsSchema = z
+  .object({
+    team_id: UUIDSchema,
+  })
+  .transform(({ team_id }) => ({ teamID: team_id }));
+
+export const remooveMemberBodySchema = z
+  .object({ team_id: UUIDSchema, member_id: UUIDSchema })
+  .transform(({ team_id, member_id }) => ({
+    teamID: team_id,
+    memberID: member_id,
+  }));
+
+export const createInviteLinkQuerySchema = z
+  .object({
+    ttl: z.coerce.number().int().positive().nullable().default(null),
+    limit_members: z.coerce.number().int().positive().nullable().default(null),
+  })
+  .transform(({ ttl, limit_members }) => ({
+    ttl,
+    limitMembers: limit_members,
+  }));
+
+export const addTeamMemberByCodeParamsSchema = z.object({ code: z.string() });
